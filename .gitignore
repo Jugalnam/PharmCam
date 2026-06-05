@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build output
+app/out/
+app/dist/
+app/release/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local data / secrets (앱 데이터는 %APPDATA%에 있으나 혹시 모를 유출 방지)
+*.db
+*.db-wal
+*.db-shm
+.env
+.env.*
+.data-key
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

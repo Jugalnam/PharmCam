@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DQ-001 설계 적격성 평가 — PharmCam</title>
+<style>
+  :root{
+    --navy:#0b1929; --navy-2:#15273d; --navy-3:#1e3a5f;
+    --gold:#c8a847; --gold-2:#e8d07a;
+    --ink:#1c2b3a; --muted:#64748b; --line:#dde3ec; --soft:#f7f9fc; --panel:#fff;
+    --ok:#15803d; --ok-bg:#dcfce7; --dev:#b45309;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:"Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif;background:#e8edf3;color:var(--ink);line-height:1.6;}
+  .page{width:min(1040px,calc(100% - 32px));margin:28px auto 48px;background:var(--panel);box-shadow:0 24px 64px rgba(11,25,41,.14);}
+  header{background:var(--navy);padding:30px 36px 26px;}
+  .doc-id{font-size:13px;letter-spacing:3px;color:var(--gold);font-weight:800;}
+  header h1{font-size:24px;color:#fff;margin:8px 0 4px;font-weight:800;}
+  header .sub{color:#7da4c4;font-size:14px;}
+  .badge-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+  .badge{padding:4px 12px;border-radius:4px;font-size:12px;font-weight:700;}
+  .badge.approved{background:var(--ok-bg);color:var(--ok);}
+  .badge.gold{background:rgba(200,168,71,.18);color:var(--gold-2);}
+  main{padding:14px 36px 40px;}
+  section{margin-top:28px;}
+  h2{font-size:13px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:1.2px;padding-bottom:8px;border-bottom:2px solid var(--navy);margin-bottom:12px;display:flex;align-items:baseline;gap:10px;}
+  h2 .num{color:var(--gold);font-size:18px;font-weight:800;}
+  h3{font-size:14px;color:#fff;background:var(--navy-3);padding:6px 13px;border-radius:5px;margin:16px 0 10px;display:inline-block;}
+  p{margin:8px 0;font-size:14px;}
+  .note{background:var(--soft);border-left:4px solid var(--gold);padding:12px 16px;font-size:14px;margin:10px 0;}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.5px;}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top;}
+  th{background:var(--navy);color:#fff;font-weight:700;font-size:11.5px;}
+  tr:nth-child(even) td{background:var(--soft);}
+  td.d{font-weight:800;color:var(--navy-3);white-space:nowrap;}
+  td.src{color:var(--muted);font-size:11.5px;white-space:nowrap;}
+  pre{background:var(--navy);color:#c8ddef;padding:16px 18px;border-radius:8px;font-size:12.5px;overflow-x:auto;margin:12px 0;line-height:1.55;}
+  .met{color:var(--ok);font-weight:800;}
+  .no{color:#b91c1c;font-weight:800;}
+  footer{padding:18px 36px 28px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;}
+  strong{color:var(--navy-3);}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="doc-id">DQ-001</div>
+    <h1>Design Qualification — 설계 적격성 평가</h1>
+    <div class="sub">PharmCam — 검체·시료 사진 기록 시스템</div>
+    <div class="badge-row">
+      <span class="badge approved">확정 v1.0</span>
+      <span class="badge gold">2층 아키텍처</span>
+      <span class="badge gold">설계결정 D-1~D-10</span>
+    </div>
+  </header>
+
+  <main>
+    <p class="note"><strong>이 문서가 하는 일:</strong> "무엇을 해야 하는가(URS)"를 "어떻게 만들 것인가(설계)"로 옮기고, 그 설계가 URS 42개를 만족함을 검증한다. URS-002의 일탈 중 설계로 해결할 부분(해시체인·키관리·시각탐지)도 구체화한다.</p>
+
+    <section>
+      <h2><span class="num">2</span> 시스템 아키텍처</h2>
+      <pre>┌──────────────────────────────────────────────┐
+│  설정 서비스 (Config) — 권한자 전용·감사추적됨        │
+│  · 코어 플래그는 잠금(변경 불가)                      │
+├──────────────────────────────────────────────┤
+│  선택 모듈:  [전자서명] [암호화] [백업] [LIMS 커넥터]   │ on/off
+├──────────────────────────────────────────────┤
+│  필수 코어:  인증·권한 / 촬영·메타데이터 / 감사추적     │ 항상 on
+│            / 무결성(해시) / 시각 / 레코드 저장         │
+└──────────────────────────────────────────────┘</pre>
+      <table>
+        <tr><th>프로세스</th><th>역할</th></tr>
+        <tr><td>Main (Node.js)</td><td>데이터·암호화·파일 I/O·DB·시각·감사추적 (보안 민감 로직)</td></tr>
+        <tr><td>Renderer (Chromium)</td><td>UI — DB 직접 접근 금지, IPC로만 요청</td></tr>
+        <tr><td>IPC (contextIsolation)</td><td>화이트리스트 채널만 노출</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="num">3</span> 데이터 모델</h2>
+      <table>
+        <tr><th>엔터티</th><th>주요 필드</th><th>관련 URS</th></tr>
+        <tr><td class="d">User</td><td>id, username, passwordHash(argon2), roleId, status, createdAt, disabledAt</td><td class="src">010·014·051</td></tr>
+        <tr><td class="d">Role</td><td>id, name(Operator/Reviewer/Admin), permissions</td><td class="src">012</td></tr>
+        <tr><td class="d">Record</td><td>id, testNo, sampleId?, operatorId, captureTs, imageRef, imageHash, status, correctionOf?</td><td class="src">030·043·046</td></tr>
+        <tr><td class="d">AuditEntry</td><td>seq, ts, userId, action, target, before, after, entryHash, prevHash</td><td class="src">040·041</td></tr>
+        <tr><td class="d">Signature</td><td>id, recordId, signerId, meaning, ts, sigHash</td><td class="src">021~023</td></tr>
+        <tr><td class="d">Config</td><td>key, value, coreLocked, changedBy, changedTs</td><td class="src">070~073</td></tr>
+        <tr><td class="d">BackupJob</td><td>mode, path, schedule, lastRunTs, integrityHash</td><td class="src">060~062</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="num">4</span> 핵심 설계 결정 (URS·일탈 대응)</h2>
+      <table>
+        <tr><th>#</th><th>설계 결정</th><th>충족 URS/일탈</th></tr>
+        <tr><td class="d">D-1</td><td>감사추적 = append-only + 해시 체이닝(prevHash 사슬). 중간 변조 시 사슬이 깨져 탐지. 편집·삭제 API 없음</td><td class="src">040·041, DEV-01</td></tr>
+        <tr><td class="d">D-2</td><td>원본 이미지: SHA-256 기록, 읽기전용, 조회 시 해시 재검증</td><td class="src">043, DEV-01</td></tr>
+        <tr><td class="d">D-3</td><td>시각: OS 시계 + 직전 레코드 비교로 역행·점프 탐지·로깅, (가능 시) NTP</td><td class="src">044, DEV-02</td></tr>
+        <tr><td class="d">D-4</td><td>암호화: 선택 시 DB·이미지 암호화, 키는 DPAPI 보관, 방식은 IQ 확정</td><td class="src">050, DEV-03</td></tr>
+        <tr><td class="d">D-5</td><td>인증·권한: argon2, RBAC, 세션 타임아웃, 로그인 실패 잠금</td><td class="src">010~016·051</td></tr>
+        <tr><td class="d">D-6</td><td>전자서명: 재인증 → 서명 레코드(서명자·의미·시각·sigHash) 연결</td><td class="src">020~023</td></tr>
+        <tr><td class="d">D-7</td><td>설정 관리: coreLocked 플래그(코어 변경 불가), 변경은 감사추적, 상태 조회</td><td class="src">070~073</td></tr>
+        <tr><td class="d">D-8</td><td>백업: mode(internal/external/off), 내장 시 백업본 해시 검증</td><td class="src">060~062, DEV-05</td></tr>
+        <tr><td class="d">D-9</td><td>저장 파이프라인: 촬영→미리보기→필수항목 검증→원자적 저장→성공 검증, 실패·재촬영 기록</td><td class="src">030·032·033·045</td></tr>
+        <tr><td class="d">D-10</td><td>LIMS 커넥터: 인터페이스(확장점)만, 기본 비활성, 후속 변경관리</td><td class="src">080·081, DEV-07</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="num">5</span> 설계 ↔ URS 추적 검증</h2>
+      <table>
+        <tr><th>URS 카테고리</th><th>충족 설계 요소</th><th>판정</th></tr>
+        <tr><td>GEN (001~003)</td><td>아키텍처·저장모델·ALCOA+ 설계</td><td class="met">충족</td></tr>
+        <tr><td>AUTH (010~016)</td><td>D-5</td><td class="met">충족</td></tr>
+        <tr><td>ESIG (020~023)</td><td>D-6</td><td class="met">충족</td></tr>
+        <tr><td>CAP (030~034)</td><td>D-9</td><td class="met">충족</td></tr>
+        <tr><td>DAT (040~046)</td><td>D-1·D-2·D-3</td><td class="met">충족</td></tr>
+        <tr><td>SEC (050~052)</td><td>D-4·D-5 (일부 환경)</td><td class="met">충족</td></tr>
+        <tr><td>BAK (060~063)</td><td>D-8</td><td class="met">충족</td></tr>
+        <tr><td>CFG (070~073)</td><td>D-7</td><td class="met">충족</td></tr>
+        <tr><td>INT (080~081)</td><td>D-10 (구조)</td><td>구조 충족(후속)</td></tr>
+        <tr><td>NFR (090~092)</td><td>조회·내보내기·도움말</td><td class="met">충족</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="num">6</span> 기존 솔루션 평가 (Solution Assessment)</h2>
+      <p class="note">GAMP 5는 맞춤 개발 전 기존 솔루션 활용 가능성을 평가하도록 권고한다. 본 절은 그 평가 기록이다(2026-06-05, 오픈소스 조사 기반).</p>
+      <h3>6.1 평가 대상 및 부적합 사유</h3>
+      <table>
+        <tr><th>솔루션</th><th>성격</th><th>부적합 사유</th></tr>
+        <tr><td>eLabFTW</td><td>서버 오픈소스 ELN</td><td>폐쇄망·단독 PC 카메라 캡처 요건 불일치, 촬영 워크플로우 부재</td></tr>
+        <tr><td>SciNote</td><td>서버 오픈소스 ELN</td><td>서버·웹 전제</td></tr>
+        <tr><td>OpenSpecimen</td><td>서버 biobank LIMS</td><td>검체 관리 중심, 촬영 앱 아님</td></tr>
+        <tr><td>attest / Trillian</td><td>감사추적 라이브러리</td><td>외부 앵커링·네트워크 전제 → 폐쇄망 불가</td></tr>
+      </table>
+      <h3>6.2 패턴 차용 여부</h3>
+      <table>
+        <tr><th>패턴</th><th>판단</th><th>채택</th></tr>
+        <tr><td>RFC3161 타임스탬프 / 외부 앵커링</td><td>폐쇄망 외부 서비스 접근 불가</td><td class="no">❌</td></tr>
+        <tr><td>HMAC 키 해시체인</td><td>현 URS(변조 탐지)는 평문 SHA-256으로 충족 → 과잉</td><td class="no">❌</td></tr>
+        <tr><td>전자 witnessing / LIMS REST</td><td>현 범위 외</td><td>후속 보류</td></tr>
+      </table>
+      <p><strong>결론:</strong> 요건 충족 기성 솔루션 없음 → 맞춤 개발(GAMP Cat 5) 유지 정당. 무결성은 평문 SHA-256 해시체인(D-1)으로 구현(URS-041 충족). 추가 강화는 향후 변경관리로 재검토.</p>
+    </section>
+
+    <section>
+      <h2><span class="num">8</span> 설계 검토 결론</h2>
+      <p>기존 솔루션 평가 결과 적합한 기성 솔루션이 없어 맞춤 개발을 유지하고, 무결성은 평문 SHA-256 해시체인으로 구현한다. 제안 설계는 URS 42개를 충족하며, 설계로 해결 가능한 일탈(DEV-01·02·03)을 반영했다. 환경·절차 의존 일탈(DEV-04~06)은 IQ/SOP로 처리된다. 따라서 본 설계는 적격하며 <strong>구현(빌드) 및 IQ 단계 진입이 가능</strong>하다.</p>
+    </section>
+  </main>
+
+  <footer>PharmCam CSV 산출물 · DQ-001 v1.0 · 표준: SHA-256·argon2·DPAPI·SQLite·PNG/JPEG · 상위: URS-001/002</footer>
+</div>
+</body>
+</html>

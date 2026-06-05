@@ -1,0 +1,185 @@
+import { useEffect, useRef, useState } from 'react'
+import type { SessionUser } from '../../shared/auth.types'
+
+interface CaptureProps {
+  user: SessionUser
+}
+
+export default function Capture({ user }: CaptureProps): JSX.Element {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+
+  const [testNo, setTestNo] = useState('')
+  const [sampleId, setSampleId] = useState('')
+  const [preview, setPreview] = useState<string | null>(null)
+  const [cameraError, setCameraError] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    let active = true
+
+    async function startCamera(): Promise<void> {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' },
+          audio: false
+        })
+        if (!active) {
+          stream.getTracks().forEach((t) => t.stop())
+          return
+        }
+        streamRef.current = stream
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream
+        }
+      } catch {
+        setCameraError('카메라를 사용할 수 없습니다. 연결 및 권한을 확인하세요.')
+      }
+    }
+
+    startCamera()
+
+    return () => {
+      active = false
+      streamRef.current?.getTracks().forEach((t) => t.stop())
+    }
+  }, [])
+
+  function handleCapture(): void {
+    const video = videoRef.current
+    const canvas = canvasRef.current
+    if (!video || !canvas) {
+      return
+    }
+
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      return
+    }
+
+    ctx.drawImage(video, 0, 0)
+    setPreview(canvas.toDataURL('image/png'))
+    setSaveError(null)
+    setSaveSuccess(null)
+  }
+
+  function handleRetake(): void {
+    setPreview(null)
+    setSaveError(null)
+    setSaveSuccess(null)
+  }
+
+  async function handleSave(): Promise<void> {
+    if (!preview) {
+      return
+    }
+    if (!testNo.trim()) {
+      setSaveError('시험번호는 필수 항목입니다.')
+      return
+    }
+
+    setSaving(true)
+    setSaveError(null)
+    setSaveSuccess(null)
+
+    try {
+      const result = await window.api.record.save({
+        testNo: testNo.trim(),
+        sampleId: sampleId.trim() || undefined,
+        imageDataBase64: preview
+      })
+
+      if (result.ok && result.recordId) {
+        setSaveSuccess(`기록 #${result.recordId} 저장 완료`)
+        setPreview(null)
+      } else {
+        setSaveError(result.error ?? '저장에 실패했습니다.')
+      }
+    } catch {
+      setSaveError('저장 처리 중 오류가 발생했습니다.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="capture-page">
+      <div className="capture-info-banner">
+        <h2>촬영 대상 확인 (URS-034)</h2>
+        <dl>
+          <div>
+            <dt>시험번호</dt>
+            <dd className="highlight">{testNo.trim() || '— 미입력 —'}</dd>
+          </div>
+          <div>
+            <dt>시료 ID</dt>
+            <dd>{sampleId.trim() || '—'}</dd>
+          </div>
+          <div>
+            <dt>작업자</dt>
+            <dd className="highlight">
+              {user.username} (ID: {user.id})
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <div className="capture-layout">
+        <section className="capture-form">
+          <label>
+            시험번호 <span className="required">*</span>
+            <input
+              value={testNo}
+              onChange={(e) => setTestNo(e.target.value)}
+              placeholder="예: T-2026-001"
+            />
+          </label>
+          <label>
+            시료 ID
+            <input
+              value={sampleId}
+              onChange={(e) => setSampleId(e.target.value)}
+              placeholder="선택"
+            />
+          </label>
+        </section>
+
+        <section className="capture-preview">
+          {cameraError ? (
+            <p className="login-error">{cameraError}</p>
+          ) : preview ? (
+            <img src={preview} alt="촬영 미리보기" className="captured-image" />
+          ) : (
+            <video ref={videoRef} autoPlay playsInline muted className="camera-video" />
+          )}
+          <canvas ref={canvasRef} className="hidden-canvas" />
+        </section>
+      </div>
+
+      <div className="capture-actions">
+        {!preview ? (
+          <button type="button" onClick={handleCapture} disabled={!!cameraError}>
+            촬영
+          </button>
+        ) : (
+          <>
+            <button type="button" className="secondary-btn" onClick={handleRetake} disabled={saving}>
+              재촬영
+            </button>
+            <button type="button" onClick={handleSave} disabled={saving || !testNo.trim()}>
+              {saving ? '저장 중…' : '저장'}
+            </button>
+          </>
+        )}
+      </div>
+
+      {saveError && <p className="login-error">{saveError}</p>}
+      {saveSuccess && <p className="save-success">{saveSuccess}</p>}
+    </div>
+  )
+}

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>강의 2 — 무엇이 잘못될 수 있나: 위험평가로 검증의 우선순위를 정하다</title>
+<style>
+  :root{
+    --navy:#0b1929; --navy-2:#15273d; --navy-3:#1e3a5f;
+    --gold:#c8a847; --gold-2:#e8d07a;
+    --ink:#1c2b3a; --muted:#64748b; --line:#dde3ec; --soft:#f7f9fc; --panel:#fff;
+    --ok:#15803d; --high:#b91c1c; --high-bg:#fee2e2; --med:#92400e; --med-bg:#fef3c7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:"Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif;background:#e8edf3;color:var(--ink);line-height:1.75;}
+  .page{width:min(880px,calc(100% - 32px));margin:28px auto 56px;background:var(--panel);box-shadow:0 24px 64px rgba(11,25,41,.14);}
+  header{background:var(--navy);padding:42px 40px 36px;}
+  .kicker{font-size:12px;letter-spacing:3px;color:var(--gold);font-weight:800;text-transform:uppercase;}
+  header h1{font-size:28px;color:#fff;margin:12px 0 10px;font-weight:800;line-height:1.3;}
+  header .lead{color:#9fc0db;font-size:15px;max-width:62ch;}
+  .series{margin-top:18px;font-size:12px;color:#5a7e9a;}
+  main{padding:14px 40px 44px;}
+  section{margin-top:38px;}
+  .step-no{font-size:12px;letter-spacing:2px;color:var(--gold);font-weight:800;}
+  h2{font-size:21px;color:var(--navy);margin:6px 0 14px;font-weight:800;line-height:1.35;}
+  h3{font-size:16px;color:var(--navy-3);margin:20px 0 8px;}
+  p{font-size:15px;margin:10px 0;}
+  .why{background:var(--soft);border-left:4px solid var(--gold);padding:16px 20px;margin:16px 0;border-radius:0 6px 6px 0;}
+  .why .why-t{font-size:12px;font-weight:800;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+  .term{background:#fffdf0;border:1px solid var(--gold);border-radius:6px;padding:12px 16px;margin:14px 0;font-size:14px;}
+  .term b{color:var(--navy-3);}
+  pre{background:var(--navy);color:#c8ddef;padding:18px 20px;border-radius:8px;font-size:14px;overflow-x:auto;margin:14px 0;line-height:1.6;text-align:center;}
+  .decision{border:1px solid var(--line);border-top:4px solid var(--navy-3);border-radius:8px;padding:18px 22px;margin:16px 0;background:#fff;}
+  .decision .d-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .decision .d-badge{background:var(--navy);color:var(--gold);font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:1px;}
+  .decision h3{margin:0;color:var(--navy);}
+  .qa{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin-top:10px;font-size:14px;}
+  .qa .q{color:var(--muted);font-weight:700;}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px;}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;}
+  th{background:var(--navy);color:#fff;font-size:12px;}
+  td.c{text-align:center;font-weight:700;}
+  .pri{display:inline-block;padding:1px 8px;border-radius:3px;font-size:11px;font-weight:800;}
+  .pri.high{background:var(--high-bg);color:var(--high);}
+  .cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:14px 0;}
+  .cat-card{border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:6px;padding:12px 14px;font-size:13.5px;background:var(--soft);}
+  .cat-card b{color:var(--navy);}
+  .takeaway{background:var(--navy);color:#e7eef6;padding:24px 28px;border-radius:10px;margin-top:34px;}
+  .takeaway h3{color:var(--gold);margin:0 0 12px;font-size:15px;letter-spacing:1px;text-transform:uppercase;}
+  .takeaway ul{list-style:none;}
+  .takeaway li{padding:6px 0 6px 22px;position:relative;font-size:15px;}
+  .takeaway li::before{content:"✓";position:absolute;left:0;color:var(--gold);font-weight:800;}
+  footer{padding:20px 40px 30px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;}
+  .next{color:var(--navy-3);font-weight:700;}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="kicker">강의 2 · Risk Assessment</div>
+    <h1>무엇이 잘못될 수 있나 — 위험평가로 '검증의 지도'를 그리다</h1>
+    <p class="lead">VP에서 "전부 검증해야 한다"고 정했다면, 위험평가(RA)는 "그 안에서 어디에 힘을 줄지"를 정한다. PharmCam의 위험을 7개 카테고리로 펼쳐 31건을 찾아낸 과정을 따라가 본다.</p>
+    <div class="series">PharmCam CSV 시리즈 · 2/7 · 이전: VP · 다음: URS</div>
+  </header>
+
+  <main>
+    <section>
+      <div class="step-no">들어가며</div>
+      <h2>왜 위험부터 따지고 코드를 안 짤까?</h2>
+      <p>Category 5(맞춤 개발) 시스템은 검증할 게 너무 많습니다. 전부 똑같이 빡세게 검증하면 끝이 없죠. 그래서 <strong>"위험이 큰 곳에 검증을 몰아준다"</strong>는 게 GMP의 핵심 전략입니다. 그 지도를 그리는 게 위험평가입니다.</p>
+      <div class="term"><b>ICH Q9 (품질위험관리)</b> — "위험에 비례한 노력"을 원칙으로 하는 국제 가이드라인. 위험이 작은 곳에 과한 검증을 하지 말고, 큰 곳에 집중하라는 뜻입니다.</div>
+    </section>
+
+    <section>
+      <div class="step-no">핵심 결정 1</div>
+      <div class="decision">
+        <div class="d-head"><span class="d-badge">결정</span><h3>위험을 숫자로 매긴다 — S × P × D</h3></div>
+        <div class="qa">
+          <div class="q">무엇을</div><div>위험점수 = 심각도 × 발생가능성 × 검출성</div>
+          <div class="q">왜</div><div>"느낌"이 아니라 일관된 기준으로 우선순위를 매기기 위해</div>
+        </div>
+      </div>
+      <pre>위험점수 = 심각도(S) × 발생가능성(P) × 검출성(D)</pre>
+      <div class="why"><div class="why-t">검출성이 왜 들어갈까?</div>똑같이 심각해도 <b>"조용히 잘못되는" 위험이 더 무섭습니다.</b> 눈에 안 보이게 데이터가 틀어지면 아무도 모르니까요. 그래서 발견하기 어려울수록 점수를 높입니다.</div>
+      <table>
+        <tr><th>점수</th><th>판정</th><th>조치</th></tr>
+        <tr><td class="c">12~27</td><td><span class="pri high">High</span></td><td>반드시 통제 + 집중 시험</td></tr>
+        <tr><td class="c">5~11</td><td>Medium</td><td>통제 권장</td></tr>
+        <tr><td class="c">1~4</td><td>Low</td><td>기본 통제로 충분</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <div class="step-no">핵심 결정 2</div>
+      <div class="decision">
+        <div class="d-head"><span class="d-badge">결정</span><h3>위험을 '카테고리'로 묶는다 — 그래야 빠진 게 보인다</h3></div>
+        <div class="qa">
+          <div class="q">무엇을</div><div>보안·권한·데이터·백업 + 소프트웨어·인프라·인적 = 7개 카테고리</div>
+          <div class="q">왜</div><div>처음엔 백업·세션·정기검토가 통째로 누락됐었기 때문</div>
+        </div>
+      </div>
+      <p>첫 위험평가는 9건뿐이었습니다. 카테고리로 나눠 다시 보니 빠진 영역이 한눈에 드러났고, <strong>31건으로 늘었습니다.</strong></p>
+      <div class="cat-grid">
+        <div class="cat-card"><b>SEC</b> 보안·암호화<br>저장 암호화·비밀번호·악성코드</div>
+        <div class="cat-card"><b>AUTH</b> 권한·접근통제<br>1인1계정·세션·전자서명</div>
+        <div class="cat-card"><b>DAT</b> 데이터 무결성<br>감사추적·원본성·시각</div>
+        <div class="cat-card"><b>BAK</b> 백업·복구·보존<br>백업·복구검증·장기 판독</div>
+        <div class="cat-card"><b>SW</b> 소프트웨어·기능<br>캡처 신뢰성·버그</div>
+        <div class="cat-card"><b>INF / HUM</b> 인프라·인적<br>OS 시계·정기검토</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="step-no">핵심 결정 3</div>
+      <div class="decision">
+        <div class="d-head"><span class="d-badge">결정</span><h3>규제기관이 자주 지적하는 실패를 일부러 찾아 넣었다</h3></div>
+        <div class="qa">
+          <div class="q">무엇을</div><div>FDA/EU 단골 지적사항을 검색해 위험으로 등록</div>
+          <div class="q">왜</div><div>"실제로 적발되는 것"이 가장 현실적인 위험이라서</div>
+        </div>
+      </div>
+      <table>
+        <tr><th>단골 지적사항</th><th>우리 위험 ID</th></tr>
+        <tr><td>공용계정 사용(누가 했는지 불명)</td><td>AUTH-01</td></tr>
+        <tr><td>감사추적을 끌 수 있음</td><td>DAT-07</td></tr>
+        <tr><td>시각 조작(백데이팅)</td><td>DAT-04 · INF-01</td></tr>
+        <tr><td>백업을 만들지만 복구는 검증 안 함</td><td>BAK-02</td></tr>
+        <tr><td>정기 검토 부재</td><td>HUM-02</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <div class="step-no">핵심 결정 4</div>
+      <div class="decision">
+        <div class="d-head"><span class="d-badge">결정</span><h3>모든 위험을 코드로 풀지 않는다 — 통제는 3종류</h3></div>
+        <div class="qa">
+          <div class="q">무엇을</div><div>통제를 ① SW 기능 ② 환경 통제 ③ 절차(SOP)로 구분</div>
+          <div class="q">왜</div><div>'잘못된 검체 촬영' 같은 건 코드로 못 막기 때문</div>
+        </div>
+      </div>
+      <div class="why"><div class="why-t">GMP식 사고</div>예: 작업자가 엉뚱한 검체를 찍는 실수(SW-03)는 앱이 막을 수 없습니다. 그래서 <b>화면에 시험정보를 띄워 확인시키는 기능 + 표준작업절차(SOP)를 함께</b> 둡니다. Category 5라고 전부 코딩으로 해결하는 게 아닙니다.</div>
+    </section>
+
+    <section>
+      <div class="step-no">핵심 결정 5</div>
+      <div class="decision">
+        <div class="d-head"><span class="d-badge">결정</span><h3>엄격한 GMP는 끄지 못하게, 나머지는 회사별로 켜고 끌 수 있게</h3></div>
+        <div class="qa">
+          <div class="q">무엇을</div><div>기능을 '필수 코어'와 '설정 가능 모듈' 두 층으로 분리</div>
+          <div class="q">왜</div><div>회사마다 운영이 다름 — 전자서명은 안 쓰지만 감사추적은 필요, 백업은 자체 시스템 사용, 추후 LIMS 연동 등</div>
+        </div>
+      </div>
+      <div class="cat-grid">
+        <div class="cat-card" style="border-left-color:var(--high)"><b>1층 · 필수 코어</b> (끌 수 없음)<br>감사추적 · 작업자 식별 · 원본 보호 · 신뢰 시각 · 필수 메타데이터</div>
+        <div class="cat-card"><b>2층 · 설정 가능 모듈</b> (회사별 on/off)<br>전자서명 · 백업(내장/자체/경로) · LIMS 커넥터 · 비밀번호 정책 · 보존기간</div>
+      </div>
+      <div class="why"><div class="why-t">함정 — 유연성이 새 위험을 만든다</div>"끄고 켤 수 있다"는 건 <b>"몰래 통제를 꺼버릴 수도 있다"</b>는 뜻입니다. 그래서 가드레일을 둡니다 ⟶ ① 설정 변경 자체를 <b>감사추적·권한 통제</b> 대상으로, ② 무결성 코어(감사추적 등)는 <b>설정에서 아예 제외</b>해 끌 수 없게. "전자서명 off"는 되지만 "감사추적 off"는 불가능합니다.</div>
+      <div class="term"><b>설정 명세 (configuration spec)</b> — 회사별 배포본은 "이 회사는 어떤 기능을 켰나"를 적은 하나의 설정 명세가 됩니다. 그 설정 상태 그대로를 그 회사에서 다시 검증(IQ/OQ)합니다. 코어는 한 번 검증하고, 회사별 설정만 확인하는 방식입니다.</div>
+    </section>
+
+    <section>
+      <div class="step-no">결과</div>
+      <h2>가장 위험한 곳 = 가장 먼저 검증할 곳</h2>
+      <p>점수가 높은 순서가 곧 우리가 가장 신경 쓸 기능입니다. 이 14개 High 위험의 <strong>통제는 전부 다음 단계 URS의 요구사항</strong>이 됩니다.</p>
+      <table>
+        <tr><th>최고 위험</th><th>점수</th><th>→ 곧 URS 요구사항이 됨</th></tr>
+        <tr><td>DAT-01 시험번호 오귀속</td><td class="c">27</td><td>필수항목 강제·저장 전 확인 화면</td></tr>
+        <tr><td>AUTH-01 공용계정</td><td class="c">18</td><td>1인 1계정 강제</td></tr>
+        <tr><td>AUTH-04 세션 미종료</td><td class="c">18</td><td>자동 로그아웃</td></tr>
+        <tr><td>DAT-02 감사추적 변조</td><td class="c">18</td><td>수정불가 append-only 기록</td></tr>
+      </table>
+    </section>
+
+    <div class="takeaway">
+      <h3>이번 강의 핵심 정리</h3>
+      <ul>
+        <li>위험평가 = 검증을 '어디에 집중할지' 정하는 지도 (ICH Q9: 위험에 비례한 노력)</li>
+        <li>위험은 숫자로 — S×P×D. '조용히 잘못되는' 위험(검출성↓)이 가장 무섭다</li>
+        <li>카테고리로 묶어야 빠진 영역이 보인다 (9건 → 31건)</li>
+        <li>규제기관 단골 지적(공용계정·백데이팅 등)을 미리 위험으로 등록</li>
+        <li>통제는 SW·환경·절차 3종류 — 전부 코드로 풀지 않는다</li>
+        <li>엄격한 코어는 끌 수 없게, 나머지는 회사별 설정으로 — 단 설정 변경도 통제 대상</li>
+        <li>High 위험의 통제가 곧 다음 단계 URS 요구사항이 된다</li>
+      </ul>
+    </div>
+
+    <p style="margin-top:28px;" class="next">→ 다음 강의: URS — 위험 통제들을 "시스템이 반드시 해야 할 일" 목록으로 바꿉니다.</p>
+  </main>
+
+  <footer>PharmCam CSV 시리즈 · 강의 2/7 · Risk Assessment(RA-001 v1.0) 기반 · "만들면서 가르친다"</footer>
+</div>
+</body>
+</html>

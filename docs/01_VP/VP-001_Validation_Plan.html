@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VP-001 밸리데이션 계획서 — PharmCam</title>
+<style>
+  :root{
+    --navy:#0b1929; --navy-2:#15273d; --navy-3:#1e3a5f;
+    --gold:#c8a847; --gold-2:#e8d07a;
+    --ink:#1c2b3a; --muted:#64748b; --line:#dde3ec; --soft:#f7f9fc; --panel:#fff;
+    --ok:#15803d; --ok-bg:#dcfce7; --warn:#92400e; --warn-bg:#fef3c7;
+    --direct:#b91c1c; --direct-bg:#fee2e2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:"Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif;background:#e8edf3;color:var(--ink);line-height:1.65;}
+  .page{width:min(960px,calc(100% - 32px));margin:28px auto 48px;background:var(--panel);box-shadow:0 24px 64px rgba(11,25,41,.14);}
+  header{background:var(--navy);padding:30px 36px 26px;}
+  .doc-id{font-size:13px;letter-spacing:3px;color:var(--gold);font-weight:800;}
+  header h1{font-size:24px;color:#fff;margin:8px 0 4px;font-weight:800;}
+  header .sub{color:#7da4c4;font-size:14px;}
+  .badge-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+  .badge{padding:4px 12px;border-radius:4px;font-size:12px;font-weight:700;}
+  .badge.approved{background:var(--ok-bg);color:var(--ok);}
+  .badge.gold{background:rgba(200,168,71,.18);color:var(--gold-2);}
+  .meta-bar{display:flex;flex-wrap:wrap;gap:0;border-bottom:2px solid var(--line);}
+  .m-card{padding:14px 22px;border-right:1px solid var(--line);}
+  .m-label{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);}
+  .m-val{font-size:15px;font-weight:700;color:var(--ink);margin-top:2px;}
+  main{padding:8px 36px 40px;}
+  section{margin-top:30px;}
+  h2{font-size:13px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:1.2px;padding-bottom:8px;border-bottom:2px solid var(--navy);margin-bottom:14px;display:flex;align-items:baseline;gap:10px;}
+  h2 .num{color:var(--gold);font-size:19px;font-weight:800;}
+  h3{font-size:15px;color:var(--navy-3);margin:18px 0 8px;}
+  p{margin:8px 0;font-size:14.5px;}
+  .note{background:var(--soft);border-left:4px solid var(--gold);padding:12px 16px;font-size:14px;margin:10px 0;}
+  .def{font-size:13px;color:var(--muted);}
+  ul{margin:8px 0 8px 4px;list-style:none;}
+  ul li{position:relative;padding:6px 0 6px 20px;font-size:14px;border-bottom:1px solid var(--line);}
+  ul li:last-child{border-bottom:0;}
+  ul li::before{content:"▸";position:absolute;left:0;top:6px;color:var(--gold);font-size:12px;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px;}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top;}
+  th{background:var(--navy);color:#fff;font-weight:700;font-size:12px;letter-spacing:.5px;}
+  tr:nth-child(even) td{background:var(--soft);}
+  .tag{display:inline-block;padding:1px 8px;border-radius:3px;font-size:11px;font-weight:700;}
+  .tag.direct{background:var(--direct-bg);color:var(--direct);}
+  .tag.no{background:#eef2f7;color:var(--muted);}
+  pre{background:var(--navy);color:#c8ddef;padding:16px 18px;border-radius:6px;font-size:13px;overflow-x:auto;margin:12px 0;line-height:1.5;}
+  footer{padding:18px 36px 28px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;}
+  strong{color:var(--navy-3);}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="doc-id">VP-001</div>
+    <h1>Validation Plan — 밸리데이션 계획서</h1>
+    <div class="sub">PharmCam — 검체·시료 사진 기록 시스템</div>
+    <div class="badge-row">
+      <span class="badge approved">확정 v1.0</span>
+      <span class="badge gold">GAMP 5 · Category 5</span>
+      <span class="badge gold">Direct Impact</span>
+    </div>
+  </header>
+
+  <div class="meta-bar">
+    <div class="m-card"><div class="m-label">시스템</div><div class="m-val">PharmCam (Electron / Windows)</div></div>
+    <div class="m-card"><div class="m-label">작성일</div><div class="m-val">2026-06-05</div></div>
+    <div class="m-card"><div class="m-label">확정일</div><div class="m-val">2026-06-05</div></div>
+    <div class="m-card"><div class="m-label">버전</div><div class="m-val">1.0 (Approved)</div></div>
+  </div>
+
+  <main>
+    <p class="note"><strong>이 문서가 하는 일:</strong> PharmCam을 GMP 기준으로 어떻게 검증(validation)할지를 미리 정하는 계획서. 이후 만들어질 모든 산출물(RA, URS, DQ, IQ, OQ, PQ)이 이 계획을 근거로 작성된다.</p>
+
+    <section>
+      <h2><span class="num">1</span> 목적 (Purpose)</h2>
+      <p>PharmCam이 <strong>의도된 용도대로 정확하고 일관되게 동작함</strong>을, 그리고 생성된 데이터가 <strong>데이터 무결성(data integrity)</strong> 요건을 만족함을 문서화된 증거로 보증하기 위함이다.</p>
+      <p class="def">데이터 무결성: 데이터가 만들어진 시점부터 폐기될 때까지 변조되지 않고 신뢰할 수 있는 상태로 유지되는 것.</p>
+    </section>
+
+    <section>
+      <h2><span class="num">2</span> 범위 (Scope)</h2>
+      <table>
+        <tr><th>구분</th><th>내용</th></tr>
+        <tr><td>시스템</td><td>PharmCam (Windows용 Electron 데스크톱 앱)</td></tr>
+        <tr><td>주요 기능</td><td>검체/시료 촬영, 메타데이터(시험번호·작업자·일시) 자동 각인, 감사추적(audit trail) 기록</td></tr>
+        <tr><td>설치 환경</td><td>QC 실험실 내 Windows 단독(standalone) PC</td></tr>
+        <tr><td>포함 (In scope)</td><td>앱 소프트웨어, 설치 절차, 데이터 저장·보존, 감사추적 기능</td></tr>
+        <tr><td>제외 (Out of scope)</td><td>PC 하드웨어/OS 적격성, 카메라 장치 검교정, 네트워크 인프라</td></tr>
+      </table>
+      <p class="def">감사추적(audit trail): 누가·언제·무엇을 했는지를 사후 변경 불가능하게 남기는 기록.</p>
+    </section>
+
+    <section>
+      <h2><span class="num">3</span> 시스템 개요 (System Overview)</h2>
+      <p>QC 작업자가 검체/시료를 촬영하면, PharmCam이 시험번호·작업자·촬영일시를 사진에 묶어 저장하고, 모든 행위를 감사추적에 남긴다. 종이 사진 기록을 대체해 ALCOA+ 원칙을 전자적으로 보장하는 것이 목적이다.</p>
+      <p class="def">ALCOA+: 데이터가 갖춰야 할 9가지 속성 — Attributable, Legible, Contemporaneous, Original, Accurate + Complete, Consistent, Enduring, Available.</p>
+    </section>
+
+    <section>
+      <h2><span class="num">4</span> 영향성 평가 (Impact Assessment)</h2>
+      <p class="note"><strong>이 절이 하는 일:</strong> "이 시스템을 얼마나 빡세게 검증해야 하는가"를 정당화한다. GxP 영향이 클수록, 규정 적용을 받을수록 검증 강도가 올라간다.</p>
+
+      <h3>4.1 GxP 영향성 평가</h3>
+      <ul>
+        <li><strong>Direct Impact</strong> — GxP 기능(제품 품질·환자 안전·데이터 무결성)에 직접 영향 → 정식 검증 필요</li>
+        <li><strong>Indirect Impact</strong> — 직접 영향 항목 보조 → 제한적 검증</li>
+        <li><strong>No Impact</strong> — GxP 영향 없음 → GEP로 관리, 정식 검증 불필요</li>
+      </ul>
+      <table>
+        <tr><th>구성요소 (기능)</th><th>영향성</th><th>근거</th></tr>
+        <tr><td>촬영·이미지 캡처</td><td><span class="tag direct">Direct</span></td><td>GMP 품질기록(사진) 자체를 생성</td></tr>
+        <tr><td>메타데이터 각인</td><td><span class="tag direct">Direct</span></td><td>귀속성·동시성 보증</td></tr>
+        <tr><td>감사추적 (audit trail)</td><td><span class="tag direct">Direct</span></td><td>데이터 무결성의 핵심 증거</td></tr>
+        <tr><td>데이터 저장·보존</td><td><span class="tag direct">Direct</span></td><td>원본성·보존성</td></tr>
+        <tr><td>사용자 식별·접근통제</td><td><span class="tag direct">Direct</span></td><td>귀속성·보안</td></tr>
+        <tr><td>화면 테마·표시 설정</td><td><span class="tag no">No Impact</span></td><td>품질·무결성에 영향 없음</td></tr>
+      </table>
+      <p>→ <strong>시스템 종합 판정: Direct Impact.</strong> 전체 시스템을 정식 검증 대상으로 본다.</p>
+
+      <h3>4.2 규정 적용성 평가 (21 CFR Part 11 / EU Annex 11)</h3>
+      <p>PharmCam이 생성하는 사진·메타데이터·감사추적은 종이 기록을 대체하는 <strong>전자기록(electronic record)</strong>이며, GMP 예측규정이 요구하는 품질기록에 해당한다.</p>
+      <table>
+        <tr><th>평가 항목</th><th>판정</th><th>비고</th></tr>
+        <tr><td>전자기록(e-record)을 생성·보관하는가</td><td>예</td><td>→ Part 11 / Annex 11 적용 대상</td></tr>
+        <tr><td>전자서명(e-signature)을 사용하는가</td><td>URS에서 결정</td><td>작업자 확정/승인 방식</td></tr>
+        <tr><td>적용 규정</td><td>FDA 21 CFR Part 11, EU GMP Annex 11</td><td>전자기록·데이터 무결성 요구</td></tr>
+      </table>
+      <p>적용에 따라 갖춰야 할 통제(URS/DQ로 전개): 시스템 밸리데이션, 감사추적, 접근통제·사용자 식별, 정확한 사본·백업·보존, 신뢰할 수 있는 시각 출처.</p>
+
+      <h3>4.3 종합 영향성 → 검증 전략</h3>
+      <table>
+        <tr><th>GxP 영향성</th><th>GAMP 카테고리</th><th>→ 검증 전략</th></tr>
+        <tr><td><span class="tag direct">Direct</span></td><td>5 (Custom)</td><td>전 단계 정식 검증 (URS→DQ→IQ→OQ→PQ), RA로 검증 깊이 조절</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="num">5</span> 밸리데이션 접근방식 — V-모델</h2>
+      <pre>URS  ──────────────── PQ   (요구사항이 실제 운영에서 충족되는지)
+  DQ ────────────── OQ      (설계·기능이 의도대로 동작하는지)
+     IQ                     (올바르게 설치되었는지)</pre>
+      <p>위험평가(RA)에 근거해 각 단계의 검증 깊이를 조절한다.</p>
+    </section>
+
+    <section>
+      <h2><span class="num">6</span> 책임과 역할 (Roles &amp; Responsibilities)</h2>
+      <p class="def">본 프로젝트는 비개발자 QC 실무자가 Claude Code를 도구로 활용해 수행하는 교육 겸용 프로젝트다. 실제 사내 적용 시 QA의 독립적 검토·승인이 분리되어야 한다.</p>
+      <table>
+        <tr><th>역할</th><th>담당</th><th>책임</th></tr>
+        <tr><td>System Owner</td><td>QC 실무자</td><td>요구사항 정의, 검증 활동 주관</td></tr>
+        <tr><td>개발/구현</td><td>Claude Code + Cursor</td><td>코드 작성, 설계 문서화</td></tr>
+        <tr><td>Tester</td><td>QC 실무자</td><td>IQ/OQ/PQ 실행 및 결과 기록</td></tr>
+        <tr><td>QA</td><td><em>(별도 지정 필요)</em></td><td>산출물 독립 검토 및 최종 승인</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="num">7</span> 밸리데이션 산출물 (Deliverables)</h2>
+      <table>
+        <tr><th>단계</th><th>문서 ID</th><th>폴더</th><th>상태</th></tr>
+        <tr><td>Validation Plan</td><td>VP-001</td><td>docs/01_VP</td><td><span class="tag" style="background:var(--ok-bg);color:var(--ok)">확정 v1.0</span></td></tr>
+        <tr><td>Risk Assessment</td><td>RA-001</td><td>docs/02_RA</td><td><span class="tag" style="background:var(--ok-bg);color:var(--ok)">확정 v1.0</span></td></tr>
+        <tr><td>User Requirement Spec</td><td>URS-001/002</td><td>docs/03_URS</td><td><span class="tag" style="background:var(--ok-bg);color:var(--ok)">확정 v1.0</span></td></tr>
+        <tr><td>Design Qualification</td><td>DQ-001</td><td>docs/04_DQ</td><td><span class="tag" style="background:var(--ok-bg);color:var(--ok)">확정 v1.0</span></td></tr>
+        <tr><td>Installation Qualification</td><td>IQ-xxx</td><td>docs/05_IQ</td><td>예정</td></tr>
+        <tr><td>Operational Qualification</td><td>OQ-TC-xxx</td><td>docs/06_OQ</td><td>예정</td></tr>
+        <tr><td>Performance Qualification</td><td>PQ-TC-xxx</td><td>docs/07_PQ</td><td>예정</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="num">8</span> 합격 기준 및 일탈 처리</h2>
+      <ul>
+        <li>각 검증의 모든 테스트 케이스가 사전 정의된 예상 결과(expected result)와 일치하면 합격</li>
+        <li>불일치 시 일탈(deviation)로 기록, 원인·영향·조치를 문서화 후 재시험</li>
+        <li>모든 미결 일탈이 종결되기 전 시스템을 운영에 사용하지 않음</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2><span class="num">9</span> 변경 관리 및 추적성</h2>
+      <ul>
+        <li>승인된 문서의 변경은 버전을 올리고 변경 사유를 기록</li>
+        <li>모든 URS 항목은 설계(DQ)와 검증(OQ/PQ)까지 추적성 매트릭스로 추적</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2><span class="num">10</span> 승인 (Approval)</h2>
+      <table>
+        <tr><th>역할</th><th>성명</th><th>서명</th><th>일자</th></tr>
+        <tr><td>System Owner</td><td><em>(지정)</em></td><td></td><td></td></tr>
+        <tr><td>QA</td><td><em>(지정)</em></td><td></td><td></td></tr>
+      </table>
+    </section>
+  </main>
+
+  <footer>
+    PharmCam CSV 산출물 · VP-001 v1.0 · 약어: VP, RA, URS, DQ/IQ/OQ/PQ, CSV, GAMP, GxP, GEP, ALCOA+
+  </footer>
+</div>
+</body>
+</html>

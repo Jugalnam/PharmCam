@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RA-001 위험평가 — PharmCam</title>
+<style>
+  :root{
+    --navy:#0b1929; --navy-2:#15273d; --navy-3:#1e3a5f;
+    --gold:#c8a847; --gold-2:#e8d07a;
+    --ink:#1c2b3a; --muted:#64748b; --line:#dde3ec; --soft:#f7f9fc; --panel:#fff;
+    --ok:#15803d; --ok-bg:#dcfce7; --warn:#92400e; --warn-bg:#fef3c7;
+    --high:#b91c1c; --high-bg:#fee2e2; --med:#92400e; --med-bg:#fef3c7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:"Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif;background:#e8edf3;color:var(--ink);line-height:1.6;}
+  .page{width:min(1040px,calc(100% - 32px));margin:28px auto 48px;background:var(--panel);box-shadow:0 24px 64px rgba(11,25,41,.14);}
+  header{background:var(--navy);padding:30px 36px 26px;}
+  .doc-id{font-size:13px;letter-spacing:3px;color:var(--gold);font-weight:800;}
+  header h1{font-size:24px;color:#fff;margin:8px 0 4px;font-weight:800;}
+  header .sub{color:#7da4c4;font-size:14px;}
+  .badge-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+  .badge{padding:4px 12px;border-radius:4px;font-size:12px;font-weight:700;}
+  .badge.approved{background:var(--ok-bg);color:var(--ok);}
+  .badge.gold{background:rgba(200,168,71,.18);color:var(--gold-2);}
+  .meta-bar{display:flex;flex-wrap:wrap;border-bottom:2px solid var(--line);}
+  .m-card{padding:14px 22px;border-right:1px solid var(--line);}
+  .m-label{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);}
+  .m-val{font-size:15px;font-weight:700;margin-top:2px;}
+  main{padding:8px 36px 40px;}
+  section{margin-top:30px;}
+  h2{font-size:13px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:1.2px;padding-bottom:8px;border-bottom:2px solid var(--navy);margin-bottom:14px;display:flex;align-items:baseline;gap:10px;}
+  h2 .num{color:var(--gold);font-size:19px;font-weight:800;}
+  h3{font-size:14px;color:#fff;background:var(--navy-3);padding:7px 14px;border-radius:5px;margin:20px 0 10px;letter-spacing:.5px;}
+  p{margin:8px 0;font-size:14.5px;}
+  .note{background:var(--soft);border-left:4px solid var(--gold);padding:12px 16px;font-size:14px;margin:10px 0;}
+  .def{font-size:13px;color:var(--muted);}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.5px;}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top;}
+  th{background:var(--navy);color:#fff;font-weight:700;font-size:11.5px;}
+  tr:nth-child(even) td{background:var(--soft);}
+  td.c{text-align:center;font-weight:700;}
+  .pri{display:inline-block;padding:1px 9px;border-radius:3px;font-size:11px;font-weight:800;}
+  .pri.high{background:var(--high-bg);color:var(--high);}
+  .pri.med{background:var(--med-bg);color:var(--med);}
+  .score{font-weight:800;}
+  .cat-tag{display:inline-block;font-weight:800;color:var(--gold);}
+  .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0;}
+  .sum-card{border:1px solid var(--line);border-top:3px solid var(--navy-3);border-radius:8px;padding:14px 16px;background:#fff;}
+  .sum-card .cat{font-size:12px;color:var(--muted);font-weight:700;}
+  .sum-card .n{font-size:26px;font-weight:800;color:var(--navy);}
+  .sum-card .hi{font-size:12px;color:var(--high);font-weight:700;}
+  footer{padding:18px 36px 28px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;}
+  strong{color:var(--navy-3);}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="doc-id">RA-001</div>
+    <h1>Risk Assessment — 위험평가</h1>
+    <div class="sub">PharmCam — 검체·시료 사진 기록 시스템</div>
+    <div class="badge-row">
+      <span class="badge approved">확정 v1.0</span>
+      <span class="badge gold">ICH Q9 · FMEA</span>
+      <span class="badge gold">7 카테고리 · 31 위험</span>
+    </div>
+  </header>
+
+  <div class="meta-bar">
+    <div class="m-card"><div class="m-label">방법론</div><div class="m-val">S × P × D (위험점수)</div></div>
+    <div class="m-card"><div class="m-label">상위 문서</div><div class="m-val">VP-001 §4</div></div>
+    <div class="m-card"><div class="m-label">확정일</div><div class="m-val">2026-06-05</div></div>
+    <div class="m-card"><div class="m-label">High 위험</div><div class="m-val" style="color:var(--high)">14건</div></div>
+  </div>
+
+  <main>
+    <p class="note"><strong>이 문서가 하는 일:</strong> "어디서 무엇이 잘못될 수 있는가"를 다방면으로 따져 검증 노력을 위험이 큰 곳에 집중시킨다. Category 5(맞춤 개발)이므로 심도 깊게 수행했다. 도출된 통제는 URS·OQ/PQ로 직결된다.</p>
+
+    <section>
+      <h2><span class="num">3</span> 위험평가 방법론</h2>
+      <p>위험 우선순위 = <strong>심각도(S) × 발생가능성(P) × 검출성(D)</strong>. 각 항목 High(3)/Medium(2)/Low(1).</p>
+      <table>
+        <tr><th>점수</th><th>판정</th><th>조치</th></tr>
+        <tr><td class="c">12~27</td><td><span class="pri high">High</span></td><td>반드시 통제 + OQ/PQ 집중 시험</td></tr>
+        <tr><td class="c">5~11</td><td><span class="pri med">Medium</span></td><td>통제 권장 + 시험 확인</td></tr>
+        <tr><td class="c">1~4</td><td>Low</td><td>기본 통제로 충분</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="num">4</span> 위험 등록부 (Risk Register)</h2>
+      <p class="def">S·P·D는 통제 적용 전(inherent) 기준.</p>
+
+      <h3>4.1 SEC — 보안 · 암호화</h3>
+      <table>
+        <tr><th>ID</th><th>실패 모드</th><th>영향</th><th>S</th><th>P</th><th>D</th><th>점수</th><th>우선순위</th><th>통제 → 전개</th></tr>
+        <tr><td>SEC-01</td><td>저장 이미지·메타데이터 비암호화 → 직접 접근 시 유출·변조</td><td>무결성·기밀성</td><td class="c">3</td><td class="c">2</td><td class="c">2</td><td class="c score">12</td><td><span class="pri high">High</span></td><td>저장 데이터 암호화 → URS/DQ</td></tr>
+        <tr><td>SEC-02</td><td>비밀번호 정책 부재(복잡도·만료·잠금)</td><td>계정 도용</td><td class="c">2</td><td class="c">2</td><td class="c">2</td><td class="c score">8</td><td><span class="pri med">Medium</span></td><td>비밀번호 정책 → URS</td></tr>
+        <tr><td>SEC-03</td><td>비밀번호 평문 저장/전송</td><td>자격증명 유출</td><td class="c">3</td><td class="c">1</td><td class="c">3</td><td class="c score">9</td><td><span class="pri med">Medium</span></td><td>salted hash 저장 → DQ</td></tr>
+        <tr><td>SEC-04</td><td>악성코드/랜섬웨어로 데이터 손상</td><td>가용성·무결성</td><td class="c">3</td><td class="c">1</td><td class="c">2</td><td class="c score">6</td><td><span class="pri med">Medium</span></td><td>단독 PC·백신·외부차단 → URS</td></tr>
+        <tr><td>SEC-05</td><td>무차별 대입 로그인</td><td>무단 접근</td><td class="c">2</td><td class="c">2</td><td class="c">2</td><td class="c score">8</td><td><span class="pri med">Medium</span></td><td>실패 횟수 제한·잠금 → URS</td></tr>
+      </table>
+
+      <h3>4.2 AUTH — 권한 · 접근통제</h3>
+      <table>
+        <tr><th>ID</th><th>실패 모드</th><th>영향</th><th>S</th><th>P</th><th>D</th><th>점수</th><th>우선순위</th><th>통제 → 전개</th></tr>
+        <tr><td>AUTH-01</td><td>공용(공유) 계정 사용 → 누가 했는지 불명</td><td>귀속성 위반</td><td class="c">3</td><td class="c">3</td><td class="c">2</td><td class="c score">18</td><td><span class="pri high">High</span></td><td>1인 1계정 강제 → URS</td></tr>
+        <tr><td>AUTH-02</td><td>권한 미구분 → 일반 작업자가 삭제·설정 변경</td><td>무결성 저해</td><td class="c">3</td><td class="c">2</td><td class="c">2</td><td class="c score">12</td><td><span class="pri high">High</span></td><td>역할 기반 접근통제(RBAC) → URS</td></tr>
+        <tr><td>AUTH-03</td><td>로그인 없이 촬영 가능</td><td>귀속성 상실</td><td class="c">3</td><td class="c">2</td><td class="c">2</td><td class="c score">12</td><td><span class="pri high">High</span></td><td>식별 없이 촬영 차단 → URS</td></tr>
+        <tr><td>AUTH-04</td><td>세션 미종료 → 자리비움 시 타인 작업</td><td>귀속성 위반</td><td class="c">2</td><td class="c">3</td><td class="c">3</td><td class="c score">18</td><td><span class="pri high">High</span></td><td>자동 로그아웃 → URS</td></tr>
+        <tr><td>AUTH-05</td><td>전자서명 부재/위조 → 승인 책임 불명</td><td>책임추적 상실</td><td class="c">3</td><td class="c">1</td><td class="c">2</td><td class="c score">6</td><td><span class="pri med">Medium</span></td><td>e-signature, URS에서 결정</td></tr>
+        <tr><td>AUTH-06</td><td>퇴사·전배자 계정 미비활성화</td><td>무단 접근</td><td class="c">2</td><td class="c">2</td><td class="c">3</td><td class="c score">12</td><td><span class="pri high">High</span></td><td>계정 수명주기 관리 → URS/SOP</td></tr>
+      </table>
+
+      <h3>4.3 DAT — 데이터 무결성</h3>
+      <table>
+        <tr><th>ID</th><th>실패 모드</th><th>영향</th><th>S</th><th>P</th><th>D</th><th>점수</th><th>우선순위</th><th>통제 → 전개</th></tr>
+        <tr><td>DAT-01</td><td>시험번호 오입력·누락 → 엉뚱한 시험에 귀속</td><td>추적성 상실</td><td class="c">3</td><td class="c">3</td><td class="c">3</td><td class="c score">27</td><td><span class="pri high">High</span></td><td>필수항목 강제·입력검증·확인 → URS</td></tr>
+        <tr><td>DAT-02</td><td>감사추적 누락 또는 사후 변조 가능</td><td>무결성 증거 상실</td><td class="c">3</td><td class="c">2</td><td class="c">3</td><td class="c score">18</td><td><span class="pri high">High</span></td><td>append-only·수정불가 → URS/DQ</td></tr>
+        <tr><td>DAT-03</td><td>원본 이미지 변조·교체</td><td>원본성 상실</td><td class="c">3</td><td class="c">2</td><td class="c">2</td><td class="c score">12</td><td><span class="pri high">High</span></td><td>원본 해시·읽기전용 → URS/DQ</td></tr>
+        <tr><td>DAT-04</td><td>촬영 시각 부정확(시스템 시간 변경)</td><td>동시성 의심</td><td class="c">2</td><td class="c">2</td><td class="c">3</td><td class="c score">12</td><td><span class="pri high">High</span></td><td>신뢰 시각원·변경 감지 → URS/DQ</td></tr>
+        <tr><td>DAT-05</td><td>중도 실패·재촬영 기록 누락</td><td>완전성 상실</td><td class="c">2</td><td class="c">2</td><td class="c">2</td><td class="c score">8</td><td><span class="pri med">Medium</span></td><td>실패/재시도도 기록 → DQ</td></tr>
+        <tr><td>DAT-06</td><td>메타데이터-이미지 분리/불일치</td><td>신뢰성 저하</td><td class="c">2</td><td class="c">2</td><td class="c">2</td><td class="c score">8</td><td><span class="pri med">Medium</span></td><td>원자적 묶음 저장 → DQ</td></tr>
+        <tr><td>DAT-07</td><td>감사추적 기능 자체를 끌 수 있음</td><td>통제 무력화</td><td class="c">3</td><td class="c">1</td><td class="c">3</td><td class="c score">9</td><td><span class="pri med">Medium</span></td><td>비활성화 불가·상시 작동 → DQ</td></tr>
+      </table>
+
+      <h3>4.4 BAK — 백업 · 복구 · 보존</h3>
+      <table>
+        <tr><th>ID</th><th>실패 모드</th><th>영향</th><th>S</th><th>P</th><th>D</th><th>점수</th><th>우선순위</th><th>통제 → 전개</th></tr>
+        <tr><td>BAK-01</td><td>백업 부재 → PC 고장 시 전체 유실</td><td>가용성 상실</td><td class="c">3</td><td class="c">2</td><td class="c">2</td><td class="c score">12</td><td><span class="pri high">High</span></td><td>정기 자동 백업·이중 저장 → URS</td></tr>
+        <tr><td>BAK-02</td><td>백업 무결성 미검증 → 복구 시 손상</td><td>복구 실패</td><td class="c">3</td><td class="c">1</td><td class="c">3</td><td class="c score">9</td><td><span class="pri med">Medium</span></td><td>주기 복구 테스트 → SOP</td></tr>
+        <tr><td>BAK-03</td><td>보존기간 중 판독 불가(포맷·매체 열화)</td><td>Enduring/Available 위반</td><td class="c">2</td><td class="c">2</td><td class="c">2</td><td class="c score">8</td><td><span class="pri med">Medium</span></td><td>표준 포맷·보존정책 → URS/SOP</td></tr>
+        <tr><td>BAK-04</td><td>저장공간 부족으로 신규 저장 실패</td><td>가용성 상실</td><td class="c">2</td><td class="c">2</td><td class="c">2</td><td class="c score">8</td><td><span class="pri med">Medium</span></td><td>용량 모니터링·경고 → URS</td></tr>
+        <tr><td>BAK-05</td><td>재해복구 절차 부재</td><td>가용성 상실</td><td class="c">3</td><td class="c">1</td><td class="c">2</td><td class="c score">6</td><td><span class="pri med">Medium</span></td><td>재해복구(DR) 절차 → SOP</td></tr>
+      </table>
+
+      <h3>4.5 SW — 소프트웨어 · 기능</h3>
+      <table>
+        <tr><th>ID</th><th>실패 모드</th><th>영향</th><th>S</th><th>P</th><th>D</th><th>점수</th><th>우선순위</th><th>통제 → 전개</th></tr>
+        <tr><td>SW-01</td><td>흐릿·과다노출 등 판독 불가 이미지</td><td>가독성 저하</td><td class="c">2</td><td class="c">2</td><td class="c">2</td><td class="c score">8</td><td><span class="pri med">Medium</span></td><td>미리보기·재촬영 → URS</td></tr>
+        <tr><td>SW-02</td><td>캡처/저장 실패인데 성공으로 표시</td><td>기록 누락 미인지</td><td class="c">2</td><td class="c">2</td><td class="c">3</td><td class="c score">12</td><td><span class="pri high">High</span></td><td>저장 성공 검증·실패 알림 → URS/DQ</td></tr>
+        <tr><td>SW-03</td><td>잘못된 검체를 촬영(작업자 실수)</td><td>잘못된 기록</td><td class="c">2</td><td class="c">2</td><td class="c">3</td><td class="c score">12</td><td><span class="pri high">High</span></td><td>시험정보 병기·확인(SW+SOP) → URS</td></tr>
+        <tr><td>SW-04</td><td>버그·예외로 비정상 종료 시 손상</td><td>무결성 저해</td><td class="c">2</td><td class="c">2</td><td class="c">2</td><td class="c score">8</td><td><span class="pri med">Medium</span></td><td>예외처리·자동복구 → DQ</td></tr>
+      </table>
+
+      <h3>4.6 INF — 인프라 · 운영 &nbsp;/&nbsp; 4.7 HUM — 인적 · 절차</h3>
+      <table>
+        <tr><th>ID</th><th>실패 모드</th><th>영향</th><th>S</th><th>P</th><th>D</th><th>점수</th><th>우선순위</th><th>통제 → 전개</th></tr>
+        <tr><td>INF-01</td><td>OS 시스템 시계 변경 권한 노출 → 시각 조작</td><td>동시성 위반</td><td class="c">2</td><td class="c">2</td><td class="c">3</td><td class="c score">12</td><td><span class="pri high">High</span></td><td>OS 시간변경 제한 → URS</td></tr>
+        <tr><td>INF-02</td><td>미인가 SW 설치·USB로 데이터 반출</td><td>무단 반출·변조</td><td class="c">2</td><td class="c">2</td><td class="c">2</td><td class="c score">8</td><td><span class="pri med">Medium</span></td><td>단말 통제 정책 → SOP</td></tr>
+        <tr><td>HUM-01</td><td>미숙련 작업자 오조작</td><td>잘못된 기록</td><td class="c">2</td><td class="c">2</td><td class="c">2</td><td class="c score">8</td><td><span class="pri med">Medium</span></td><td>교육·SOP → SOP</td></tr>
+        <tr><td>HUM-02</td><td>정기 검토(periodic review) 부재</td><td>잠재 위험 방치</td><td class="c">2</td><td class="c">2</td><td class="c">3</td><td class="c score">12</td><td><span class="pri high">High</span></td><td>감사추적 주기 검토 SOP → SOP</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="num">5</span> 위험 요약</h2>
+      <div class="summary-grid">
+        <div class="sum-card"><div class="cat">SEC 보안·암호화</div><div class="n">5</div><div class="hi">High 1</div></div>
+        <div class="sum-card"><div class="cat">AUTH 권한·접근통제</div><div class="n">6</div><div class="hi">High 4</div></div>
+        <div class="sum-card"><div class="cat">DAT 데이터 무결성</div><div class="n">7</div><div class="hi">High 4</div></div>
+        <div class="sum-card"><div class="cat">BAK 백업·복구·보존</div><div class="n">5</div><div class="hi">High 1</div></div>
+        <div class="sum-card"><div class="cat">SW 소프트웨어·기능</div><div class="n">4</div><div class="hi">High 2</div></div>
+        <div class="sum-card"><div class="cat">INF 인프라·운영</div><div class="n">2</div><div class="hi">High 1</div></div>
+        <div class="sum-card"><div class="cat">HUM 인적·절차</div><div class="n">2</div><div class="hi">High 1</div></div>
+        <div class="sum-card" style="border-top-color:var(--gold)"><div class="cat">합계</div><div class="n">31</div><div class="hi">High 14 · Med 17</div></div>
+      </div>
+      <p>최고위험: <strong>DAT-01(시험번호 오귀속, 27점)</strong>, AUTH-01·AUTH-04·DAT-02(18점).</p>
+    </section>
+
+    <section>
+      <h2><span class="num">7</span> 결론</h2>
+      <p>7개 카테고리에서 위험 31건(High 14, Medium 17)을 식별. <strong>High 위험 14건은 전부 URS 요구사항으로 전개</strong>하고 OQ/PQ에서 집중 검증한다. 통제는 ① 소프트웨어 기능 ② 환경 통제 ③ 절차(SOP)로 나뉘며, SW만으로 해결되지 않는 위험은 SOP와 병행한다. 모든 통제는 추적성 매트릭스로 URS↔DQ↔OQ/PQ까지 추적된다.</p>
+    </section>
+  </main>
+
+  <footer>PharmCam CSV 산출물 · RA-001 v1.0 · 방법론: ICH Q9 / FMEA(S×P×D) · 약어: RA, S/P/D, RBAC, DR, DI, SOP, e-signature</footer>
+</div>
+</body>
+</html>
