@@ -87,7 +87,7 @@ async function main(): Promise<void> {
   await auth.login('admin', 'Admin123!')
   const adminOk = tryExport(auth)
   const exportPath = join(tmpdir(), `pharmcam-audit-test-${Date.now()}.csv`)
-  const entries = audit.list({ action: 'login' })
+  const entries = audit.listWithUsers({ action: 'login' })
   const rowCount = writeExportFile('audit', 'csv', exportPath, entries, [])
 
   audit.append('export', {

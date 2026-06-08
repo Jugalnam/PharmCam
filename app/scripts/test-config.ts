@@ -84,7 +84,7 @@ async function main(): Promise<void> {
   }
 
   const spec = config.getCurrentSpec()
-  console.log(`\n   getCurrentSpec(): ${spec.length === 16 ? 'PASS' : 'FAIL'} (${spec.length}항목)`)
+  console.log(`\n   getCurrentSpec(): ${spec.length === 18 ? 'PASS' : 'FAIL'} (${spec.length}항목)`)
   const lockedCount = spec.filter((e) => e.coreLocked).length
   console.log(`   core_locked 항목 수: ${lockedCount} (기대 4)`)
   console.log(`   verifyChain: ${audit.verifyChain() === null ? 'PASS' : 'FAIL'}`)

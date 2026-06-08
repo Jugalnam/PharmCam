@@ -1,6 +1,5 @@
 import { writeFileSync } from 'fs'
-import type { AuditEntry } from '../../shared/types'
-import type { ExportFormat, ExportTarget } from '../../shared/audit.types'
+import type { AuditListItem, ExportFormat, ExportTarget } from '../../shared/audit.types'
 import type { RecordListItem } from '../../shared/record.types'
 
 function escapeCsv(value: string | number | null | undefined): string {
@@ -14,16 +13,21 @@ function escapeCsv(value: string | number | null | undefined): string {
   return str
 }
 
-function buildAuditCsv(entries: AuditEntry[]): string {
-  const header = 'seq,ts,user_id,action,target_type,target_id,before_value,after_value,entry_hash'
+function buildAuditCsv(entries: AuditListItem[]): string {
+  // user_id/target_id(불변 원본) + user_label/target_label(가독성)을 함께 내보내
+  // 기계 추적성과 사람 가독성을 모두 보존한다.
+  const header =
+    'seq,ts,user_id,user_label,action,target_type,target_id,target_label,before_value,after_value,entry_hash'
   const rows = entries.map((e) =>
     [
       e.seq,
       e.ts,
       e.userId ?? '',
+      e.userLabel ?? '',
       e.action,
       e.targetType ?? '',
       e.targetId ?? '',
+      e.targetLabel ?? '',
       e.beforeValue ?? '',
       e.afterValue ?? '',
       e.entryHash
@@ -109,7 +113,7 @@ export function writeExportFile(
   target: ExportTarget,
   format: ExportFormat,
   filePath: string,
-  auditEntries: AuditEntry[],
+  auditEntries: AuditListItem[],
   records: RecordListItem[]
 ): number {
   let rowCount = 0
@@ -121,7 +125,7 @@ export function writeExportFile(
     } else {
       const lines = auditEntries.map(
         (e) =>
-          `${e.seq} | ${e.ts} | user=${e.userId ?? '-'} | ${e.action} | ${e.targetType ?? ''}:${e.targetId ?? ''}`
+          `${e.seq} | ${e.ts} | user=${e.userLabel ?? '-'} | ${e.action} | ${e.targetType ?? ''}${e.targetLabel ? `: ${e.targetLabel}` : ''}`
       )
       writeFileSync(filePath, buildSimplePdf('PharmCam Audit Trail Export', lines))
     }

@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react'
-import type { AuditFilter, ExportFormat, ExportTarget } from '../../shared/audit.types'
+import type {
+  AuditFilter,
+  AuditListItem,
+  ExportFormat,
+  ExportTarget
+} from '../../shared/audit.types'
 import type { SessionUser } from '../../shared/auth.types'
-import type { AuditEntry } from '../../shared/types'
 
 interface AuditViewProps {
   user: SessionUser
@@ -22,7 +26,7 @@ const COMMON_ACTIONS = [
 ]
 
 export default function AuditView({ user }: AuditViewProps): JSX.Element {
-  const [entries, setEntries] = useState<AuditEntry[]>([])
+  const [entries, setEntries] = useState<AuditListItem[]>([])
   const [filter, setFilter] = useState<AuditFilter>({ limit: 200 })
   const [userIdInput, setUserIdInput] = useState('')
   const [actionInput, setActionInput] = useState('')
@@ -230,11 +234,11 @@ export default function AuditView({ user }: AuditViewProps): JSX.Element {
             <tr key={e.seq}>
               <td>{e.seq}</td>
               <td>{new Date(e.ts).toLocaleString('ko-KR')}</td>
-              <td>{e.userId ?? '—'}</td>
+              <td>{e.userLabel ?? '—'}</td>
               <td>{e.action}</td>
               <td>
                 {e.targetType ?? ''}
-                {e.targetId ? `:${e.targetId}` : ''}
+                {e.targetLabel ? `: ${e.targetLabel}` : ''}
               </td>
               <td className="mono truncate">{e.beforeValue ?? ''}</td>
               <td className="mono truncate">{e.afterValue ?? ''}</td>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { SessionUser } from '../../shared/auth.types'
+import type { MetadataField } from '../../shared/record.types'
 
 interface CaptureProps {
   user: SessionUser
@@ -12,6 +13,8 @@ export default function Capture({ user }: CaptureProps): JSX.Element {
 
   const [testNo, setTestNo] = useState('')
   const [sampleId, setSampleId] = useState('')
+  const [customFields, setCustomFields] = useState<MetadataField[]>([])
+  const [metaValues, setMetaValues] = useState<Record<string, string>>({})
   const [preview, setPreview] = useState<string | null>(null)
   const [cameraError, setCameraError] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -48,6 +51,18 @@ export default function Capture({ user }: CaptureProps): JSX.Element {
     }
   }, [])
 
+  useEffect(() => {
+    // 회사별 추가 메타데이터 항목(URS-031) 로드
+    window.api.metadata
+      .getFields()
+      .then((fields) => setCustomFields(fields))
+      .catch(() => setCustomFields([]))
+  }, [])
+
+  function setMetaValue(key: string, value: string): void {
+    setMetaValues((prev) => ({ ...prev, [key]: value }))
+  }
+
   function handleCapture(): void {
     const video = videoRef.current
     const canvas = canvasRef.current
@@ -83,6 +98,24 @@ export default function Capture({ user }: CaptureProps): JSX.Element {
       return
     }
 
+    // 사용자 정의 필수 항목 검증
+    const missing = customFields
+      .filter((f) => f.required && !(metaValues[f.key] ?? '').trim())
+      .map((f) => f.label)
+    if (missing.length > 0) {
+      setSaveError(`필수 항목을 입력하세요: ${missing.join(', ')}`)
+      return
+    }
+
+    // 비어있지 않은 추가 항목만 meta로 전달
+    const meta: Record<string, string> = {}
+    for (const f of customFields) {
+      const v = (metaValues[f.key] ?? '').trim()
+      if (v) {
+        meta[f.key] = v
+      }
+    }
+
     setSaving(true)
     setSaveError(null)
     setSaveSuccess(null)
@@ -91,7 +124,8 @@ export default function Capture({ user }: CaptureProps): JSX.Element {
       const result = await window.api.record.save({
         testNo: testNo.trim(),
         sampleId: sampleId.trim() || undefined,
-        imageDataBase64: preview
+        imageDataBase64: preview,
+        meta: Object.keys(meta).length > 0 ? meta : undefined
       })
 
       if (result.ok && result.recordId) {
@@ -126,6 +160,12 @@ export default function Capture({ user }: CaptureProps): JSX.Element {
               {user.username} (ID: {user.id})
             </dd>
           </div>
+          {customFields.map((f) => (
+            <div key={f.key}>
+              <dt>{f.label}</dt>
+              <dd>{(metaValues[f.key] ?? '').trim() || '—'}</dd>
+            </div>
+          ))}
         </dl>
       </div>
 
@@ -147,16 +187,30 @@ export default function Capture({ user }: CaptureProps): JSX.Element {
               placeholder="선택"
             />
           </label>
+          {customFields.map((f) => (
+            <label key={f.key}>
+              {f.label} {f.required && <span className="required">*</span>}
+              <input
+                value={metaValues[f.key] ?? ''}
+                onChange={(e) => setMetaValue(f.key, e.target.value)}
+                placeholder={f.required ? '필수' : '선택'}
+              />
+            </label>
+          ))}
         </section>
 
         <section className="capture-preview">
-          {cameraError ? (
-            <p className="login-error">{cameraError}</p>
-          ) : preview ? (
-            <img src={preview} alt="촬영 미리보기" className="captured-image" />
-          ) : (
-            <video ref={videoRef} autoPlay playsInline muted className="camera-video" />
-          )}
+          {cameraError && <p className="login-error">{cameraError}</p>}
+          {/* video는 항상 마운트해 stream 연결을 유지한다(재촬영 시 카메라가 다시 보이도록). */}
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="camera-video"
+            style={{ display: !cameraError && !preview ? 'block' : 'none' }}
+          />
+          {preview && <img src={preview} alt="촬영 미리보기" className="captured-image" />}
           <canvas ref={canvasRef} className="hidden-canvas" />
         </section>
       </div>

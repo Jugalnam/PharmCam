@@ -1,6 +1,11 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type { CreateUserInput } from '../shared/auth.types'
-import type { CorrectRecordInput, RecordFilter, SaveRecordInput } from '../shared/record.types'
+import type {
+  CorrectRecordInput,
+  MetadataField,
+  RecordFilter,
+  SaveRecordInput
+} from '../shared/record.types'
 import type { AuditFilter, ExportRequest } from '../shared/audit.types'
 import type { SignatureMeaning } from '../shared/types'
 
@@ -16,6 +21,8 @@ contextBridge.exposeInMainWorld('api', {
     touchActivity: () => ipcRenderer.invoke('auth:touchActivity'),
     createUser: (input: CreateUserInput) => ipcRenderer.invoke('auth:createUser', input),
     deactivateUser: (userId: number) => ipcRenderer.invoke('auth:deactivateUser', userId),
+    listUsers: () => ipcRenderer.invoke('auth:listUsers'),
+    getPermissionMatrix: () => ipcRenderer.invoke('auth:getPermissionMatrix'),
     changePassword: (currentPassword: string, newPassword: string) =>
       ipcRenderer.invoke('auth:changePassword', currentPassword, newPassword)
   },
@@ -30,6 +37,16 @@ contextBridge.exposeInMainWorld('api', {
     get: (key: string) => ipcRenderer.invoke('config:get', key),
     getSpec: () => ipcRenderer.invoke('config:getSpec'),
     set: (key: string, value: string) => ipcRenderer.invoke('config:set', key, value)
+  },
+  storage: {
+    getInfo: () => ipcRenderer.invoke('storage:getInfo'),
+    setRoot: (path: string) => ipcRenderer.invoke('storage:setRoot', path),
+    choose: () => ipcRenderer.invoke('storage:choose'),
+    openFolder: () => ipcRenderer.invoke('storage:openFolder')
+  },
+  metadata: {
+    getFields: () => ipcRenderer.invoke('metadata:getFields'),
+    setFields: (fields: MetadataField[]) => ipcRenderer.invoke('metadata:setFields', fields)
   },
   sign: {
     getStatus: () => ipcRenderer.invoke('sign:getStatus'),

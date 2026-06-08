@@ -57,13 +57,17 @@ function setupSecurity(): void {
   })
 
   // 폐쇄망: 외부 origin 차단 CSP
+  // 프로덕션(배포본)은 엄격하게 유지하고, 개발 서버일 때만 Vite HMR/Fast Refresh를
+  // 위해 inline/eval·ws(localhost)를 허용한다. 검증 대상인 프로덕션 빌드의 CSP는 불변.
+  const isDev = !!process.env.ELECTRON_RENDERER_URL
+  const csp = isDev
+    ? "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' ws://localhost:* http://localhost:*; font-src 'self'; object-src 'none'; base-uri 'self'"
+    : "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'"
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     callback({
       responseHeaders: {
         ...details.responseHeaders,
-        'Content-Security-Policy': [
-          "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'"
-        ]
+        'Content-Security-Policy': [csp]
       }
     })
   })

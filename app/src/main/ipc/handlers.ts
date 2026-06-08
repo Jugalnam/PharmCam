@@ -1,4 +1,4 @@
-import { dialog, ipcMain } from 'electron'
+import { dialog, ipcMain, shell } from 'electron'
 import { writeFileSync } from 'fs'
 import type { AuditService } from '../services/audit.service'
 import type { AuthService } from '../services/auth.service'
@@ -14,6 +14,7 @@ import type { CreateUserInput } from '../../shared/auth.types'
 import type { AuditFilter, ExportRequest } from '../../shared/audit.types'
 import type {
   CorrectRecordInput,
+  MetadataField,
   RecordFilter,
   SaveRecordInput
 } from '../../shared/record.types'
@@ -32,7 +33,7 @@ export function registerIpcHandlers(
 ): void {
   ipcMain.handle('audit:list', (_event, filter?: AuditFilter) => {
     authService.requirePermission('audit.view')
-    return auditService.list(filter ?? {})
+    return auditService.listWithUsers(filter ?? {})
   })
 
   ipcMain.handle('audit:verifyChain', () => {
@@ -63,7 +64,7 @@ export function registerIpcHandlers(
 
     try {
       const auditEntries =
-        request.target === 'audit' ? auditService.list(request.filter ?? {}) : []
+        request.target === 'audit' ? auditService.listWithUsers(request.filter ?? {}) : []
       const records =
         request.target === 'records'
           ? recordService.list(request.recordFilter ?? { limit: 500 })
@@ -121,6 +122,14 @@ export function registerIpcHandlers(
     return authService.deactivateUser(userId)
   })
 
+  ipcMain.handle('auth:listUsers', () => {
+    return authService.listUsers()
+  })
+
+  ipcMain.handle('auth:getPermissionMatrix', () => {
+    return authService.getPermissionMatrix()
+  })
+
   ipcMain.handle(
     'auth:changePassword',
     async (_event, currentPassword: string, newPassword: string) => {
@@ -146,6 +155,47 @@ export function registerIpcHandlers(
   ipcMain.handle('record:correct', (_event, id: number, input: CorrectRecordInput) => {
     const user = authService.requirePermission('capture')
     return recordService.correct(id, input, user.id)
+  })
+
+  // 메타데이터 추가 항목(URS-031) — 조회는 세션, 변경은 관리자(config 권한)만.
+  ipcMain.handle('metadata:getFields', () => {
+    authService.requireSession()
+    return recordService.getMetadataFields()
+  })
+
+  ipcMain.handle('metadata:setFields', (_event, fields: MetadataField[]) => {
+    const user = authService.requirePermission('config')
+    return recordService.setMetadataFields(fields, user.id)
+  })
+
+  // 저장 위치(D-11) — 조회·변경·폴더 열기. 변경은 관리자(config 권한)만.
+  ipcMain.handle('storage:getInfo', () => {
+    authService.requirePermission('config')
+    return recordService.getStorageInfo()
+  })
+
+  ipcMain.handle('storage:setRoot', (_event, path: string) => {
+    const user = authService.requirePermission('config')
+    return recordService.setStorageRoot(path, user.id)
+  })
+
+  ipcMain.handle('storage:choose', async () => {
+    const user = authService.requirePermission('config')
+    const res = await dialog.showOpenDialog({
+      title: 'PharmCam 저장 위치 선택 (로컬 폴더)',
+      properties: ['openDirectory', 'createDirectory']
+    })
+    if (res.canceled || res.filePaths.length === 0) {
+      return { ok: false, error: '선택이 취소되었습니다.' }
+    }
+    return recordService.setStorageRoot(res.filePaths[0], user.id)
+  })
+
+  ipcMain.handle('storage:openFolder', async () => {
+    authService.requirePermission('config')
+    const root = recordService.ensureStorageRoot()
+    const err = await shell.openPath(root)
+    return { ok: err === '', error: err || undefined }
   })
 
   ipcMain.handle('config:get', (_event, key: string) => {

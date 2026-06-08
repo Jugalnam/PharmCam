@@ -6,12 +6,14 @@ import type {
   CreateUserResult,
   DeactivateUserResult,
   LoginResult,
-  SessionUser
+  PermissionMatrix,
+  SessionUser,
+  UserSummary
 } from '../../shared/auth.types'
-import type { UserRole } from '../../shared/types'
+import type { UserRole, UserStatus } from '../../shared/types'
 import type { AuditService } from './audit.service'
 import type { ConfigService } from './config.service'
-import { hasPermission, type Permission } from './rbac'
+import { getPermissionMatrix, hasPermission, type Permission } from './rbac'
 import type { TimeService } from './time.service'
 
 const DEFAULT_ADMIN_USERNAME = 'admin'
@@ -324,6 +326,36 @@ export class AuthService {
     }
 
     return { ok: true }
+  }
+
+  /** 역할별 권한 매트릭스(읽기전용). 세션만 있으면 조회 가능 — 정책 정보일 뿐 민감 데이터 아님. */
+  getPermissionMatrix(): PermissionMatrix {
+    this.requireSession()
+    return getPermissionMatrix()
+  }
+
+  listUsers(): UserSummary[] {
+    this.requirePermission('user.manage')
+    const rows = this.db
+      .prepare(
+        'SELECT id, username, role, status, created_at, disabled_at FROM users ORDER BY id'
+      )
+      .all() as Array<{
+      id: number
+      username: string
+      role: string
+      status: string
+      created_at: string
+      disabled_at: string | null
+    }>
+    return rows.map((r) => ({
+      id: r.id,
+      username: r.username,
+      role: r.role as UserRole,
+      status: r.status as UserStatus,
+      createdAt: r.created_at,
+      disabledAt: r.disabled_at
+    }))
   }
 
   private handleLoginFailure(user: UserRow): LoginResult {

@@ -39,20 +39,44 @@ PQ  (성능 적격성 평가)       docs/07_PQ
 - 각 문서는 고유 ID 체계를 쓴다: URS는 `URS-001`, 위험은 `RA-001`, 테스트는 `OQ-TC-001` 식. 이 ID로 서로를 참조(추적성)한다.
 - 한 단계를 마치면 다음 단계로 넘어가기 전에 사용자(QC 실무자)의 승인을 받는다. CSV에서 단계 승인은 형식 요건이다.
 
-## 현재 진행 상황 (2026-06-05 기준)
+## 현재 진행 상황 (2026-06-08 기준)
 
 ```
 [✓] VP-001   확정 v1.0    (docs/01_VP)
-[✓] RA-001   확정 v1.0    (docs/02_RA, 위험 31건 / 7 카테고리)
-[✓] URS-001  확정 v1.0    (요구사항 42개)  + URS-002 적합성·일탈(예외 7건) 확정
-[✓] DQ-001   확정 v1.0    (설계결정 D-1~D-10, 기존 솔루션 평가 포함)
-[✓] app/ 구현 완료         (M1~M8 + 배포준비) — 빌드/테스트 통과
+[✓] RA-001   v1.1 Approved (2026-06-08)  (DAT-08 저장위치 위험 추가)
+[✓] URS-001  v1.1 Approved (2026-06-08)  (URS-047 저장위치 신설, URS-040·073 문구보강)
+[✓] DQ-001   v1.1 Approved (2026-06-08)  (D-11 저장위치 설계 추가)
+[✓] app/ 구현 완료         (M1~M8 + 배포준비) + 2026-06-08 세션 추가구현(아래)
 [ ] IQ  ← 다음 단계        (자가점검 화면이 IQ 검증 항목과 연결됨)
 [ ] OQ / PQ
 ```
 
 - 강의자료 4편 완료(`lectures/01~04`). 전자서명은 **도입(포함)** 결정됨.
 - 빌드 명세서: `app/BUILD_SPEC.md` (DQ↔구현 상세 설계, M1~M8 마일스톤).
+
+### 세션 로그 — 2026-06-08 (환경복구 + UX개선 + 신규기능)
+
+**환경(새 PC):** Node 22.22.3(winget OpenJS.NodeJS.22) — PATH 미등록이라 PowerShell 앞에
+`$env:Path="C:\Users\User\AppData\Local\Microsoft\WinGet\Packages\OpenJS.NodeJS.22_Microsoft.Winget.Source_8wekyb3d8bbwe\node-v22.22.3-win-x64;"+$env:Path` 프리픽스 필요. VS BuildTools+ClangCL 설치됨.
+
+**구현 완료(코드 반영·typecheck/test 통과, 단 git 미커밋):**
+- 재촬영 버그 수정(`Capture.tsx` video 항상 마운트) URS-032
+- 설정 입력 위젯화(드롭다운/체크박스/숫자) `Settings.tsx`
+- 계정 관리 UI `UserManagement.tsx`(생성/비활성화) URS-014
+- **권한 매트릭스 읽기전용 조회**(계정관리 탭 하단) — `rbac.getPermissionMatrix()`+`auth:getPermissionMatrix`, URS-012/073
+- **감사추적 사용자 가독표시** `admin (#1)` — `audit.listWithUsers()`(서버측 JOIN), 화면+CSV+PDF, 저장값·해시체인 불변, URS-040
+- **저장 위치 지정** `storage.root` config — `record.service` 저장시점 경로해석·검증(로컬한정·UNC거부·쓰기권한)·마이그레이션X, `storage:*` IPC, 설정탭 "저장 위치" 섹션. URS-047/D-11
+- **메타데이터 항목 구성** `metadata.fields` config — 촬영화면 동적입력+필수검증, 설정탭 "촬영 메타데이터 항목" 편집, `metadata:*` IPC. URS-031
+- config 시드 `INSERT OR IGNORE`(멱등) → 기존 DB에도 신규키 추가. **config 18개**(테스트 기대값 18).
+
+**미완료/다음 작업(우선순위순):**
+1. **문서 마무리 잔여**: URS/RA/DQ v1.1 Approved·추적성 갱신 完(2026-06-08). 남은 것 = (규칙)v1.1 변경분 **HTML 변환·강의자료 생성** + **OQ-TC** 작성 + 추적성 OQ열 + **git 커밋(이번 세션 전부 미커밋)**.
+2. **A-1 카메라 선택/전환**: 현재 `facingMode:'environment'` 고정 → 신규 **URS-035[설정가능]+RA+DQ** 필요(미작성).
+3. URS-092 도움말 미구현 / 기록상세에 커스텀 meta 표시 후속 / 인쇄는 의식적 제외(저장위치 대체).
+
+**배포(테스트용):** `npm run build` → `release/` 삭제 → `npx electron-builder --win portable`
+(rcedit "Unable to commit changes"=Defender 잠금 추정 → release 정리+재시도로 해결).
+산출물 `app/release/PharmCam-0.1.0-portable.exe`. **검증 전 테스트 빌드**(IQ/OQ/PQ 전).
 
 ## 폴더 구조
 
@@ -115,7 +139,7 @@ PharmCam은 **GMP를 엄격하게 적용하되, 회사마다 기능을 커스터
 
 **스택:** Electron + React + TypeScript, electron-vite(번들), better-sqlite3(DB), argon2(비번 해시), Electron safeStorage=DPAPI(키 보호), Node crypto SHA-256(무결성).
 
-**구조:** `src/main`(보안 민감 로직·DB·서비스), `src/preload`(contextBridge `window.api`), `src/renderer`(React UI), `src/shared`(공유 타입). 서비스: audit/integrity/time/auth/record/signature/config/backup/crypto/lims/system.
+**구조:** `src/main`(보안 민감 로직 — `db`/`ipc`/`services` 하위 폴더), `src/preload`(contextBridge `window.api`), `src/renderer`(React UI — `pages`/`hooks`), `src/shared`(공유 타입). 서비스: audit/integrity/time/auth/record/signature/config/backup/crypto/lims/system/export, 그리고 접근권한 제어 `rbac`.
 
 **불변 규약 (깨면 안 됨):**
 - 감사추적은 append-only — `audit_entries`에 update/delete 코드·IPC·UI 금지(DB 트리거로도 차단). 변조는 해시체인 `verifyChain()`으로 탐지.

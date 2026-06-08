@@ -1,15 +1,17 @@
 import { app } from 'electron'
 import { chmodSync, constants, existsSync, mkdirSync, unlinkSync, writeFileSync } from 'fs'
-import { join } from 'path'
+import { isAbsolute, join } from 'path'
 import type Database from 'better-sqlite3'
 import type {
   CorrectRecordInput,
+  MetadataField,
   RecordDetail,
   RecordFilter,
   RecordListItem,
   SaveRecordInput,
   SaveRecordResult
 } from '../../shared/record.types'
+import type { SetConfigResult, StorageInfo } from '../../shared/config.types'
 import type { RecordStatus } from '../../shared/types'
 import type { AuditService } from './audit.service'
 import type { ConfigService } from './config.service'
@@ -32,7 +34,8 @@ interface RecordRow {
 }
 
 export class RecordService {
-  private readonly imagesDir: string
+  /** 테스트·특수배포용 고정 경로 override. 지정 시 config(storage.root)보다 우선한다. */
+  private readonly imagesDirOverride?: string
 
   constructor(
     private readonly db: Database.Database,
@@ -43,8 +46,83 @@ export class RecordService {
     imagesDir?: string,
     private readonly cryptoService?: CryptoService
   ) {
-    this.imagesDir = imagesDir ?? join(app.getPath('userData'), 'data', 'images')
-    mkdirSync(this.imagesDir, { recursive: true })
+    this.imagesDirOverride = imagesDir
+  }
+
+  /** 기본 데이터 루트 — storage.root가 비어 있을 때 사용 */
+  private defaultStorageRoot(): string {
+    return join(app.getPath('userData'), 'data')
+  }
+
+  /** 현재 적용 중인 데이터 루트(절대경로). config storage.root가 비어 있으면 기본값. */
+  getStorageRoot(): string {
+    const configured = this.configService.get('storage.root')
+    if (configured && configured.trim()) {
+      return configured.trim()
+    }
+    return this.defaultStorageRoot()
+  }
+
+  /** 신규 이미지가 저장될 폴더(root/images)를 보장(없으면 생성)하고 반환.
+   *  D-11: 저장 시점에 config를 읽어 경로를 결정한다(런타임 반영, 재시작 불필요). */
+  private resolveImagesDir(): string {
+    const dir = this.imagesDirOverride ?? join(this.getStorageRoot(), 'images')
+    mkdirSync(dir, { recursive: true })
+    return dir
+  }
+
+  /** 데이터 루트 폴더를 보장(없으면 생성)하고 절대경로를 반환 — '폴더 열기'용 */
+  ensureStorageRoot(): string {
+    const root = this.imagesDirOverride
+      ? join(this.imagesDirOverride, '..')
+      : this.getStorageRoot()
+    mkdirSync(root, { recursive: true })
+    return root
+  }
+
+  /** UI 표시용 현재 저장 위치 정보 */
+  getStorageInfo(): StorageInfo {
+    const configured = this.configService.get('storage.root')
+    const isDefault = !configured || !configured.trim()
+    const root = this.imagesDirOverride ?? this.getStorageRoot()
+    const imagesDir = this.imagesDirOverride ?? join(root, 'images')
+    return { root, imagesDir, isDefault, exists: existsSync(imagesDir) }
+  }
+
+  /** 저장 위치 후보 경로 검증 — 로컬 절대경로 + 쓰기권한(D-11). 네트워크/UNC 거부. */
+  validateStorageRoot(target: string): { ok: boolean; error?: string } {
+    const p = target?.trim()
+    if (!p) {
+      return { ok: false, error: '경로를 입력하세요.' }
+    }
+    if (p.startsWith('\\\\') || p.startsWith('//')) {
+      return {
+        ok: false,
+        error: '네트워크/공유 폴더(UNC 경로)는 지정할 수 없습니다. 로컬 경로만 허용됩니다.'
+      }
+    }
+    if (!isAbsolute(p) || !/^[a-zA-Z]:[\\/]/.test(p)) {
+      return { ok: false, error: '로컬 드라이브 절대경로(예: C:\\PharmCam\\data)만 허용됩니다.' }
+    }
+    try {
+      mkdirSync(p, { recursive: true })
+      const probe = join(p, '.pharmcam-write-test')
+      writeFileSync(probe, 'ok')
+      unlinkSync(probe)
+    } catch {
+      return { ok: false, error: '해당 경로에 쓰기 권한이 없거나 폴더를 만들 수 없습니다.' }
+    }
+    return { ok: true }
+  }
+
+  /** 저장 위치 변경 — 검증 통과 시 config에 저장(config.set이 이전→이후 경로를 감사추적에 기록).
+   *  D-11: 마이그레이션은 하지 않는다. 기존 기록은 절대경로(image_path)로 옛 위치에서 계속 조회된다. */
+  setStorageRoot(target: string, userId: number): SetConfigResult {
+    const validation = this.validateStorageRoot(target)
+    if (!validation.ok) {
+      return { ok: false, error: validation.error }
+    }
+    return this.configService.set('storage.root', target.trim(), userId)
   }
 
   save(input: SaveRecordInput, operatorId: number): SaveRecordResult {
@@ -132,13 +210,15 @@ export class RecordService {
 
       const filename = this.buildFilename(captureTs, operatorId, input.testNo)
       const useEncryption = this.cryptoService?.isEnabled() ?? false
+      // 저장 시점에 현재 설정된 저장 위치를 해석(D-11)
+      const imagesDir = this.resolveImagesDir()
 
       if (useEncryption && this.cryptoService) {
-        imagePath = join(this.imagesDir, `${filename}.enc`)
+        imagePath = join(imagesDir, `${filename}.enc`)
         const encrypted = this.cryptoService.encryptFile(imageBuffer)
         writeFileSync(imagePath, encrypted)
       } else {
-        imagePath = join(this.imagesDir, filename)
+        imagePath = join(imagesDir, filename)
         writeFileSync(imagePath, imageBuffer)
       }
 
@@ -230,8 +310,13 @@ export class RecordService {
       'testNo',
       'operatorId'
     ])
+    // 회사가 추가한 사용자 정의 필수 항목도 함께 강제(URS-031)
+    const customRequired = this.getMetadataFields()
+      .filter((f) => f.required)
+      .map((f) => f.key)
+    const all = [...new Set([...required, ...customRequired])]
 
-    const missing = required.filter((field) => {
+    const missing = all.filter((field) => {
       const value = metadata[field]
       return value === undefined || value === null || value === ''
     })
@@ -239,6 +324,52 @@ export class RecordService {
     if (missing.length > 0) {
       throw new Error(`필수 항목이 누락되었습니다: ${missing.join(', ')}`)
     }
+  }
+
+  /** 회사별 추가 메타데이터 항목 목록(URS-031). 손상된 항목은 걸러서 반환. */
+  getMetadataFields(): MetadataField[] {
+    const raw = this.configService.getJson<MetadataField[]>('metadata.fields', [])
+    if (!Array.isArray(raw)) {
+      return []
+    }
+    return raw
+      .filter((f) => f && typeof f.key === 'string' && typeof f.label === 'string')
+      .map((f) => ({ key: f.key, label: f.label, required: !!f.required }))
+  }
+
+  /** 추가 메타데이터 항목 저장 — 키 형식·중복·예약어 검증 후 config에 기록(감사추적됨). */
+  setMetadataFields(fields: MetadataField[], userId: number): SetConfigResult {
+    if (!Array.isArray(fields)) {
+      return { ok: false, error: '항목 목록이 올바르지 않습니다.' }
+    }
+    if (fields.length > 20) {
+      return { ok: false, error: '추가 항목은 최대 20개까지 정의할 수 있습니다.' }
+    }
+    const reserved = ['testNo', 'sampleId', 'operatorId', 'id', 'captureTs']
+    const seen = new Set<string>()
+    const normalized: MetadataField[] = []
+    for (const f of fields) {
+      const key = (f?.key ?? '').trim()
+      const label = (f?.label ?? '').trim()
+      if (!key || !label) {
+        return { ok: false, error: '항목 키와 이름을 모두 입력하세요.' }
+      }
+      if (!/^[a-zA-Z][a-zA-Z0-9_]{0,39}$/.test(key)) {
+        return {
+          ok: false,
+          error: `키 형식 오류: "${key}" (영문으로 시작, 영문·숫자·_ 만 허용)`
+        }
+      }
+      if (reserved.includes(key)) {
+        return { ok: false, error: `예약된 키는 사용할 수 없습니다: ${key}` }
+      }
+      if (seen.has(key)) {
+        return { ok: false, error: `중복된 키: ${key}` }
+      }
+      seen.add(key)
+      normalized.push({ key, label, required: !!f.required })
+    }
+    return this.configService.set('metadata.fields', JSON.stringify(normalized), userId)
   }
 
   private decodeImage(imageDataBase64: string): Buffer {

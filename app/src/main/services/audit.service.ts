@@ -1,6 +1,6 @@
 import { createHash } from 'crypto'
 import type Database from 'better-sqlite3'
-import type { AuditFilter } from '../../shared/audit.types'
+import type { AuditFilter, AuditListItem } from '../../shared/audit.types'
 import type { AuditEntry } from '../../shared/types'
 import type { TimeService } from './time.service'
 
@@ -50,6 +50,40 @@ export function computeEntryHash(
     prevHash
 
   return createHash('sha256').update(payload).digest('hex')
+}
+
+/** 행위자(userId)를 "username (#id)"로 표시. 매핑 없으면 "#id", userId 없으면 null. */
+export function formatUserLabel(
+  userId: number | null,
+  nameMap: Map<number, string>
+): string | null {
+  if (userId === null) {
+    return null
+  }
+  const name = nameMap.get(userId)
+  return name ? `${name} (#${userId})` : `#${userId}`
+}
+
+/**
+ * 대상(target)을 표시용 문자열로 변환.
+ * - target_type === 'user'이고 target_id가 숫자면 → "username (#id)"로 해석
+ * - target_id가 이미 사용자명(비숫자)이면(시드 admin·미존재 로그인 등) 그대로 표시
+ * - 그 외 대상(record/config/audit/system 등)은 원본 target_id 그대로
+ */
+export function formatTargetLabel(
+  targetType: string | null,
+  targetId: string | null,
+  nameMap: Map<number, string>
+): string | null {
+  if (!targetId) {
+    return null
+  }
+  if (targetType === 'user' && /^\d+$/.test(targetId)) {
+    const id = Number(targetId)
+    const name = nameMap.get(id)
+    return name ? `${name} (#${id})` : `#${id}`
+  }
+  return targetId
 }
 
 function rowToEntry(row: AuditRow): AuditEntry {
@@ -153,6 +187,34 @@ export class AuditService {
 
     const rows = this.db.prepare(sql).all(...params) as AuditRow[]
     return rows.map(rowToEntry)
+  }
+
+  /**
+   * 감사추적을 사람이 읽을 수 있는 사용자 라벨과 함께 반환한다(표시·내보내기용).
+   * 저장값(user_id, target_id)은 해시체인의 일부라 절대 바꾸지 않고, 표시 단계에서만
+   * users 테이블을 조회해 "username (#id)"로 해석한다. 과거·신규 기록 모두 가독성 확보.
+   * (계정은 삭제 불가·username 재사용 불가 → id↔username 매핑이 영구 유일하여 모호함 없음.)
+   */
+  listWithUsers(filter: AuditFilter = {}): AuditListItem[] {
+    const entries = this.list(filter)
+    const nameMap = this.buildUserNameMap()
+    return entries.map((e) => ({
+      ...e,
+      userLabel: formatUserLabel(e.userId, nameMap),
+      targetLabel: formatTargetLabel(e.targetType, e.targetId, nameMap)
+    }))
+  }
+
+  private buildUserNameMap(): Map<number, string> {
+    const rows = this.db.prepare('SELECT id, username FROM users').all() as Array<{
+      id: number
+      username: string
+    }>
+    const map = new Map<number, string>()
+    for (const r of rows) {
+      map.set(r.id, r.username)
+    }
+    return map
   }
 
   count(filter: AuditFilter = {}): number {
