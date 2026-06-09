@@ -43,6 +43,7 @@ contextBridge.exposeInMainWorld('api', {
   },
   storage: {
     getInfo: () => ipcRenderer.invoke('storage:getInfo'),
+    getSpace: () => ipcRenderer.invoke('storage:getSpace'),
     setRoot: (path: string) => ipcRenderer.invoke('storage:setRoot', path),
     choose: () => ipcRenderer.invoke('storage:choose'),
     openFolder: () => ipcRenderer.invoke('storage:openFolder')

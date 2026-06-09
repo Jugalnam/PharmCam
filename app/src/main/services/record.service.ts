@@ -1,5 +1,5 @@
 import { app } from 'electron'
-import { chmodSync, constants, existsSync, mkdirSync, unlinkSync, writeFileSync } from 'fs'
+import { chmodSync, constants, existsSync, mkdirSync, statfsSync, unlinkSync, writeFileSync } from 'fs'
 import { isAbsolute, join } from 'path'
 import type Database from 'better-sqlite3'
 import type {
@@ -13,7 +13,7 @@ import type {
   SaveRecordInput,
   SaveRecordResult
 } from '../../shared/record.types'
-import type { SetConfigResult, StorageInfo } from '../../shared/config.types'
+import type { SetConfigResult, StorageInfo, StorageSpace } from '../../shared/config.types'
 import type { RecordStatus } from '../../shared/types'
 import type { AuditService } from './audit.service'
 import type { ConfigService } from './config.service'
@@ -80,6 +80,21 @@ export class RecordService {
       : this.getStorageRoot()
     mkdirSync(root, { recursive: true })
     return root
+  }
+
+  /** 저장 위치(실제 데이터 루트)의 디스크 여유 공간 점검(URS-063). 백업과 무관하게 상시 조회. */
+  getStorageSpace(): StorageSpace {
+    const minFreeMb = this.configService.getNumber('storage.minFreeMb', 500)
+    const root = this.imagesDirOverride ?? this.getStorageRoot()
+    try {
+      mkdirSync(root, { recursive: true })
+      const st = statfsSync(root)
+      const freeMb = Math.round((st.bavail * st.bsize) / (1024 * 1024))
+      const totalMb = Math.round((st.blocks * st.bsize) / (1024 * 1024))
+      return { freeMb, totalMb, minFreeMb, lowSpace: freeMb < minFreeMb }
+    } catch {
+      return { freeMb: null, totalMb: null, minFreeMb, lowSpace: false }
+    }
   }
 
   /** UI 표시용 현재 저장 위치 정보 */

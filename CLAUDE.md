@@ -68,7 +68,7 @@ PQ  (성능 적격성 평가)       docs/07_PQ
 - **감사추적 사용자 가독표시** `admin (#1)` — `audit.listWithUsers()`(서버측 JOIN), 화면+CSV+PDF, 저장값·해시체인 불변, URS-040
 - **저장 위치 지정** `storage.root` config — `record.service` 저장시점 경로해석·검증(로컬한정·UNC거부·쓰기권한)·마이그레이션X, `storage:*` IPC, 설정탭 "저장 위치" 섹션. URS-047/D-11
 - **메타데이터 항목 구성** `metadata.fields` config — 촬영화면 동적입력+필수검증, 설정탭 "촬영 메타데이터 항목" 편집, `metadata:*` IPC. URS-031
-- config 시드 `INSERT OR IGNORE`(멱등) → 기존 DB에도 신규키 추가. **config 18개**(테스트 기대값 18).
+- config 시드 `INSERT OR IGNORE`(멱등) → 기존 DB에도 신규키 추가. **config 18개**(2026-06-09 storage.minFreeMb 추가 → **19**, 테스트 기대값 19).
 
 **추가 세션 — 2026-06-08 (Codex): 통제 인쇄·기록 조회 통제·감사 필터** *(상세 로그는 `AGENTS.md`, git 커밋 aa975e7)*
 - **통제 인쇄(URS-093/D-12)**: `print_jobs` 테이블(schema v4), `PrintService`(인쇄 전 원본 해시검증), 미리보기=인쇄 동일 템플릿(`print-template.ts`), `record:getPrintPreview/printControlled` IPC, 기록상세 통제인쇄 UI, `print`/`print_failed` 감사추적. `webContents.print` 미동작 → `window.print()` 방식. **인쇄 제외 결정 철회됨.**
@@ -79,7 +79,7 @@ PQ  (성능 적격성 평가)       docs/07_PQ
 **미완료/다음 작업(우선순위순):**
 1. **OQ 확장·실행**: RA/URS/DQ **v1.2 Approved 完(2026-06-08)** + 회귀 7모듈 PASS·typecheck 통과·스키마 v4 정상. 남은 것 = **OQ-001(현 v0.1, 범위=v1.1)을 v1.2(인쇄·조회통제)까지 확장 + 실행** + 추적성 OQ열 + v1.2 HTML 재생성 확인.
 2. **A-1 카메라 선택/전환**: 현재 `facingMode:'environment'` 고정 → 신규 **URS-035[설정가능]+RA+DQ** 필요(미작성).
-3. URS-092 도움말 미구현 / 기록상세에 커스텀 meta 표시 후속. (인쇄는 통제 인쇄로 도입됨.)
+3. **URS-063 저장공간 경고·URS-092 인앱 도움말 = 2026-06-09 구현 완료** (storage.minFreeMb config, 촬영/설정 경고 표시 `storage:getSpace`, 도움말 탭 `Help.tsx`). 기록상세 커스텀 meta 표시는 후속. (인쇄는 통제 인쇄로 도입됨.)
 
 **배포(테스트용):** `npm run build` → `release/` 삭제 → `npx electron-builder --win portable`
 (rcedit "Unable to commit changes"=Defender 잠금 추정 → release 정리+재시도로 해결).

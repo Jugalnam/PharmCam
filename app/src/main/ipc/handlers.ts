@@ -200,6 +200,12 @@ export function registerIpcHandlers(
     return recordService.getStorageInfo()
   })
 
+  // 저장공간 여유 점검(URS-063) — 촬영 화면 경고용이라 세션만 있으면 조회 가능
+  ipcMain.handle('storage:getSpace', () => {
+    authService.requireSession()
+    return recordService.getStorageSpace()
+  })
+
   ipcMain.handle('storage:setRoot', (_event, path: string) => {
     const user = authService.requirePermission('config')
     return recordService.setStorageRoot(path, user.id)

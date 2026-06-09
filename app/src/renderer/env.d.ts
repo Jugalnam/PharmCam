@@ -33,7 +33,12 @@ import type {
   BackupStatus,
   BackupVerifyResult
 } from '../shared/module.types'
-import type { ConfigurationSpec, SetConfigResult, StorageInfo } from '../shared/config.types'
+import type {
+  ConfigurationSpec,
+  SetConfigResult,
+  StorageInfo,
+  StorageSpace
+} from '../shared/config.types'
 import type {
   CreateSignatureResult,
   EsignStatus,
@@ -88,6 +93,7 @@ declare global {
       }
       storage: {
         getInfo: () => Promise<StorageInfo>
+        getSpace: () => Promise<StorageSpace>
         setRoot: (path: string) => Promise<SetConfigResult>
         choose: () => Promise<SetConfigResult>
         openFolder: () => Promise<{ ok: boolean; error?: string }>

@@ -6,13 +6,14 @@ import AuditView from './AuditView'
 import Settings from './Settings'
 import SystemCheck from './SystemCheck'
 import UserManagement from './UserManagement'
+import Help from './Help'
 
 interface HomeProps {
   user: SessionUser
   onLogout: () => void
 }
 
-type Tab = 'capture' | 'list' | 'audit' | 'users' | 'settings' | 'system'
+type Tab = 'capture' | 'list' | 'audit' | 'users' | 'settings' | 'system' | 'help'
 
 const ROLE_LABELS: Record<SessionUser['role'], string> = {
   operator: '작업자 (Operator)',
@@ -84,6 +85,13 @@ export default function Home({ user, onLogout }: HomeProps): JSX.Element {
               환경 점검
             </button>
           )}
+          <button
+            type="button"
+            className={tab === 'help' ? 'active' : ''}
+            onClick={() => setTab('help')}
+          >
+            도움말
+          </button>
         </div>
         <button type="button" className="logout-btn" onClick={handleLogout}>
           로그아웃
@@ -97,6 +105,7 @@ export default function Home({ user, onLogout }: HomeProps): JSX.Element {
         {tab === 'users' && user.role === 'admin' && <UserManagement user={user} />}
         {tab === 'settings' && user.role === 'admin' && <Settings />}
         {tab === 'system' && user.role === 'admin' && <SystemCheck />}
+        {tab === 'help' && <Help user={user} />}
       </div>
     </div>
   )

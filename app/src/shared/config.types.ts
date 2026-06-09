@@ -7,6 +7,18 @@ export interface SetConfigResult {
 
 export type ConfigurationSpec = ConfigEntry[]
 
+/** 저장 위치 디스크 여유 공간(URS-063). lowSpace=true면 임계치 미만 경고. */
+export interface StorageSpace {
+  /** 여유 공간(MB). 측정 실패 시 null */
+  freeMb: number | null
+  /** 전체 용량(MB) */
+  totalMb: number | null
+  /** 경고 임계치(MB) — storage.minFreeMb */
+  minFreeMb: number
+  /** freeMb < minFreeMb 이면 true */
+  lowSpace: boolean
+}
+
 /** 현재 저장 위치 정보(표시용). root = 데이터 루트, imagesDir = 실제 이미지 폴더. */
 export interface StorageInfo {
   /** 현재 적용 중인 데이터 루트 절대경로 */

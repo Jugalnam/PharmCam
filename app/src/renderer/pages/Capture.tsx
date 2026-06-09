@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { SessionUser } from '../../shared/auth.types'
+import type { StorageSpace } from '../../shared/config.types'
 import type { MetadataField } from '../../shared/record.types'
 
 interface CaptureProps {
@@ -15,6 +16,7 @@ export default function Capture({ user }: CaptureProps): JSX.Element {
   const [sampleId, setSampleId] = useState('')
   const [customFields, setCustomFields] = useState<MetadataField[]>([])
   const [metaValues, setMetaValues] = useState<Record<string, string>>({})
+  const [space, setSpace] = useState<StorageSpace | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [cameraError, setCameraError] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -58,6 +60,18 @@ export default function Capture({ user }: CaptureProps): JSX.Element {
       .then((fields) => setCustomFields(fields))
       .catch(() => setCustomFields([]))
   }, [])
+
+  useEffect(() => {
+    void loadSpace()
+  }, [])
+
+  async function loadSpace(): Promise<void> {
+    try {
+      setSpace(await window.api.storage.getSpace())
+    } catch {
+      setSpace(null)
+    }
+  }
 
   function setMetaValue(key: string, value: string): void {
     setMetaValues((prev) => ({ ...prev, [key]: value }))
@@ -131,6 +145,7 @@ export default function Capture({ user }: CaptureProps): JSX.Element {
       if (result.ok && result.recordId) {
         setSaveSuccess(`기록 #${result.recordId} 저장 완료`)
         setPreview(null)
+        void loadSpace()
       } else {
         setSaveError(result.error ?? '저장에 실패했습니다.')
       }
@@ -143,6 +158,12 @@ export default function Capture({ user }: CaptureProps): JSX.Element {
 
   return (
     <div className="capture-page">
+      {space?.lowSpace && (
+        <p className="login-error">
+          ⚠ 저장공간 부족 경고 — 여유 {space.freeMb}MB (임계치 {space.minFreeMb}MB). 저장 실패가
+          발생할 수 있으니 관리자에게 문의하세요. (URS-063)
+        </p>
+      )}
       <div className="capture-info-banner">
         <h2>촬영 대상 확인 (URS-034)</h2>
         <dl>

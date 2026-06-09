@@ -32,7 +32,9 @@ const CONFIG_SEED: Array<{ key: string; value: string; coreLocked: boolean }> = 
   { key: 'encryption.enabled', value: 'false', coreLocked: false },
   { key: 'lims.enabled', value: 'false', coreLocked: false },
   // 저장 위치(D-11) — 빈 값이면 기본 경로(userData/data) 사용. coreLocked=false(관리자 변경 가능)
-  { key: 'storage.root', value: '', coreLocked: false }
+  { key: 'storage.root', value: '', coreLocked: false },
+  // 저장공간 경고 임계치(MB) — 여유공간이 이 값 미만이면 경고(URS-063)
+  { key: 'storage.minFreeMb', value: '500', coreLocked: false }
 ]
 
 export class ConfigService {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { ConfigurationSpec, StorageInfo } from '../../shared/config.types'
+import type { ConfigurationSpec, StorageInfo, StorageSpace } from '../../shared/config.types'
 import type { MetadataField } from '../../shared/record.types'
 import type { ConfigEntry } from '../../shared/types'
 
@@ -22,7 +22,8 @@ const KEY_LABELS: Record<string, string> = {
   'backup.path': '백업 경로',
   'retention.days': '보존 기간 (일)',
   'encryption.enabled': '암호화 활성화',
-  'lims.enabled': 'LIMS 연동 활성화'
+  'lims.enabled': 'LIMS 연동 활성화',
+  'storage.minFreeMb': '저장공간 경고 임계치(MB)'
 }
 
 type EditorSpec =
@@ -56,7 +57,8 @@ const KEY_EDITORS: Record<string, EditorSpec> = {
   'password.minLength': { kind: 'number', min: 1 },
   'password.expiryDays': { kind: 'number', min: 0 },
   'login.maxFails': { kind: 'number', min: 1 },
-  'retention.days': { kind: 'number', min: 1 }
+  'retention.days': { kind: 'number', min: 1 },
+  'storage.minFreeMb': { kind: 'number', min: 0 }
 }
 
 function parseJsonArray(value: string): string[] {
@@ -76,6 +78,7 @@ export default function Settings(): JSX.Element {
   const [message, setMessage] = useState<string | null>(null)
   const [savingKey, setSavingKey] = useState<string | null>(null)
   const [storage, setStorage] = useState<StorageInfo | null>(null)
+  const [space, setSpace] = useState<StorageSpace | null>(null)
   const [storageBusy, setStorageBusy] = useState(false)
   const [metaFields, setMetaFields] = useState<MetadataField[]>([])
   const [newKey, setNewKey] = useState('')
@@ -147,6 +150,7 @@ export default function Settings(): JSX.Element {
   async function loadStorage(): Promise<void> {
     try {
       setStorage(await window.api.storage.getInfo())
+      setSpace(await window.api.storage.getSpace())
     } catch {
       setStorage(null)
     }
@@ -369,6 +373,26 @@ export default function Settings(): JSX.Element {
                 {storage ? storage.imagesDir : '—'}{' '}
                 {storage && !storage.exists && (
                   <span className="setting-key">(첫 저장 시 생성됨)</span>
+                )}
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span className="setting-label">여유 공간</span>
+                <span className="setting-key">URS-063</span>
+              </td>
+              <td className="mono" colSpan={2}>
+                {space && space.freeMb !== null ? (
+                  <>
+                    {space.freeMb.toLocaleString()}MB 여유 / 임계치 {space.minFreeMb}MB{' '}
+                    {space.lowSpace ? (
+                      <span className="lock-badge">⚠ 부족</span>
+                    ) : (
+                      <span className="editable-badge">정상</span>
+                    )}
+                  </>
+                ) : (
+                  '측정 불가'
                 )}
               </td>
             </tr>
