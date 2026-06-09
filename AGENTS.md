@@ -50,8 +50,9 @@ PQ  (성능 적격성 평가)       docs/07_PQ
 [✓] URS/DQ v1.3 Approved (2026-06-09)  (URS-035/D-14 촬영 카메라 선택·전환, RA는 기존 SW-03 사용)
 [✓] RA v1.3 / URS·DQ v1.4 Approved (2026-06-09)  (SEC-06/URS-053/D-15 설치·데이터 접근통제 다층: Program Files per-machine·표준사용자·ACL·암호화·탐지·SOP. NSIS perMachine=true)
 [✓] app/ 구현 완료         (M1~M8 + 배포준비) + 2026-06-08 세션 추가구현(아래)
-[ ] IQ  ← 다음 단계        (자가점검 화면이 IQ 검증 항목과 연결됨)
-[ ] OQ / PQ
+[△] IQ-001 Draft 작성(2026-06-09, 환경점검 탭 연계) — 승인·실행 대기
+[△] OQ-001 v0.2 Draft (v1.4 범위, OQ-TC-001~025, 추적성 OQ열 完) — 승인·실행 대기
+[ ] PQ
 ```
 
 - 강의자료 4편 완료(`lectures/01~04`). 전자서명은 **도입(포함)** 결정됨.

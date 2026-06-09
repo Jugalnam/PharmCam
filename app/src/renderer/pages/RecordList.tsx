@@ -1,5 +1,11 @@
-import { useEffect, useState } from 'react'
-import type { RecordDetail, RecordFilter, RecordListItem, RecordUserOption } from '../../shared/record.types'
+import { Fragment, useEffect, useState } from 'react'
+import type {
+  MetadataField,
+  RecordDetail,
+  RecordFilter,
+  RecordListItem,
+  RecordUserOption
+} from '../../shared/record.types'
 import type { SessionUser } from '../../shared/auth.types'
 import type { EsignStatus, SignatureView } from '../../shared/sign.types'
 import type { SignatureMeaning } from '../../shared/types'
@@ -33,6 +39,7 @@ function dayEndIso(date: string): string | undefined {
 export default function RecordList({ user }: RecordListProps): JSX.Element {
   const [records, setRecords] = useState<RecordListItem[]>([])
   const [selected, setSelected] = useState<RecordDetail | null>(null)
+  const [metaFields, setMetaFields] = useState<MetadataField[]>([])
   const [recordUsers, setRecordUsers] = useState<RecordUserOption[]>([])
   const [fromDate, setFromDate] = useState(todayLocalDate())
   const [toDate, setToDate] = useState(todayLocalDate())
@@ -57,6 +64,7 @@ export default function RecordList({ user }: RecordListProps): JSX.Element {
 
   useEffect(() => {
     loadRecords()
+    window.api.metadata.getFields().then(setMetaFields).catch(() => {})
     window.api.sign.getStatus().then(setEsignStatus).catch(() => {})
     if (canFilterByUser) {
       window.api.record.listUsers().then(setRecordUsers).catch(() => {})
@@ -186,6 +194,33 @@ export default function RecordList({ user }: RecordListProps): JSX.Element {
     }
   }
 
+  // 회사별 추가 메타데이터(meta_json) 표시 — 저장·감사된 커스텀 항목을 검토 화면에 노출(URS-031/045)
+  function renderCustomMeta(): JSX.Element | null {
+    if (!selected?.metaJson) {
+      return null
+    }
+    let parsed: Record<string, unknown>
+    try {
+      parsed = JSON.parse(selected.metaJson) as Record<string, unknown>
+    } catch {
+      return null // 암호화되었거나 파싱 불가한 경우 생략
+    }
+    const entries = Object.entries(parsed).filter(([, v]) => v !== null && v !== '')
+    if (entries.length === 0) {
+      return null
+    }
+    return (
+      <>
+        {entries.map(([key, value]) => (
+          <Fragment key={key}>
+            <dt>{metaFields.find((f) => f.key === key)?.label ?? key}</dt>
+            <dd>{String(value)}</dd>
+          </Fragment>
+        ))}
+      </>
+    )
+  }
+
   const showSignForm =
     esignStatus?.enabled &&
     esignStatus.actions.includes(signMeaning) &&
@@ -313,6 +348,7 @@ export default function RecordList({ user }: RecordListProps): JSX.Element {
             <dd>{selected.testNo}</dd>
             <dt>시료 ID</dt>
             <dd>{selected.sampleId ?? '—'}</dd>
+            {renderCustomMeta()}
             <dt>작업자</dt>
             <dd>{selected.operatorName}</dd>
             <dt>촬영 시각</dt>

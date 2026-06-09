@@ -50,8 +50,9 @@ PQ  (성능 적격성 평가)       docs/07_PQ
 [✓] URS/DQ v1.3 Approved (2026-06-09)  (URS-035/D-14 촬영 카메라 선택·전환, RA는 기존 SW-03 사용)
 [✓] RA v1.3 / URS·DQ v1.4 Approved (2026-06-09)  (SEC-06/URS-053/D-15 설치·데이터 접근통제 다층: Program Files per-machine·표준사용자·ACL·암호화·탐지·SOP. NSIS perMachine=true로 변경)
 [✓] app/ 구현 완료         (M1~M8 + 배포준비) + 2026-06-08 세션 추가구현(아래)
-[ ] IQ  ← 다음 단계        (자가점검 화면이 IQ 검증 항목과 연결됨)
-[ ] OQ / PQ
+[△] IQ-001 Draft 작성(2026-06-09, 환경점검 탭 연계) — 승인·실행 대기
+[△] OQ-001 v0.2 Draft (v1.4 범위, OQ-TC-001~025, 추적성 OQ열 完) — 승인·실행 대기
+[ ] PQ
 ```
 
 - 강의자료 4편 완료(`lectures/01~04`). 전자서명은 **도입(포함)** 결정됨.
@@ -79,9 +80,9 @@ PQ  (성능 적격성 평가)       docs/07_PQ
 - 산출물: RA/URS/DQ **HTML 재생성**, **OQ-001** 시험서(v0.1 Draft, 범위=v1.1), **사용자 매뉴얼 Beta**, **강의 05**.
 
 **미완료/다음 작업(우선순위순):**
-1. **OQ 확장·실행**: RA/URS/DQ **v1.2 Approved 完(2026-06-08)** + 회귀 7모듈 PASS·typecheck 통과·스키마 v4 정상. 남은 것 = **OQ-001(현 v0.1, 범위=v1.1)을 v1.2(인쇄·조회통제)까지 확장 + 실행** + 추적성 OQ열 + v1.2 HTML 재생성 확인.
+1. **IQ/OQ 승인·실행**: IQ-001 Draft·OQ-001 v0.2 Draft(v1.4 범위, OQ-TC-001~025) 작성·추적성 OQ열 完(2026-06-09). 남은 것 = **IQ/OQ 검토·승인 후 실제 실행** + (규칙)v1.2~v1.4 변경분 HTML/강의 재생성(debt).
 2. **A-1 카메라 선택/전환 = 2026-06-09 완료**: URS-035[설정가능]+D-14 반영(URS/DQ v1.3 Approved). `Capture.tsx`가 `enumerateDevices()`로 장치 열거 + "카메라 전환" 버튼·드롭다운, `deviceId` 재취득.
-3. **URS-063 저장공간 경고·URS-092 인앱 도움말 = 2026-06-09 구현 완료** (storage.minFreeMb config, 촬영/설정 경고 표시 `storage:getSpace`, 도움말 탭 `Help.tsx`). 기록상세 커스텀 meta 표시는 후속. (인쇄는 통제 인쇄로 도입됨.)
+3. **URS-063 저장공간 경고·URS-092 인앱 도움말·기록상세 커스텀 meta 표시 = 2026-06-09 구현 완료** (storage.minFreeMb·`storage:getSpace`, `Help.tsx` 도움말 탭, `RecordList` meta 파싱표시). (인쇄는 통제 인쇄로 도입됨.)
 
 **배포(테스트용):** `npm run build` → `release/` 삭제 → `npx electron-builder --win portable`
 (rcedit "Unable to commit changes"=Defender 잠금 추정 → release 정리+재시도로 해결).
