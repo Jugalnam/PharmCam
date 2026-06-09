@@ -87,6 +87,11 @@ PQ  (성능 적격성 평가)       docs/07_PQ
 (rcedit "Unable to commit changes"=Defender 잠금 추정 → release 정리+재시도로 해결).
 산출물 `app/release/PharmCam-0.1.0-portable.exe`. **검증 전 테스트 빌드**(IQ/OQ/PQ 전).
 
+**배포 정책 — 프로토타입 단계 결정(2026-06-09):** 정식 배포는 **NSIS per-machine 설치본**(Program Files), 테스트는 포터블. **최소 baseline만 적용**:
+- 적용: per-machine 설치 + **작업자=표준 Windows 사용자** + 데이터 폴더 ACL(설치 시 수동 `icacls`) + 해시체인 탐지 + **설치본 SHA-256 체크섬·SmartScreen 통과 SOP**(코드서명 대신).
+- **보류**(실운영/검증/판매 전환 시 재검토): 코드 서명 인증서, 암호화(at rest) on, 머신 공통 데이터 위치/서비스계정 분리.
+- 근거: 내부 초기 프로토타입 → 과한 고도화 회피. **이 최소안도 URS-053 충족**(코드서명·암호화는 URS-053 필수 항목 아님; 잔여위험은 해시체인 탐지로 관리).
+
 ## 폴더 구조
 
 | 경로 | 역할 |
