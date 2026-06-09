@@ -47,6 +47,7 @@ PQ  (성능 적격성 평가)       docs/07_PQ
 [✓] URS-001  v1.1 Approved (2026-06-08)  (URS-047 저장위치 신설, URS-040·073 문구보강)
 [✓] DQ-001   v1.1 Approved (2026-06-08)  (D-11 저장위치 설계 추가)
 [✓] RA/URS/DQ v1.2 Approved (2026-06-08)  (DAT-09/URS-093/D-12 통제 인쇄, DAT-10/URS-094·095/D-13 기록 조회 통제)
+[✓] URS/DQ v1.3 Approved (2026-06-09)  (URS-035/D-14 촬영 카메라 선택·전환, RA는 기존 SW-03 사용)
 [✓] app/ 구현 완료         (M1~M8 + 배포준비) + 2026-06-08 세션 추가구현(아래)
 [ ] IQ  ← 다음 단계        (자가점검 화면이 IQ 검증 항목과 연결됨)
 [ ] OQ / PQ
@@ -78,7 +79,7 @@ PQ  (성능 적격성 평가)       docs/07_PQ
 
 **미완료/다음 작업(우선순위순):**
 1. **OQ 확장·실행**: RA/URS/DQ **v1.2 Approved 完(2026-06-08)** + 회귀 7모듈 PASS·typecheck 통과·스키마 v4 정상. 남은 것 = **OQ-001(현 v0.1, 범위=v1.1)을 v1.2(인쇄·조회통제)까지 확장 + 실행** + 추적성 OQ열 + v1.2 HTML 재생성 확인.
-2. **A-1 카메라 선택/전환**: 현재 `facingMode:'environment'` 고정 → 신규 **URS-035[설정가능]+RA+DQ** 필요(미작성).
+2. **A-1 카메라 선택/전환 = 2026-06-09 완료**: URS-035[설정가능]+D-14 반영(URS/DQ v1.3 Approved). `Capture.tsx`가 `enumerateDevices()`로 장치 열거 + "카메라 전환" 버튼·드롭다운, `deviceId` 재취득.
 3. **URS-063 저장공간 경고·URS-092 인앱 도움말 = 2026-06-09 구현 완료** (storage.minFreeMb config, 촬영/설정 경고 표시 `storage:getSpace`, 도움말 탭 `Help.tsx`). 기록상세 커스텀 meta 표시는 후속. (인쇄는 통제 인쇄로 도입됨.)
 
 **배포(테스트용):** `npm run build` → `release/` 삭제 → `npx electron-builder --win portable`

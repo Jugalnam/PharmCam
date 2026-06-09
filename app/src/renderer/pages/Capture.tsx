@@ -22,33 +22,49 @@ export default function Capture({ user }: CaptureProps): JSX.Element {
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
+  const [deviceId, setDeviceId] = useState<string | null>(null)
+
+  // 카메라 스트림 시작/전환(URS-035). deviceId 지정 시 해당 장치, 없으면 후면(environment) 우선.
+  async function startStream(targetDeviceId?: string): Promise<void> {
+    try {
+      streamRef.current?.getTracks().forEach((t) => t.stop())
+      const constraints: MediaStreamConstraints = {
+        video: targetDeviceId
+          ? { deviceId: { exact: targetDeviceId } }
+          : { facingMode: 'environment' },
+        audio: false
+      }
+      const stream = await navigator.mediaDevices.getUserMedia(constraints)
+      streamRef.current = stream
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+      }
+      setCameraError(null)
+      const activeId =
+        stream.getVideoTracks()[0]?.getSettings().deviceId ?? targetDeviceId ?? null
+      setDeviceId(activeId)
+      // 권한 부여 후 label이 채워진 장치 목록 열거
+      const all = await navigator.mediaDevices.enumerateDevices()
+      setDevices(all.filter((d) => d.kind === 'videoinput'))
+    } catch {
+      setCameraError('카메라를 사용할 수 없습니다. 연결 및 권한을 확인하세요.')
+    }
+  }
+
+  // 다음 카메라로 전환(전면↔후면 또는 다중 카메라 순환)
+  function handleSwitchCamera(): void {
+    if (devices.length < 2) {
+      return
+    }
+    const idx = devices.findIndex((d) => d.deviceId === deviceId)
+    const next = devices[(idx + 1) % devices.length]
+    void startStream(next.deviceId)
+  }
 
   useEffect(() => {
-    let active = true
-
-    async function startCamera(): Promise<void> {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' },
-          audio: false
-        })
-        if (!active) {
-          stream.getTracks().forEach((t) => t.stop())
-          return
-        }
-        streamRef.current = stream
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream
-        }
-      } catch {
-        setCameraError('카메라를 사용할 수 없습니다. 연결 및 권한을 확인하세요.')
-      }
-    }
-
-    startCamera()
-
+    void startStream()
     return () => {
-      active = false
       streamRef.current?.getTracks().forEach((t) => t.stop())
     }
   }, [])
@@ -231,6 +247,31 @@ export default function Capture({ user }: CaptureProps): JSX.Element {
             className="camera-video"
             style={{ display: !cameraError && !preview ? 'block' : 'none' }}
           />
+          {!cameraError && !preview && devices.length > 0 && (
+            <div className="camera-controls">
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={handleSwitchCamera}
+                disabled={devices.length < 2}
+                title={devices.length < 2 ? '연결된 카메라가 1개뿐입니다' : '다음 카메라로 전환'}
+              >
+                카메라 전환
+              </button>
+              <select
+                className="setting-input"
+                value={deviceId ?? ''}
+                onChange={(e) => void startStream(e.target.value)}
+                aria-label="카메라 선택"
+              >
+                {devices.map((d, i) => (
+                  <option key={d.deviceId} value={d.deviceId}>
+                    {d.label || `카메라 ${i + 1}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           {preview && <img src={preview} alt="촬영 미리보기" className="captured-image" />}
           <canvas ref={canvasRef} className="hidden-canvas" />
         </section>
