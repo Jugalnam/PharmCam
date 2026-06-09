@@ -79,6 +79,23 @@ PQ  (성능 적격성 평가)       docs/07_PQ
 - **감사 필터 UX**: 사용자명 드롭다운(`audit:listUsers`), 날짜→일범위 변환.
 - 산출물: RA/URS/DQ **HTML 재생성**, **OQ-001** 시험서(v0.1 Draft, 범위=v1.1), **사용자 매뉴얼 Beta**, **강의 05**.
 
+### 세션 로그 — 2026-06-09 (v1.3·v1.4 + IQ/OQ/PQ 골격 + 문서 HTML)
+
+**구현(코드, typecheck 통과):**
+- **카메라 선택/전환**(URS-035/D-14) `Capture.tsx` enumerateDevices+전환버튼·드롭다운
+- **저장공간 경고**(URS-063) storage.minFreeMb·`storage:getSpace`·촬영/설정 표시
+- **인앱 도움말**(URS-092) `Help.tsx`+도움말 탭(전 역할)
+- **기록상세 커스텀 meta 표시**(B-1) `RecordList` meta_json 파싱·라벨 매핑
+- 계정 추가 **모달화**(아이디/비번/비번확인/역할), 환경점검 **데이터폴더 storage.root 반영**(`system.service`), verifyChain 설명문구, 버튼 스타일
+
+**문서·결정:**
+- **설치·데이터 접근통제** 논의→다층 방어 채택: **SEC-06/URS-053/D-15**, **NSIS perMachine=true**. RA v1.3 / URS·DQ v1.4 Approved
+- **배포 정책(프로토타입 단계)** 메모리 기록(위 "배포 정책" 단락): 최소 baseline(코드서명·암호화 보류)
+- **IQ-001 신설**(docs/05_IQ, IQ-TC-001~015), **OQ-001 v0.2 확장**(v1.4 범위, OQ-TC-001~025, 추적성 OQ열 完), **PQ-001 신설**(docs/07_PQ, PQ-TC-001~010 실사용 파일럿)
+- 문서 **상호검토**(URS 48 정합) + **전 문서 HTML 일괄 재생성** `scripts/md2html.py`(`pip install markdown`)
+
+**커밋:** `aa975e7`~`2c961e1` (브랜치 `feature/2026-06-08-ux-storage-metadata`, push 미실행)
+
 **미완료/다음 작업(우선순위순):**
 1. **IQ/OQ 승인·실행**: IQ-001 Draft·OQ-001 v0.2 Draft(v1.4 범위, OQ-TC-001~025)·추적성·**전 문서 HTML 일괄생성 完**(2026-06-09, `scripts/md2html.py` + `pip install markdown`로 docs/ 전체 변환). 남은 것 = **IQ/OQ 검토·승인 후 실제 실행** + 강의자료(lecture) 재생성(debt).
 2. **A-1 카메라 선택/전환 = 2026-06-09 완료**: URS-035[설정가능]+D-14 반영(URS/DQ v1.3 Approved). `Capture.tsx`가 `enumerateDevices()`로 장치 열거 + "카메라 전환" 버튼·드롭다운, `deviceId` 재취득.
