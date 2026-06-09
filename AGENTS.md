@@ -48,6 +48,7 @@ PQ  (성능 적격성 평가)       docs/07_PQ
 [✓] DQ-001   v1.1 Approved (2026-06-08)  (D-11 저장위치 설계 추가)
 [✓] RA/URS/DQ v1.2 Approved (2026-06-08)  (DAT-09/URS-093/D-12 통제 인쇄, DAT-10/URS-094·095/D-13 기록 조회 통제)
 [✓] URS/DQ v1.3 Approved (2026-06-09)  (URS-035/D-14 촬영 카메라 선택·전환, RA는 기존 SW-03 사용)
+[✓] RA v1.3 / URS·DQ v1.4 Approved (2026-06-09)  (SEC-06/URS-053/D-15 설치·데이터 접근통제 다층: Program Files per-machine·표준사용자·ACL·암호화·탐지·SOP. NSIS perMachine=true)
 [✓] app/ 구현 완료         (M1~M8 + 배포준비) + 2026-06-08 세션 추가구현(아래)
 [ ] IQ  ← 다음 단계        (자가점검 화면이 IQ 검증 항목과 연결됨)
 [ ] OQ / PQ
