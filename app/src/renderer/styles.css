@@ -346,6 +346,58 @@ body {
   font-size: 1.1rem;
 }
 
+.record-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(150px, 180px)) minmax(180px, 240px) auto auto;
+  gap: 0.75rem;
+  align-items: end;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.record-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.record-filters input,
+.record-filters select {
+  min-height: 36px;
+  background: #0f172a;
+  border: 1px solid #475569;
+  border-radius: 4px;
+  color: #e2e8f0;
+  padding: 0.45rem 0.55rem;
+}
+
+.record-filters button {
+  min-height: 36px;
+  background: #d4a853;
+  color: #0f172a;
+  border: none;
+  border-radius: 6px;
+  padding: 0.45rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.record-filters button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.record-scope-hint {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+}
+
 .record-table {
   width: 100%;
   border-collapse: collapse;
@@ -596,6 +648,100 @@ body {
   font-size: 0.8rem;
   margin-top: 0.5rem;
   font-style: italic;
+}
+
+.controlled-print-section {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #334155;
+}
+
+.controlled-print-section h4 {
+  color: #d4a853;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.controlled-print-section .secondary-btn {
+  margin-top: 0.25rem;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.78);
+  padding: 1.5rem;
+}
+
+.print-modal {
+  width: min(1000px, 100%);
+  max-height: calc(100vh - 3rem);
+  display: flex;
+  flex-direction: column;
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.4);
+}
+
+.print-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #334155;
+}
+
+.print-modal-header h3 {
+  color: #d4a853;
+  font-size: 1rem;
+  margin-bottom: 0.2rem;
+}
+
+.print-modal-header p {
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.print-preview-frame {
+  width: 100%;
+  height: min(68vh, 760px);
+  background: #e8edf3;
+  border: 0;
+}
+
+.print-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #334155;
+}
+
+.print-modal-actions button {
+  min-width: 118px;
+  background: #d4a853;
+  color: #0f172a;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.print-modal-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.print-modal-actions .secondary-btn {
+  background: #334155;
+  color: #e2e8f0;
 }
 
 .audit-view-page {

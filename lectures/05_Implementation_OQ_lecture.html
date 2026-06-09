@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>강의 5 — 구현이 끝난 뒤: 변경관리와 OQ로 증명하기</title>
+<style>
+  :root{
+    --navy:#0b1929; --navy-2:#15273d; --navy-3:#1e3a5f;
+    --gold:#c8a847; --gold-2:#e8d07a;
+    --ink:#1c2b3a; --muted:#64748b; --line:#dde3ec; --soft:#f7f9fc; --panel:#fff;
+    --ok:#15803d; --warn:#b45309;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:"Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif;background:#e8edf3;color:var(--ink);line-height:1.75;}
+  .page{width:min(880px,calc(100% - 32px));margin:28px auto 56px;background:var(--panel);box-shadow:0 24px 64px rgba(11,25,41,.14);}
+  header{background:var(--navy);padding:42px 40px 36px;}
+  .kicker{font-size:12px;letter-spacing:3px;color:var(--gold);font-weight:800;text-transform:uppercase;}
+  header h1{font-size:27px;color:#fff;margin:12px 0 10px;font-weight:800;line-height:1.3;}
+  header .lead{color:#9fc0db;font-size:15px;max-width:64ch;}
+  .series{margin-top:18px;font-size:12px;color:#5a7e9a;}
+  main{padding:14px 40px 44px;}
+  section{margin-top:38px;}
+  .step-no{font-size:12px;letter-spacing:2px;color:var(--gold);font-weight:800;}
+  h2{font-size:21px;color:var(--navy);margin:6px 0 14px;font-weight:800;line-height:1.35;}
+  p{font-size:15px;margin:10px 0;}
+  .why{background:var(--soft);border-left:4px solid var(--gold);padding:16px 20px;margin:16px 0;border-radius:0 6px 6px 0;}
+  .why .why-t{font-size:12px;font-weight:800;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+  .term{background:#fffdf0;border:1px solid var(--gold);border-radius:6px;padding:12px 16px;margin:14px 0;font-size:14px;}
+  .term b{color:var(--navy-3);}
+  pre{background:var(--navy);color:#c8ddef;padding:16px 18px;border-radius:8px;font-size:12.5px;overflow-x:auto;margin:12px 0;line-height:1.55;}
+  .decision{border:1px solid var(--line);border-top:4px solid var(--navy-3);border-radius:8px;padding:18px 22px;margin:16px 0;background:#fff;}
+  .decision .d-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .decision .d-badge{background:var(--navy);color:var(--gold);font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:1px;}
+  .decision h3{margin:0;color:var(--navy);font-size:16px;}
+  .qa{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin-top:10px;font-size:14px;}
+  .qa .q{color:var(--muted);font-weight:700;}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px;}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top;}
+  th{background:var(--navy);color:#fff;font-size:12px;}
+  .takeaway{background:var(--navy);color:#e7eef6;padding:24px 28px;border-radius:10px;margin-top:34px;}
+  .takeaway h3{color:var(--gold);margin:0 0 12px;font-size:15px;letter-spacing:1px;text-transform:uppercase;}
+  .takeaway ul{list-style:none;}
+  .takeaway li{padding:6px 0 6px 22px;position:relative;font-size:15px;}
+  .takeaway li::before{content:"✓";position:absolute;left:0;color:var(--gold);font-weight:800;}
+  footer{padding:20px 40px 30px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;}
+  .next{color:var(--navy-3);font-weight:700;}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="kicker">강의 5 · Implementation to OQ</div>
+    <h1>구현이 끝났다고 끝이 아니다 — 변경관리와 OQ로 증명하기</h1>
+    <p class="lead">PharmCam은 app/ 구현까지 왔다. 하지만 GMP에서는 "작동한다"보다 "문서화된 시험으로 증명했다"가 더 중요하다. 이번 강의는 v1.1 변경사항을 문서에 반영하고, OQ 시험으로 연결하는 과정을 다룬다.</p>
+    <div class="series">PharmCam CSV 시리즈 · 5/7 · 이전: DQ · 다음: IQ(설치 적격성)</div>
+  </header>
+
+  <main>
+    <section>
+      <div class="step-no">들어가며</div>
+      <h2>코드가 생긴 뒤에도 CSV 순서는 계속된다</h2>
+      <p>이번 세션에서는 실제 앱에 계정관리, 권한 매트릭스, 감사추적 가독 표시, 저장 위치 지정, 메타데이터 항목 구성 같은 기능이 추가됐다. 개발 관점에서는 큰 진전이지만, CSV 관점에서는 질문이 하나 더 붙는다.</p>
+      <div class="term"><b>OQ (Operational Qualification)</b> — 운전 적격성 평가. 시스템 기능이 설계대로 동작하는지, 사전에 정한 시험 절차와 예상 결과로 확인하는 단계.</div>
+      <p>즉, "기능을 만들었다"에서 멈추지 않고 <strong>어느 URS를 만족하는지, 어떤 위험을 줄이는지, 어떤 시험으로 확인할지</strong>까지 연결해야 한다.</p>
+    </section>
+
+    <section>
+      <div class="step-no">핵심 결정 1</div>
+      <div class="decision">
+        <div class="d-head"><span class="d-badge">결정</span><h3>기능 추가는 코드가 아니라 URS 변경에서 시작한다</h3></div>
+        <div class="qa">
+          <div class="q">무엇을</div><div>저장 위치 지정 기능을 URS-047, 위험 DAT-08, 설계 D-11로 문서화</div>
+          <div class="q">왜</div><div>새 기능도 요구사항·위험·설계·검증으로 추적되어야 하기 때문</div>
+        </div>
+      </div>
+      <div class="why"><div class="why-t">왜 이렇게?</div>저장 위치는 편의 기능처럼 보이지만, 실제로는 원본 이미지가 어디에 보존되는지를 바꾸는 데이터 무결성 기능이다. 그래서 "관리자가 로컬 경로만 지정", "UNC 거부", "기존 데이터 자동 이전 없음", "감사추적 기록"까지 요구사항에 박아야 한다.</div>
+    </section>
+
+    <section>
+      <div class="step-no">핵심 결정 2</div>
+      <div class="decision">
+        <div class="d-head"><span class="d-badge">결정</span><h3>사람이 읽을 수 있는 감사추적을 요구사항으로 끌어올린다</h3></div>
+        <div class="qa">
+          <div class="q">무엇을</div><div>감사추적 조회·CSV·PDF에서 사용자를 admin (#1)처럼 표시</div>
+          <div class="q">왜</div><div>ALCOA+의 Legible은 "저장되어 있음"이 아니라 "검토자가 읽고 이해 가능함"을 뜻하기 때문</div>
+        </div>
+      </div>
+      <p>DB에는 숫자 ID가 남아도 된다. 다만 검토 화면과 출력물에서는 사용자가 누구인지 바로 식별 가능해야 한다. 그래서 저장값·해시체인은 건드리지 않고, 조회 시점에 서버에서 사용자 정보를 JOIN해 표시하는 설계를 택했다.</p>
+    </section>
+
+    <section>
+      <div class="step-no">핵심 결정 3</div>
+      <div class="decision">
+        <div class="d-head"><span class="d-badge">결정</span><h3>설정은 유연하되, GMP 코어는 잠근다</h3></div>
+        <div class="qa">
+          <div class="q">무엇을</div><div>메타데이터 항목·세션값·전자서명·저장 위치는 설정 가능, 감사추적·무결성·인증은 core_locked</div>
+          <div class="q">왜</div><div>회사별 운영 차이는 받아들이되, 데이터 무결성의 뼈대는 끌 수 없어야 하기 때문</div>
+        </div>
+      </div>
+      <pre>설정 가능: metadata.fields, storage.root, esign.enabled
+잠금 코어: audit.enabled, integrity.enabled, auth.required, timestamp.source</pre>
+      <div class="why"><div class="why-t">검증 포인트</div>OQ에서는 "설정 가능한 것은 권한자만 바꿀 수 있는가"와 "잠긴 코어는 관리자도 바꿀 수 없는가"를 나눠 시험해야 한다. 같은 설정 화면이라도 검증 의도가 다르다.</div>
+    </section>
+
+    <section>
+      <div class="step-no">핵심 결정 4</div>
+      <div class="decision">
+        <div class="d-head"><span class="d-badge">결정</span><h3>자가점검 화면을 IQ 증거로 연결한다</h3></div>
+        <div class="qa">
+          <div class="q">무엇을</div><div>safeStorage, 쓰기권한, 감사추적 해시체인, 코어잠금, 설정 명세를 앱에서 점검</div>
+          <div class="q">왜</div><div>설치 환경이 검증 가능한 상태인지 QC 실무자가 직접 증거로 남길 수 있게 하기 위해</div>
+        </div>
+      </div>
+      <p>IQ는 설치 파일을 실행했다는 뜻이 아니다. 운영 PC에서 필요한 전제조건이 맞는지 확인하는 단계다. PharmCam의 환경 점검 탭은 이 확인을 사람이 덜 실수하게 만드는 장치다.</p>
+    </section>
+
+    <section>
+      <div class="step-no">묶기</div>
+      <h2>이번 변경을 OQ로 바꾸면 이렇게 된다</h2>
+      <table>
+        <tr><th>변경</th><th>문서 연결</th><th>OQ에서 볼 것</th></tr>
+        <tr><td>권한 매트릭스 조회</td><td>URS-012, URS-073</td><td>관리자 화면에서 역할별 권한이 읽기전용으로 표시되는가</td></tr>
+        <tr><td>감사추적 가독 표시</td><td>URS-040</td><td>화면·CSV·PDF에서 사용자명과 ID가 보이는가</td></tr>
+        <tr><td>저장 위치 지정</td><td>URS-047, D-11</td><td>로컬 경로만 허용하고 변경 이력이 감사추적에 남는가</td></tr>
+        <tr><td>메타데이터 항목 구성</td><td>URS-031</td><td>필수 항목을 비우면 저장이 차단되는가</td></tr>
+      </table>
+    </section>
+
+    <div class="takeaway">
+      <h3>이번 강의 핵심 정리</h3>
+      <ul>
+        <li>구현 완료는 CSV의 끝이 아니라 IQ/OQ/PQ 검증의 시작이다</li>
+        <li>새 기능은 URS·RA·DQ·traceability matrix에 먼저 자리 잡아야 한다</li>
+        <li>감사추적은 저장뿐 아니라 사람이 읽고 검토할 수 있어야 한다</li>
+        <li>설정 가능성과 GMP 코어 잠금은 동시에 설계해야 한다</li>
+        <li>OQ는 "해봤더니 됨"이 아니라 시험 ID·절차·예상 결과로 증명하는 활동이다</li>
+      </ul>
+    </div>
+
+    <p style="margin-top:28px;" class="next">→ 다음 강의: IQ(설치 적격성) — 테스트용 exe를 운영 PC 전제조건과 연결해 설치 증거를 남깁니다.</p>
+  </main>
+
+  <footer>PharmCam CSV 시리즈 · 강의 5/7 · RA/URS/DQ v1.1 및 구현 세션 기반 · "만들면서 가르친다"</footer>
+</div>
+</body>
+</html>

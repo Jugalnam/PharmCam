@@ -8,6 +8,8 @@ import type {
   RecordDetail,
   RecordFilter,
   RecordListItem,
+  RecordQueryUser,
+  RecordUserOption,
   SaveRecordInput,
   SaveRecordResult
 } from '../../shared/record.types'
@@ -143,18 +145,37 @@ export class RecordService {
     return result
   }
 
-  list(filter: RecordFilter = {}): RecordListItem[] {
+  list(filter: RecordFilter = {}, queryUser?: RecordQueryUser): RecordListItem[] {
     const limit = filter.limit ?? 100
     let sql = `
       SELECT r.*, u.username AS operator_name
       FROM records r
       JOIN users u ON u.id = r.operator_id
+      WHERE 1=1
     `
     const params: Array<string | number> = []
 
     if (filter.testNo) {
-      sql += ' WHERE r.test_no = ?'
+      sql += ' AND r.test_no = ?'
       params.push(filter.testNo)
+    }
+
+    if (filter.fromTs) {
+      sql += ' AND r.capture_ts >= ?'
+      params.push(filter.fromTs)
+    }
+
+    if (filter.toTs) {
+      sql += ' AND r.capture_ts <= ?'
+      params.push(filter.toTs)
+    }
+
+    if (queryUser?.role === 'operator') {
+      sql += ' AND r.operator_id = ?'
+      params.push(queryUser.id)
+    } else if (filter.operatorId !== undefined) {
+      sql += ' AND r.operator_id = ?'
+      params.push(filter.operatorId)
     }
 
     sql += ' ORDER BY r.id DESC LIMIT ?'
@@ -167,7 +188,7 @@ export class RecordService {
     return rows.map((row) => this.toListItem(row))
   }
 
-  get(id: number, viewerId: number): RecordDetail | null {
+  get(id: number, viewerId: number, queryUser?: RecordQueryUser): RecordDetail | null {
     const row = this.db
       .prepare(
         `SELECT r.*, u.username AS operator_name
@@ -181,6 +202,10 @@ export class RecordService {
       return null
     }
 
+    if (queryUser?.role === 'operator' && row.operator_id !== queryUser.id) {
+      return null
+    }
+
     const integrityOk = existsSync(row.image_path)
       ? this.integrityService.verifyFile(row.image_path, row.image_hash, viewerId)
       : false
@@ -190,6 +215,17 @@ export class RecordService {
       operatorName: row.operator_name,
       integrityOk
     }
+  }
+
+  listRecordUsers(): RecordUserOption[] {
+    return this.db
+      .prepare(
+        `SELECT DISTINCT u.id, u.username
+         FROM records r
+         JOIN users u ON u.id = r.operator_id
+         ORDER BY u.username`
+      )
+      .all() as RecordUserOption[]
   }
 
   private persistRecord(

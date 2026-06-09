@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type {
   AuditFilter,
   AuditListItem,
+  AuditUserOption,
   ExportFormat,
   ExportTarget
 } from '../../shared/audit.types'
@@ -27,6 +28,7 @@ const COMMON_ACTIONS = [
 
 export default function AuditView({ user }: AuditViewProps): JSX.Element {
   const [entries, setEntries] = useState<AuditListItem[]>([])
+  const [auditUsers, setAuditUsers] = useState<AuditUserOption[]>([])
   const [filter, setFilter] = useState<AuditFilter>({ limit: 200 })
   const [userIdInput, setUserIdInput] = useState('')
   const [actionInput, setActionInput] = useState('')
@@ -43,7 +45,16 @@ export default function AuditView({ user }: AuditViewProps): JSX.Element {
 
   useEffect(() => {
     loadEntries()
+    window.api.audit.listUsers().then(setAuditUsers).catch(() => {})
   }, [])
+
+  function dateStartIso(date: string): string | undefined {
+    return date ? new Date(`${date}T00:00:00`).toISOString() : undefined
+  }
+
+  function dateEndIso(date: string): string | undefined {
+    return date ? new Date(`${date}T23:59:59.999`).toISOString() : undefined
+  }
 
   function buildFilter(): AuditFilter {
     const f: AuditFilter = { limit: filter.limit ?? 200 }
@@ -54,12 +65,10 @@ export default function AuditView({ user }: AuditViewProps): JSX.Element {
       f.action = actionInput
     }
     if (fromDate) {
-      f.fromTs = new Date(fromDate).toISOString()
+      f.fromTs = dateStartIso(fromDate)
     }
     if (toDate) {
-      const end = new Date(toDate)
-      end.setHours(23, 59, 59, 999)
-      f.toTs = end.toISOString()
+      f.toTs = dateEndIso(toDate)
     }
     return f
   }
@@ -132,13 +141,18 @@ export default function AuditView({ user }: AuditViewProps): JSX.Element {
 
       <div className="audit-filters">
         <label>
-          사용자 ID
-          <input
-            type="number"
+          사용자
+          <select
             value={userIdInput}
             onChange={(e) => setUserIdInput(e.target.value)}
-            placeholder="전체"
-          />
+          >
+            <option value="">전체 사용자</option>
+            {auditUsers.map((auditUser) => (
+              <option key={auditUser.id} value={auditUser.id}>
+                {auditUser.username} (#{auditUser.id})
+              </option>
+            ))}
+          </select>
         </label>
         <label>
           행위 (action)

@@ -1,6 +1,6 @@
 import type Database from 'better-sqlite3'
 
-export const SCHEMA_VERSION = 3
+export const SCHEMA_VERSION = 4
 
 const DDL_V1 = `
 CREATE TABLE IF NOT EXISTS schema_version (
@@ -114,5 +114,21 @@ export function runMigrations(db: Database.Database): void {
       )
     }
     db.prepare('UPDATE schema_version SET version = 3').run()
+  }
+
+  if (currentVersion < 4) {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS print_jobs (
+        id INTEGER PRIMARY KEY,
+        record_id INTEGER NOT NULL REFERENCES records(id),
+        printed_by INTEGER NOT NULL REFERENCES users(id),
+        print_ts TEXT NOT NULL,
+        displayed_fields TEXT NOT NULL,
+        target_printer TEXT,
+        result TEXT NOT NULL,
+        error TEXT
+      );
+    `)
+    db.prepare('UPDATE schema_version SET version = 4').run()
   }
 }

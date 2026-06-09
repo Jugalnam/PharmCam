@@ -1,4 +1,4 @@
-import { dialog, ipcMain, shell } from 'electron'
+import { BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { writeFileSync } from 'fs'
 import type { AuditService } from '../services/audit.service'
 import type { AuthService } from '../services/auth.service'
@@ -9,6 +9,7 @@ import type { BackupService } from '../services/backup.service'
 import type { CryptoService } from '../services/crypto.service'
 import type { LimsConnector } from '../services/lims.connector'
 import type { SystemService } from '../services/system.service'
+import type { PrintService } from '../services/print.service'
 import type { SignatureMeaning } from '../../shared/types'
 import type { CreateUserInput } from '../../shared/auth.types'
 import type { AuditFilter, ExportRequest } from '../../shared/audit.types'
@@ -29,7 +30,8 @@ export function registerIpcHandlers(
   backupService: BackupService,
   cryptoService: CryptoService,
   limsConnector: LimsConnector,
-  systemService: SystemService
+  systemService: SystemService,
+  printService: PrintService
 ): void {
   ipcMain.handle('audit:list', (_event, filter?: AuditFilter) => {
     authService.requirePermission('audit.view')
@@ -39,6 +41,11 @@ export function registerIpcHandlers(
   ipcMain.handle('audit:verifyChain', () => {
     authService.requirePermission('audit.view')
     return auditService.verifyChainDetailed()
+  })
+
+  ipcMain.handle('audit:listUsers', () => {
+    authService.requirePermission('audit.view')
+    return auditService.listUserOptions()
   })
 
   ipcMain.handle('audit:export', async (_event, request: ExportRequest) => {
@@ -143,18 +150,37 @@ export function registerIpcHandlers(
   })
 
   ipcMain.handle('record:list', (_event, filter?: RecordFilter) => {
-    authService.requirePermission('audit.view')
-    return recordService.list(filter)
+    const user = authService.requirePermission('audit.view')
+    return recordService.list(filter, user)
   })
 
   ipcMain.handle('record:get', (_event, id: number) => {
     const user = authService.requirePermission('audit.view')
-    return recordService.get(id, user.id)
+    return recordService.get(id, user.id, user)
   })
 
   ipcMain.handle('record:correct', (_event, id: number, input: CorrectRecordInput) => {
     const user = authService.requirePermission('capture')
     return recordService.correct(id, input, user.id)
+  })
+
+  ipcMain.handle('record:listUsers', () => {
+    const user = authService.requirePermission('audit.view')
+    if (user.role === 'operator') {
+      return []
+    }
+    return recordService.listRecordUsers()
+  })
+
+  ipcMain.handle('record:getPrintPreview', (_event, id: number) => {
+    const user = authService.requirePermission('audit.view')
+    return printService.buildPreview(id, user.id, user)
+  })
+
+  ipcMain.handle('record:printControlled', (_event, id: number) => {
+    const user = authService.requirePermission('audit.view')
+    const parent = BrowserWindow.fromWebContents(_event.sender) ?? undefined
+    return printService.print(id, user.id, user, parent)
   })
 
   // 메타데이터 추가 항목(URS-031) — 조회는 세션, 변경은 관리자(config 권한)만.

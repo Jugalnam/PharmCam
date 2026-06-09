@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
 
 ---
 
@@ -14,7 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **이 프로젝트는 두 개의 결과물을 동시에 만든다:**
 1. 실제 동작하는 GMP 앱 (`app/`)
-2. "비개발자가 Claude Code로 CSV를 직접 수행한다"는 **강의 콘텐츠** (`lectures/`)
+2. "비개발자가 Codex로 CSV를 직접 수행한다"는 **강의 콘텐츠** (`lectures/`)
 
 → 모든 단계는 강의 소재다. 산출물을 만들 때 "왜 이렇게 결정했는가"를 항상 명시적으로 남긴다.
 
@@ -46,6 +46,7 @@ PQ  (성능 적격성 평가)       docs/07_PQ
 [✓] RA-001   v1.1 Approved (2026-06-08)  (DAT-08 저장위치 위험 추가)
 [✓] URS-001  v1.1 Approved (2026-06-08)  (URS-047 저장위치 신설, URS-040·073 문구보강)
 [✓] DQ-001   v1.1 Approved (2026-06-08)  (D-11 저장위치 설계 추가)
+[△] RA/URS/DQ v1.2 Draft (2026-06-08)  (DAT-09/URS-093/D-12 통제 인쇄, DAT-10/URS-094·095/D-13 기록 조회 통제 추가안)
 [✓] app/ 구현 완료         (M1~M8 + 배포준비) + 2026-06-08 세션 추가구현(아래)
 [ ] IQ  ← 다음 단계        (자가점검 화면이 IQ 검증 항목과 연결됨)
 [ ] OQ / PQ
@@ -69,10 +70,61 @@ PQ  (성능 적격성 평가)       docs/07_PQ
 - **메타데이터 항목 구성** `metadata.fields` config — 촬영화면 동적입력+필수검증, 설정탭 "촬영 메타데이터 항목" 편집, `metadata:*` IPC. URS-031
 - config 시드 `INSERT OR IGNORE`(멱등) → 기존 DB에도 신규키 추가. **config 18개**(테스트 기대값 18).
 
+### 세션 로그 — 2026-06-08 추가 (통제 인쇄 기능)
+
+**결정:** "인쇄물만 원본"이 아니라, **PharmCam 전자기록이 원본이고 PharmCam 통제 인쇄 기능으로 출력한 문서만 공식 출력본(controlled printout)**으로 인정하는 방향으로 정리. 저장 폴더 이미지 파일을 OS/외부 프로그램으로 직접 인쇄한 출력물은 공식 출력본이 아님.
+
+**문서 반영(승인 전 Draft):**
+- `RA-001` v1.2 Draft: `DAT-09` 비통제 이미지 직접 인쇄 위험 추가.
+- `URS-001` v1.2 Draft: `URS-093` 통제 인쇄 요구사항 추가. 미리보기 필수 표시항목 = User ID, 시험번호, 촬영일시, 기록 ID, 파일명.
+- `DQ-001` v1.2 Draft: `D-12 Controlled Printout` 설계 추가.
+- `docs/traceability_matrix.md`: `URS-093 → DAT-09 → D-12 → _(OQ)_` 연결.
+- `app/BUILD_SPEC.md`: `PrintService — D-12` 구현 명세 추가.
+
+**구현 완료(코드 반영·typecheck 통과·dev 수동 확인):**
+- `print_jobs` 테이블 추가(`schema_version=4`) — record_id, printed_by, print_ts, displayed_fields, result/error 저장.
+- `PrintService` 추가 — Main 프로세스에서 원본 이미지 존재/해시 검증 후 통제 인쇄 처리.
+- `buildControlledPrintHtml()` 단일 템플릿 추가 — 미리보기와 실제 인쇄가 같은 HTML/CSS 템플릿 사용.
+- `record:getPrintPreview`, `record:printControlled` IPC 추가. Renderer는 미리보기 표시와 인쇄 요청만 수행.
+- 기록 상세 화면에 "통제 인쇄" 섹션과 미리보기 모달 추가.
+- 인쇄 성공 시 `print`, 실패/취소 시 `print_failed` 감사추적 기록.
+- 최초 구현의 `webContents.print()` 방식은 Windows/Electron 환경에서 인쇄 다이얼로그가 뜨지 않아, 인쇄용 창에서 `window.print()`를 실행하는 방식으로 변경. `npm run dev` 수동 확인 결과 정상 출력됨.
+- TypeScript typecheck 통과(`tsc --noEmit -p tsconfig.node.json`, `tsc --noEmit -p tsconfig.web.json`; 현재 PC에서는 `node` 직접 실행에 승인 필요).
+
+### 세션 로그 — 2026-06-08 추가 (기록 조회 통제)
+
+**결정:** 기록확인 탭은 기록 누적 시 검토성과 최소권한 원칙을 위해 날짜 필터와 역할별 조회 범위를 모두 적용한다.
+
+**문서 반영(승인 전 Draft):**
+- `RA-001` v1.2 Draft: `DAT-10` 기록 누적/과도조회 위험 추가.
+- `URS-001` v1.2 Draft: `URS-094` 날짜/기간 필터 및 기본 오늘 조회, `URS-095` 역할별 조회 범위 통제 추가.
+- `DQ-001` v1.2 Draft: `D-13 Record Query Control` 설계 추가.
+- `docs/traceability_matrix.md`: `URS-094/095 → DAT-10 → D-13 → _(OQ)_` 연결.
+- `app/BUILD_SPEC.md`: `Record Query Control — D-13` 구현 명세 추가.
+
+**구현 완료(코드 반영·typecheck 통과):**
+- 기록확인 탭 기본 조회 범위 = 오늘 날짜.
+- 날짜/기간 필터 UI 추가.
+- operator는 Main 쿼리에서 본인 기록만 조회·상세조회·통제 인쇄 가능하도록 강제.
+- reviewer/admin은 전체 기록 조회 및 작업자별 필터 가능.
+- `record:listUsers` IPC 추가(reviewer/admin 전용, operator는 빈 목록).
+- `record:list`, `record:get`, `record:getPrintPreview`, `record:printControlled` 모두 동일한 역할별 조회 scope 적용.
+- TypeScript typecheck 통과.
+
+### 세션 로그 — 2026-06-08 추가 (감사추적 필터 UX 개선)
+
+**구현 완료(코드 반영·typecheck 통과):**
+- 감사추적 사용자 필터를 숫자 ID 직접 입력에서 사용자명 드롭다운(`admin (#1)`, `leesi (#2)` 등)으로 변경.
+- `audit:listUsers` IPC 추가 — `audit.view` 권한으로 감사추적 필터용 사용자 목록 조회.
+- 시작일/종료일은 달력 입력(`type=date`)을 유지하고, 조회 시 각각 해당 일자의 00:00:00~23:59:59.999 범위로 변환.
+- 기존 감사추적 표시값(`username (#id)`)과 필터 선택값이 일치하도록 개선.
+- TypeScript typecheck 통과.
+
 **미완료/다음 작업(우선순위순):**
 1. **문서 마무리 잔여**: URS/RA/DQ v1.1 Approved·추적성 갱신 完(2026-06-08). 남은 것 = (규칙)v1.1 변경분 **HTML 변환·강의자료 생성** + **OQ-TC** 작성 + 추적성 OQ열 + **git 커밋(이번 세션 전부 미커밋)**.
 2. **A-1 카메라 선택/전환**: 현재 `facingMode:'environment'` 고정 → 신규 **URS-035[설정가능]+RA+DQ** 필요(미작성).
-3. URS-092 도움말 미구현 / 기록상세에 커스텀 meta 표시 후속 / 인쇄는 의식적 제외(저장위치 대체).
+3. URS-092 도움말 미구현 / 기록상세에 커스텀 meta 표시 후속.
+4. 통제 인쇄 기능은 구현·수동확인 완료. 기록 조회 통제는 구현·typecheck 완료. 남은 것 = v1.2 문서 승인 여부 결정, dev 수동 확인, OQ 시험 항목 작성, 패키징 빌드 재생성.
 
 **배포(테스트용):** `npm run build` → `release/` 삭제 → `npx electron-builder --win portable`
 (rcedit "Unable to commit changes"=Defender 잠금 추정 → release 정리+재시도로 해결).
@@ -156,14 +208,9 @@ PharmCam은 **GMP를 엄격하게 적용하되, 회사마다 기능을 커스터
 | `npm install` | 의존성 설치 (네이티브 모듈 자동 재빌드) |
 | `npm run dev` | 개발 실행 (기능 확인·OQ 준비는 이걸로 충분) |
 | `npm run build` | electron-vite 빌드 (`out/`) |
-| `npm run typecheck` | **타입 검사(main+renderer 두 tsconfig). 커밋 전 1차 검증은 이것** |
 | `npm run package` | 빌드 + electron-builder Windows 설치본 (`release/`) |
-| `npm run test:<모듈>` | 모듈별 개발자 테스트 (audit/auth/record/config/sign/audit-export/m8) |
+| `npm run test:*` | 모듈별 개발자 테스트 (audit/auth/record/config/sign/audit-export/m8) |
 
-- **Node PATH(이 PC):** `npm`이 PATH에 없음 → 모든 npm 명령 앞에 프리픽스 필요:
-  `$env:Path="C:\Users\User\AppData\Local\Microsoft\WinGet\Packages\OpenJS.NodeJS.22_Microsoft.Winget.Source_8wekyb3d8bbwe\node-v22.22.3-win-x64;"+$env:Path`
-- **테스트 구조:** Jest 등 프레임워크 아님. 각 `test:*`는 `app/scripts/test-*.ts`를 electron(`ELECTRON_RUN_AS_NODE`)+tsx로 실행하는 **독립 스크립트**(in-memory SQLite로 시나리오 수행, PASS/FAIL 콘솔 출력). **파일 내 단일 테스트 단위 실행은 없음** — 모듈 스크립트를 통째로 돌린다. config 항목 수가 바뀌면 `test-config.ts` 기대값(현재 18)도 함께 갱신.
-- **포터블 빌드 주의:** `npx electron-builder --win portable` 시 rcedit "Unable to commit changes"(Defender 잠금 추정) 발생 가능 → `release/` 삭제 후 재시도로 해결.
 - **패키징 전제(빌드 PC 1회):** VS 2022 Build Tools(C++ 워크로드) + Python 필요 — 네이티브 모듈(argon2·better-sqlite3) 컴파일용. 운영 PC엔 불필요. (`app/README.md` 참조)
 - 데이터 위치: `%APPDATA%/pharmcam/data/` (DB·이미지·암호화 키)
 - 초기 계정: `admin / Admin123!` (최초 로그인 시 비밀번호 강제 변경)

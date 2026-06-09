@@ -16,12 +16,14 @@ import type {
   RecordDetail,
   RecordFilter,
   RecordListItem,
+  RecordUserOption,
   SaveRecordInput,
   SaveRecordResult
 } from '../shared/record.types'
 import type {
   AuditFilter,
   AuditListResult,
+  AuditUserOption,
   ExportRequest,
   ExportResult,
   VerifyChainResult
@@ -37,6 +39,10 @@ import type {
   EsignStatus,
   SignatureView
 } from '../shared/sign.types'
+import type {
+  ControlledPrintPreviewResult,
+  ControlledPrintResult
+} from '../shared/print.types'
 import type {
   AppInfo,
   ExportSelfCheckResult,
@@ -71,6 +77,9 @@ declare global {
         list: (filter?: RecordFilter) => Promise<RecordListItem[]>
         get: (id: number) => Promise<RecordDetail | null>
         correct: (id: number, input: CorrectRecordInput) => Promise<SaveRecordResult>
+        listUsers: () => Promise<RecordUserOption[]>
+        getPrintPreview: (id: number) => Promise<ControlledPrintPreviewResult>
+        printControlled: (id: number) => Promise<ControlledPrintResult>
       }
       config: {
         get: (key: string) => Promise<string | null>
@@ -105,6 +114,7 @@ declare global {
       }
       audit: {
         list: (filter?: AuditFilter) => Promise<AuditListResult>
+        listUsers: () => Promise<AuditUserOption[]>
         verifyChain: () => Promise<VerifyChainResult>
         export: (request: ExportRequest) => Promise<ExportResult>
       }

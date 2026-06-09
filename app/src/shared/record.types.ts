@@ -27,7 +27,20 @@ export interface CorrectRecordInput {
 
 export interface RecordFilter {
   testNo?: string
+  fromTs?: string
+  toTs?: string
+  operatorId?: number
   limit?: number
+}
+
+export interface RecordQueryUser {
+  id: number
+  role: 'operator' | 'reviewer' | 'admin'
+}
+
+export interface RecordUserOption {
+  id: number
+  username: string
 }
 
 export interface SaveRecordResult {

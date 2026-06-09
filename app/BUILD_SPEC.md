@@ -237,6 +237,24 @@ CREATE TABLE backup_log (
 
 - 인터페이스만 정의(`exportRecord(record): Promise<Result>`), 기본 비활성. 실제 어댑터는 후속 변경관리(DEV-07). 폐쇄망 내부망 한정.
 
+### 5.11 PrintService — D-12 (URS-093)
+
+- PharmCam 전자기록을 원본으로 유지하되, 종이 사용이 필요한 경우 **통제 인쇄(Controlled Printout)** 기능으로 공식 출력본을 생성한다.
+- 인쇄 미리보기와 실제 인쇄는 동일한 `buildControlledPrintHtml(record, user)` 템플릿을 사용한다.
+- 미리보기/출력물 필수 표시 항목: User ID, 시험번호, 촬영일시, 기록 ID, 파일명.
+- 인쇄 요청은 Main 프로세스에서 처리한다. Renderer는 미리보기 확인과 인쇄 요청만 수행한다.
+- 인쇄 직전 원본 이미지 파일 존재 여부와 SHA-256 무결성을 재검증한다. 실패 시 인쇄를 차단하고 `print_failed` 감사추적을 남긴다.
+- 인쇄 성공 시 `print_jobs`에 실행 결과를 남기고, AuditService에 `print` 감사추적을 추가한다. 취소/실패도 `print_failed`로 남긴다.
+- 출력물에는 "PharmCam Controlled Printout" 및 "저장 폴더 이미지 직접 인쇄본은 공식 출력본 아님" 문구를 포함한다.
+
+### 5.12 Record Query Control — D-13 (URS-094·095)
+
+- 기록 목록 기본 조회 범위는 오늘 날짜이다. Renderer는 시작일/종료일 필터를 제공한다.
+- operator는 본인이 촬영한 기록만 조회·상세조회·통제 인쇄할 수 있다. 이 제한은 Main의 `record:list`, `record:get`, `record:getPrintPreview`, `record:printControlled`에서 강제한다.
+- reviewer/admin은 전체 기록 조회와 작업자별 필터를 사용할 수 있다.
+- 사용자별 필터 목록(`record:listUsers`)은 reviewer/admin에게만 제공한다.
+- 날짜 필터는 `capture_ts` 기준 ISO 범위(`fromTs`, `toTs`)로 조회한다.
+
 ## 6. 설정 시드 (config 초기값)
 
 | key | 기본값 | core_locked | URS |
@@ -265,8 +283,8 @@ CREATE TABLE backup_log (
 ```ts
 window.api = {
   auth:   { login(u,p), logout(), currentUser() },
-  record: { save(input), list(filter), get(id), correct(id, input) },
-  audit:  { list(filter), verifyChain(), export(filter) },   // 조회·검증만, 수정/삭제 없음
+  record: { save(input), list(filter), get(id), correct(id, input), listUsers(), getPrintPreview(id), printControlled(id) },
+  audit:  { list(filter), listUsers(), verifyChain(), export(filter) },   // 조회·검증만, 수정/삭제 없음
   sign:   { create(recordId, meaning, password) },
   config: { get(key), getSpec(), set(key, value) },           // set은 admin
   backup: { runNow(), verify(), status() },

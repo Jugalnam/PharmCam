@@ -1,6 +1,6 @@
 import { createHash } from 'crypto'
 import type Database from 'better-sqlite3'
-import type { AuditFilter, AuditListItem } from '../../shared/audit.types'
+import type { AuditFilter, AuditListItem, AuditUserOption } from '../../shared/audit.types'
 import type { AuditEntry } from '../../shared/types'
 import type { TimeService } from './time.service'
 
@@ -203,6 +203,12 @@ export class AuditService {
       userLabel: formatUserLabel(e.userId, nameMap),
       targetLabel: formatTargetLabel(e.targetType, e.targetId, nameMap)
     }))
+  }
+
+  listUserOptions(): AuditUserOption[] {
+    return this.db
+      .prepare('SELECT id, username FROM users ORDER BY username')
+      .all() as AuditUserOption[]
   }
 
   private buildUserNameMap(): Map<number, string> {

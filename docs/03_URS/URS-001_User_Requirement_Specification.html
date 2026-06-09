@@ -1,187 +1,45 @@
 <!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>URS-001 사용자 요구사항 명세 — PharmCam</title>
-<style>
-  :root{
-    --navy:#0b1929; --navy-2:#15273d; --navy-3:#1e3a5f;
-    --gold:#c8a847; --gold-2:#e8d07a;
-    --ink:#1c2b3a; --muted:#64748b; --line:#dde3ec; --soft:#f7f9fc; --panel:#fff;
-    --ok:#15803d; --ok-bg:#dcfce7;
-    --req:#b91c1c; --req-bg:#fee2e2; --cfg:#1d4ed8; --cfg-bg:#dbeafe; --cond:#92400e; --cond-bg:#fef3c7;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:"Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif;background:#e8edf3;color:var(--ink);line-height:1.6;}
-  .page{width:min(1040px,calc(100% - 32px));margin:28px auto 48px;background:var(--panel);box-shadow:0 24px 64px rgba(11,25,41,.14);}
-  header{background:var(--navy);padding:30px 36px 26px;}
-  .doc-id{font-size:13px;letter-spacing:3px;color:var(--gold);font-weight:800;}
-  header h1{font-size:24px;color:#fff;margin:8px 0 4px;font-weight:800;}
-  header .sub{color:#7da4c4;font-size:14px;}
-  .badge-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
-  .badge{padding:4px 12px;border-radius:4px;font-size:12px;font-weight:700;}
-  .badge.approved{background:var(--ok-bg);color:var(--ok);}
-  .badge.gold{background:rgba(200,168,71,.18);color:var(--gold-2);}
-  .legend{display:flex;flex-wrap:wrap;border-bottom:2px solid var(--line);}
-  .lg{padding:12px 20px;border-right:1px solid var(--line);font-size:13px;}
-  .lg b{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
-  main{padding:8px 36px 40px;}
-  section{margin-top:26px;}
-  h2{font-size:13px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:1.2px;padding-bottom:8px;border-bottom:2px solid var(--navy);margin-bottom:6px;display:flex;align-items:baseline;gap:10px;}
-  h2 .num{color:var(--gold);font-size:18px;font-weight:800;}
-  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;}
-  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top;}
-  th{background:var(--navy);color:#fff;font-weight:700;font-size:12px;}
-  tr:nth-child(even) td{background:var(--soft);}
-  td.id{font-weight:700;color:var(--navy-3);white-space:nowrap;}
-  td.src{color:var(--muted);font-size:12px;white-space:nowrap;}
-  .tag{display:inline-block;padding:1px 8px;border-radius:3px;font-size:11px;font-weight:800;white-space:nowrap;}
-  .tag.req{background:var(--req-bg);color:var(--req);}
-  .tag.cfg{background:var(--cfg-bg);color:var(--cfg);}
-  .tag.cond{background:var(--cond-bg);color:var(--cond);}
-  .note{background:var(--soft);border-left:4px solid var(--gold);padding:12px 16px;font-size:14px;margin:10px 0;}
-  .sumgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:14px 0;}
-  .sc{border:1px solid var(--line);border-top:3px solid var(--navy-3);border-radius:8px;padding:12px 14px;}
-  .sc .c{font-size:12px;color:var(--muted);}
-  .sc .n{font-size:24px;font-weight:800;color:var(--navy);}
-  footer{padding:18px 36px 28px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;}
-  strong{color:var(--navy-3);}
-</style>
-</head>
-<body>
-<div class="page">
-  <header>
-    <div class="doc-id">URS-001</div>
-    <h1>User Requirement Specification — 사용자 요구사항 명세</h1>
-    <div class="sub">PharmCam — 검체·시료 사진 기록 시스템</div>
-    <div class="badge-row">
-      <span class="badge approved">확정 v1.0</span>
-      <span class="badge gold">요구사항 42</span>
-      <span class="badge gold">RA 추적 연결</span>
-    </div>
-  </header>
-
-  <div class="legend">
-    <div class="lg"><b>태그</b><span class="tag req">필수</span> 코어, 끌 수 없음</div>
-    <div class="lg"><b>&nbsp;</b><span class="tag cfg">설정가능</span> 회사별 on/off·값</div>
-    <div class="lg"><b>&nbsp;</b><span class="tag cond">조건부</span> 모듈 사용 시 필수</div>
-    <div class="lg"><b>출처</b> 각 요구사항은 RA 위험 ID에서 도출</div>
-  </div>
-
-  <main>
-    <p class="note"><strong>이 문서가 하는 일:</strong> "시스템이 반드시 해야 할 일"을 요구사항으로 정의한다. 각 요구사항은 RA의 위험 통제에서 도출되며(추적성), DQ·OQ/PQ로 연결된다. <strong>엄격한 GMP 코어 + 회사별 설정 유연성</strong> 원칙을 따른다.</p>
-
-    <section>
-      <h2><span class="num">2.1</span> GEN — 일반/시스템</h2>
-      <table>
-        <tr><th>ID</th><th>태그</th><th>요구사항</th><th>출처</th></tr>
-        <tr><td class="id">URS-001</td><td><span class="tag req">필수</span></td><td>Windows 단독 PC에서 동작하는 데스크톱 앱</td><td class="src">VP 범위</td></tr>
-        <tr><td class="id">URS-002</td><td><span class="tag req">필수</span></td><td>검체/시료 사진을 촬영해 메타데이터와 함께 전자기록으로 저장</td><td class="src">VP 개요</td></tr>
-        <tr><td class="id">URS-003</td><td><span class="tag req">필수</span></td><td>모든 GxP 기록은 ALCOA+ 원칙을 만족</td><td class="src">VP §4</td></tr>
-      </table>
-    </section>
-
-    <section>
-      <h2><span class="num">2.2</span> AUTH — 사용자 식별·접근통제</h2>
-      <table>
-        <tr><th>ID</th><th>태그</th><th>요구사항</th><th>출처</th></tr>
-        <tr><td class="id">URS-010</td><td><span class="tag req">필수</span></td><td>개인 계정 로그인 강제, 공용/공유 계정 금지</td><td class="src">AUTH-01</td></tr>
-        <tr><td class="id">URS-011</td><td><span class="tag req">필수</span></td><td>작업자 식별 없이는 촬영·저장 불가</td><td class="src">AUTH-03</td></tr>
-        <tr><td class="id">URS-012</td><td><span class="tag req">필수</span></td><td>역할 기반 접근통제(RBAC), 삭제·설정변경은 권한자만</td><td class="src">AUTH-02</td></tr>
-        <tr><td class="id">URS-013</td><td><span class="tag cfg">설정가능</span></td><td>자동 로그아웃(세션 타임아웃), 시간 값 설정</td><td class="src">AUTH-04</td></tr>
-        <tr><td class="id">URS-014</td><td><span class="tag req">필수</span></td><td>계정 수명주기 관리, 퇴사자 계정 비활성화</td><td class="src">AUTH-06</td></tr>
-        <tr><td class="id">URS-015</td><td><span class="tag cfg">설정가능</span></td><td>비밀번호 정책(길이·복잡도·만료) 값 설정</td><td class="src">SEC-02</td></tr>
-        <tr><td class="id">URS-016</td><td><span class="tag cfg">설정가능</span></td><td>로그인 실패 N회 시 계정 잠금, N 설정</td><td class="src">SEC-05</td></tr>
-      </table>
-    </section>
-
-    <section>
-      <h2><span class="num">2.3</span> ESIG — 전자서명 <span style="font-size:11px;color:var(--muted)">(도입 결정 2026-06-05)</span></h2>
-      <table>
-        <tr><th>ID</th><th>태그</th><th>요구사항</th><th>출처</th></tr>
-        <tr><td class="id">URS-020</td><td><span class="tag cfg">설정가능</span></td><td>전자서명 사용 여부·적용 행위(작성/검토/승인) 설정</td><td class="src">AUTH-05</td></tr>
-        <tr><td class="id">URS-021</td><td><span class="tag cond">조건부</span></td><td>전자서명 = 서명자 아이디 + 의미 + 일시 포함</td><td class="src">Part 11</td></tr>
-        <tr><td class="id">URS-022</td><td><span class="tag cond">조건부</span></td><td>기록과 영구 연결, 위조·재사용 불가</td><td class="src">Part 11</td></tr>
-        <tr><td class="id">URS-023</td><td><span class="tag cond">조건부</span></td><td>서명 시 사용자 재인증 요구</td><td class="src">Part 11</td></tr>
-      </table>
-    </section>
-
-    <section>
-      <h2><span class="num">2.4</span> CAP — 촬영·메타데이터</h2>
-      <table>
-        <tr><th>ID</th><th>태그</th><th>요구사항</th><th>출처</th></tr>
-        <tr><td class="id">URS-030</td><td><span class="tag req">필수</span></td><td>시험번호·작업자·일시 기록, 필수항목 미입력 시 저장 차단</td><td class="src">DAT-01</td></tr>
-        <tr><td class="id">URS-031</td><td><span class="tag cfg">설정가능</span></td><td>필수 메타데이터 항목 구성을 회사별 설정</td><td class="src">DAT-01</td></tr>
-        <tr><td class="id">URS-032</td><td><span class="tag req">필수</span></td><td>촬영 후 미리보기·재촬영</td><td class="src">SW-01</td></tr>
-        <tr><td class="id">URS-033</td><td><span class="tag req">필수</span></td><td>저장 성공 검증, 실패 시 명확 알림(오표시 금지)</td><td class="src">SW-02</td></tr>
-        <tr><td class="id">URS-034</td><td><span class="tag req">필수</span></td><td>촬영 대상 시험정보 화면 표시(오촬영 예방)</td><td class="src">SW-03</td></tr>
-      </table>
-    </section>
-
-    <section>
-      <h2><span class="num">2.5</span> DAT — 데이터 무결성·감사추적</h2>
-      <table>
-        <tr><th>ID</th><th>태그</th><th>요구사항</th><th>출처</th></tr>
-        <tr><td class="id">URS-040</td><td><span class="tag req">필수</span></td><td>전 행위 감사추적(누가·언제·무엇을·이전/이후값)</td><td class="src">DAT-02</td></tr>
-        <tr><td class="id">URS-041</td><td><span class="tag req">필수</span></td><td>감사추적 append-only, 사용자 수정·삭제 불가</td><td class="src">DAT-02</td></tr>
-        <tr><td class="id">URS-042</td><td><span class="tag req">필수</span></td><td>감사추적 비활성화 불가(설정 대상 아님)</td><td class="src">DAT-07</td></tr>
-        <tr><td class="id">URS-043</td><td><span class="tag req">필수</span></td><td>원본 이미지 해시 + 읽기전용 보관</td><td class="src">DAT-03</td></tr>
-        <tr><td class="id">URS-044</td><td><span class="tag req">필수</span></td><td>신뢰 시각 사용, 시스템 시간 변경 감지·기록</td><td class="src">DAT-04·INF-01</td></tr>
-        <tr><td class="id">URS-045</td><td><span class="tag req">필수</span></td><td>메타데이터-이미지 묶음 저장, 실패·재촬영도 기록</td><td class="src">DAT-05·06</td></tr>
-        <tr><td class="id">URS-046</td><td><span class="tag req">필수</span></td><td>임의 수정·삭제 불가, 정정은 사유·이력 남기는 방식만</td><td class="src">DAT-02</td></tr>
-      </table>
-    </section>
-
-    <section>
-      <h2><span class="num">2.6 ~ 2.7</span> SEC 보안·암호화 / BAK 백업·보존</h2>
-      <table>
-        <tr><th>ID</th><th>태그</th><th>요구사항</th><th>출처</th></tr>
-        <tr><td class="id">URS-050</td><td><span class="tag cfg">설정가능</span></td><td>저장 데이터 암호화(encryption at rest), 사용 여부 설정</td><td class="src">SEC-01</td></tr>
-        <tr><td class="id">URS-051</td><td><span class="tag req">필수</span></td><td>비밀번호 평문 금지, 안전한 해시 보관</td><td class="src">SEC-03</td></tr>
-        <tr><td class="id">URS-052</td><td><span class="tag cfg">설정가능</span></td><td>단독 PC·외부연결 차단·악성코드 보호 등 환경 보안</td><td class="src">SEC-04</td></tr>
-        <tr><td class="id">URS-060</td><td><span class="tag cfg">설정가능</span></td><td>백업 방식: 내장/외부경로/비활성</td><td class="src">BAK-01</td></tr>
-        <tr><td class="id">URS-061</td><td><span class="tag cond">조건부</span></td><td>내장 백업 사용 시 무결성·복구 검증</td><td class="src">BAK-02</td></tr>
-        <tr><td class="id">URS-062</td><td><span class="tag cfg">설정가능</span></td><td>보존기간 설정, 판독 가능한 표준 포맷 유지</td><td class="src">BAK-03</td></tr>
-        <tr><td class="id">URS-063</td><td><span class="tag req">필수</span></td><td>저장공간 임계치 경고</td><td class="src">BAK-04</td></tr>
-      </table>
-    </section>
-
-    <section>
-      <h2><span class="num">2.8 ~ 2.10</span> CFG 설정관리 / INT 연동 / NFR 운영</h2>
-      <table>
-        <tr><th>ID</th><th>태그</th><th>요구사항</th><th>출처</th></tr>
-        <tr><td class="id">URS-070</td><td><span class="tag req">필수</span></td><td>회사별 설정 프로필, 기능 on/off·값 정의</td><td class="src">아키텍처</td></tr>
-        <tr><td class="id">URS-071</td><td><span class="tag req">필수</span></td><td>설정 변경은 권한자만, 모든 변경 감사추적 기록</td><td class="src">설정우회</td></tr>
-        <tr><td class="id">URS-072</td><td><span class="tag req">필수</span></td><td>무결성 코어는 설정으로 비활성화 불가</td><td class="src">아키텍처</td></tr>
-        <tr><td class="id">URS-073</td><td><span class="tag req">필수</span></td><td>현재 설정 상태 조회·출력(configuration spec)</td><td class="src">회사별 IQ</td></tr>
-        <tr><td class="id">URS-080</td><td><span class="tag cfg">설정가능</span></td><td>LIMS 등 외부 연동 커넥터 구조, 미사용 시 비활성</td><td class="src">확장성</td></tr>
-        <tr><td class="id">URS-081</td><td><span class="tag cond">조건부</span></td><td>연동 사용 시 외부 전송 데이터 무결성 보장</td><td class="src">DI</td></tr>
-        <tr><td class="id">URS-090</td><td><span class="tag req">필수</span></td><td>감사추적 조회·필터·출력(정기 검토 지원)</td><td class="src">HUM-02</td></tr>
-        <tr><td class="id">URS-091</td><td><span class="tag req">필수</span></td><td>권한 기반 내보내기 통제(미인가 반출 방지)</td><td class="src">INF-02</td></tr>
-        <tr><td class="id">URS-092</td><td><span class="tag cfg">설정가능</span></td><td>사용자 교육용 도움말/가이드 제공</td><td class="src">HUM-01</td></tr>
-      </table>
-    </section>
-
-    <section>
-      <h2><span class="num">3</span> 요약</h2>
-      <div class="sumgrid">
-        <div class="sc"><div class="c">GEN</div><div class="n">3</div></div>
-        <div class="sc"><div class="c">AUTH</div><div class="n">7</div></div>
-        <div class="sc"><div class="c">ESIG</div><div class="n">4</div></div>
-        <div class="sc"><div class="c">CAP</div><div class="n">5</div></div>
-        <div class="sc"><div class="c">DAT</div><div class="n">7</div></div>
-        <div class="sc"><div class="c">SEC</div><div class="n">3</div></div>
-        <div class="sc"><div class="c">BAK</div><div class="n">4</div></div>
-        <div class="sc"><div class="c">CFG</div><div class="n">4</div></div>
-        <div class="sc"><div class="c">INT</div><div class="n">2</div></div>
-        <div class="sc"><div class="c">NFR</div><div class="n">3</div></div>
-        <div class="sc" style="border-top-color:var(--gold)"><div class="c">합계</div><div class="n">42</div></div>
-      </div>
-    </section>
-  </main>
-
-  <footer>PharmCam CSV 산출물 · URS-001 v1.0 · 동반: URS-002 적합성·일탈 검토 · 약어: URS, RBAC, e-signature, LIMS, config, DI</footer>
-</div>
-</body>
-</html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>URS-001 User Requirement Specification — 사용자 요구사항 명세 — PharmCam</title><style>:root{--navy:#0b1929;--navy-3:#1e3a5f;--gold:#c8a847;--gold-2:#e8d07a;--ink:#1c2b3a;--muted:#64748b;--line:#dde3ec;--soft:#f7f9fc;--panel:#fff;--draft:#92400e;--draft-bg:#fef3c7}*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif;background:#e8edf3;color:var(--ink);line-height:1.68}.page{width:min(1040px,calc(100% - 32px));margin:28px auto 48px;background:var(--panel);box-shadow:0 24px 64px rgba(11,25,41,.14)}header{background:var(--navy);padding:30px 36px 26px}.doc-id{font-size:13px;letter-spacing:3px;color:var(--gold);font-weight:800}header h1{font-size:24px;color:#fff;margin:8px 0 4px;font-weight:800}.sub{color:#9fc0db;font-size:14px}.badge-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}.badge{padding:4px 12px;border-radius:4px;font-size:12px;font-weight:700}.draft{background:var(--draft-bg);color:var(--draft)}.gold{background:rgba(200,168,71,.18);color:var(--gold-2)}main{padding:18px 36px 42px}h1{font-size:24px;color:var(--navy);margin:14px 0 16px}h2{font-size:17px;font-weight:800;color:var(--navy);margin:28px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--navy)}h3{font-size:15px;color:var(--navy-3);margin:20px 0 8px}p{margin:8px 0;font-size:14px}.note{background:var(--soft);border-left:4px solid var(--gold);padding:12px 16px;font-size:14px;margin:12px 0}ul{margin:8px 0 8px 4px;list-style:none}li{position:relative;padding:5px 0 5px 20px;font-size:14px;border-bottom:1px solid #edf1f6}li:before{content:"▸";position:absolute;left:0;color:var(--gold)}table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}th{background:var(--navy);color:#fff;font-weight:700;font-size:12px}tr:nth-child(even) td{background:var(--soft)}code{background:#eef2f7;padding:1px 5px;border-radius:3px}pre{background:var(--navy);color:#c8ddef;padding:16px 18px;border-radius:6px;font-size:13px;overflow-x:auto;margin:12px 0;line-height:1.5}hr{border:0;border-top:1px solid var(--line);margin:22px 0}footer{padding:18px 36px 28px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}</style></head><body><div class="page"><header><div class="doc-id">URS-001</div><h1>URS-001 User Requirement Specification — 사용자 요구사항 명세</h1><div class="sub">PharmCam — GMP 검체·시료 사진 기록 시스템</div><div class="badge-row"><span class="badge draft">v1.2 Draft</span><span class="badge gold">Record Query Control</span><span class="badge gold">CSV V-Model</span></div></header><main><h1>URS-001 — User Requirement Specification (사용자 요구사항 명세)</h1>
+<p><strong>시스템명:</strong> PharmCam — 검체·시료 사진 기록 시스템</p>
+<p><strong>문서 ID:</strong> URS-001</p>
+<p><strong>버전:</strong> 1.2 (Draft — 2026-06-08 변경안: URS-093 통제 인쇄, URS-094/095 기록 조회 통제 추가)</p>
+<p><strong>작성일:</strong> 2026-06-05</p>
+<p><strong>확정일:</strong> 2026-06-05 (v1.0) · 2026-06-08 (v1.1)</p>
+<p><strong>상위 문서:</strong> VP-001 (Validation Plan), RA-001 (Risk Assessment)</p>
+<div class="note"><strong>이 문서가 하는 일:</strong> "시스템이 반드시 해야 할 일"을 요구사항으로 정의한다.<br>각 요구사항은 RA의 위험 통제에서 도출되며(추적성), 이후 DQ(설계)·OQ/PQ(검증)로 연결된다.<br>PharmCam은 <strong>엄격한 GMP 코어 + 회사별 설정 유연성</strong> 원칙을 따른다(VP/RA 강의 참조).</div>
+<hr>
+<h2>1. 요구사항 분류 태그</h2>
+<table><thead><tr><th>태그</th><th>의미</th></tr></thead><tbody><tr><td><strong>[필수]</strong></td><td>무결성 코어. 항상 적용되며 설정으로 끌 수 없음</td></tr><tr><td><strong>[설정가능]</strong></td><td>회사별로 on/off 하거나 값을 조정할 수 있음</td></tr><tr><td><strong>[조건부]</strong></td><td>특정 선택 모듈을 사용할 때만 필수가 됨</td></tr></tbody></table>
+<div class="note">모든 요구사항은 출처 위험 ID(RA)를 명시한다. 추적성은 <code>docs/traceability_matrix.md</code> 참조.</div>
+<h2>2. 요구사항 목록</h2>
+<h3>2.1 GEN — 일반/시스템</h3>
+<table><thead><tr><th>URS ID</th><th>태그</th><th>요구사항</th><th>출처(RA)</th></tr></thead><tbody><tr><td>URS-001</td><td>[필수]</td><td>Windows 단독 PC에서 동작하는 데스크톱 앱이어야 한다</td><td>VP 범위</td></tr><tr><td>URS-002</td><td>[필수]</td><td>검체/시료 사진을 촬영해 메타데이터와 함께 전자기록으로 저장해야 한다</td><td>VP 개요</td></tr><tr><td>URS-003</td><td>[필수]</td><td>모든 GxP 기록은 ALCOA+ 원칙을 만족해야 한다</td><td>VP §4</td></tr></tbody></table>
+<h3>2.2 AUTH — 사용자 식별 · 접근통제</h3>
+<table><thead><tr><th>URS ID</th><th>태그</th><th>요구사항</th><th>출처(RA)</th></tr></thead><tbody><tr><td>URS-010</td><td>[필수]</td><td>개인 계정 로그인을 강제하고, 공용/공유 계정을 금지해야 한다</td><td>AUTH-01</td></tr><tr><td>URS-011</td><td>[필수]</td><td>작업자 식별(로그인) 없이는 촬영·저장이 불가해야 한다</td><td>AUTH-03</td></tr><tr><td>URS-012</td><td>[필수]</td><td>역할 기반 접근통제(RBAC) — 역할별 권한 분리, 기록 삭제·설정 변경은 권한자만</td><td>AUTH-02</td></tr><tr><td>URS-013</td><td>[설정가능]</td><td>미사용 시 자동 로그아웃(세션 타임아웃). 시간 값은 설정 가능</td><td>AUTH-04</td></tr><tr><td>URS-014</td><td>[필수]</td><td>계정 수명주기 관리 — 생성·비활성화, 퇴사자 계정 비활성화</td><td>AUTH-06</td></tr><tr><td>URS-015</td><td>[설정가능]</td><td>비밀번호 정책(길이·복잡도·만료·재사용 제한) 값을 설정 가능</td><td>SEC-02</td></tr><tr><td>URS-016</td><td>[설정가능]</td><td>로그인 실패 N회 시 계정 잠금. N은 설정 가능</td><td>SEC-05</td></tr></tbody></table>
+<h3>2.3 ESIG — 전자서명 *(도입 결정: 2026-06-05 포함)*</h3>
+<table><thead><tr><th>URS ID</th><th>태그</th><th>요구사항</th><th>출처(RA)</th></tr></thead><tbody><tr><td>URS-020</td><td>[설정가능]</td><td>전자서명 기능을 제공하고, 사용 여부·적용 행위(작성/검토/승인)를 설정 가능</td><td>AUTH-05</td></tr><tr><td>URS-021</td><td>[조건부]</td><td>전자서명은 서명자 아이디 + 서명 의미 + 일시를 포함해야 한다</td><td>AUTH-05 / Part 11</td></tr><tr><td>URS-022</td><td>[조건부]</td><td>전자서명은 해당 기록과 영구 연결되고 위조·재사용이 불가해야 한다</td><td>AUTH-05 / Part 11</td></tr><tr><td>URS-023</td><td>[조건부]</td><td>서명 시 사용자 재인증(비밀번호 재입력 등)을 요구해야 한다</td><td>AUTH-05 / Part 11</td></tr></tbody></table>
+<h3>2.4 CAP — 촬영 · 메타데이터</h3>
+<table><thead><tr><th>URS ID</th><th>태그</th><th>요구사항</th><th>출처(RA)</th></tr></thead><tbody><tr><td>URS-030</td><td>[필수]</td><td>시험번호·작업자·일시를 기록하고, 필수 항목 미입력 시 저장을 차단해야 한다</td><td>DAT-01</td></tr><tr><td>URS-031</td><td>[설정가능]</td><td>필수 메타데이터 항목 구성(예: 검체ID·배치번호 추가)을 회사별 설정 가능</td><td>DAT-01</td></tr><tr><td>URS-032</td><td>[필수]</td><td>촬영 후 미리보기 및 재촬영 기능을 제공해야 한다</td><td>SW-01</td></tr><tr><td>URS-033</td><td>[필수]</td><td>저장 성공 여부를 검증하고 실패 시 명확히 알려야 한다(성공 오표시 금지)</td><td>SW-02</td></tr><tr><td>URS-034</td><td>[필수]</td><td>촬영 대상 시험정보를 화면에 표시해 오촬영을 예방해야 한다</td><td>SW-03</td></tr></tbody></table>
+<h3>2.5 DAT — 데이터 무결성 · 감사추적</h3>
+<table><thead><tr><th>URS ID</th><th>태그</th><th>요구사항</th><th>출처(RA)</th></tr></thead><tbody><tr><td>URS-040</td><td>[필수]</td><td>모든 행위(촬영·조회·수정·삭제·로그인·설정변경)에 감사추적(누가·언제·무엇을·이전/이후값) 기록. <strong>행위자·대상 사용자는 감사추적 조회·출력 시 사람이 식별 가능한 형태(사용자명, 내부 ID 병기)로 표시</strong>되어야 한다(ALCOA+ Legible)</td><td>DAT-02</td></tr><tr><td>URS-041</td><td>[필수]</td><td>감사추적은 append-only이며 사용자가 수정·삭제할 수 없어야 한다</td><td>DAT-02</td></tr><tr><td>URS-042</td><td>[필수]</td><td>감사추적 기능은 비활성화할 수 없어야 한다(설정 대상 아님)</td><td>DAT-07</td></tr><tr><td>URS-043</td><td>[필수]</td><td>원본 이미지는 무결성 검증값(해시)과 함께 읽기전용으로 보관해야 한다</td><td>DAT-03</td></tr><tr><td>URS-044</td><td>[필수]</td><td>기록 일시는 신뢰할 수 있는 시각 출처를 사용하고, 시스템 시간 변경을 감지·기록</td><td>DAT-04, INF-01</td></tr><tr><td>URS-045</td><td>[필수]</td><td>메타데이터와 이미지를 묶어 저장하고, 중도 실패·재촬영도 기록해야 한다</td><td>DAT-05, DAT-06</td></tr><tr><td>URS-046</td><td>[필수]</td><td>기록은 임의 수정·삭제 불가하며, 정정은 사유와 이력을 남기는 방식으로만 가능</td><td>DAT-02</td></tr><tr><td>URS-047</td><td>[설정가능]</td><td>원본 이미지·데이터의 <strong>저장 위치(경로)를 지정·조회</strong>할 수 있어야 한다(<strong>로컬 경로로 한정</strong> — 네트워크/공유 폴더 제외). 기본값을 제공하고, 변경은 권한자(관리자)만 가능하며 <strong>변경 이력(이전 경로→새 경로)을 감사추적에 남긴다</strong>. 위치 변경 시 기존 데이터는 자동 이전하지 않으며, 기록별 원본 경로가 보존되어 계속 접근·검증 가능해야 한다. <strong>지정 위치에서도 무결성 보호(읽기전용·해시·감사추적)는 동일하게 강제</strong>된다(보호는 비활성화 불가). 검토·폴더감사·백업/복원 검증을 위해 현재 저장 위치를 화면에서 확인할 수 있어야 한다</td><td>DAT-08 (신규)</td></tr></tbody></table>
+<h3>2.6 SEC — 보안 · 암호화</h3>
+<table><thead><tr><th>URS ID</th><th>태그</th><th>요구사항</th><th>출처(RA)</th></tr></thead><tbody><tr><td>URS-050</td><td>[설정가능]</td><td>저장 데이터(이미지·메타데이터)를 암호화 보관(encryption at rest). 사용 여부 설정</td><td>SEC-01</td></tr><tr><td>URS-051</td><td>[필수]</td><td>비밀번호는 평문 저장·전송 금지, 안전한 해시로 보관해야 한다</td><td>SEC-03</td></tr><tr><td>URS-052</td><td>[설정가능]</td><td>단독 PC·외부연결 차단·악성코드 보호 등 환경 보안 요건</td><td>SEC-04</td></tr></tbody></table>
+<h3>2.7 BAK — 백업 · 복구 · 보존</h3>
+<table><thead><tr><th>URS ID</th><th>태그</th><th>요구사항</th><th>출처(RA)</th></tr></thead><tbody><tr><td>URS-060</td><td>[설정가능]</td><td>백업 방식 선택: 내장 백업 / 외부(회사 자체) 경로 지정 / 내장 백업 비활성</td><td>BAK-01</td></tr><tr><td>URS-061</td><td>[조건부]</td><td>내장 백업 사용 시 백업 무결성·복구 가능성을 검증할 수 있어야 한다</td><td>BAK-02</td></tr><tr><td>URS-062</td><td>[설정가능]</td><td>보존기간을 설정 가능하고, 보존기간 동안 판독 가능한 표준 포맷으로 유지</td><td>BAK-03</td></tr><tr><td>URS-063</td><td>[필수]</td><td>저장공간 임계치 도달 시 경고해야 한다</td><td>BAK-04</td></tr></tbody></table>
+<h3>2.8 CFG — 설정 관리 *(유연성 가드레일)*</h3>
+<table><thead><tr><th>URS ID</th><th>태그</th><th>요구사항</th><th>출처(RA)</th></tr></thead><tbody><tr><td>URS-070</td><td>[필수]</td><td>회사별 설정 프로필(configuration)을 가지며, 설정 가능 기능의 on/off·값을 정의한다</td><td>아키텍처 원칙</td></tr><tr><td>URS-071</td><td>[필수]</td><td>설정 변경은 권한자(관리자)만 가능하고, 모든 변경은 감사추적에 기록되어야 한다</td><td>신규 위험(설정 우회)</td></tr><tr><td>URS-072</td><td>[필수]</td><td>무결성 코어(감사추적·식별·원본 보호·신뢰 시각·필수 메타데이터)는 설정으로 비활성화 불가</td><td>아키텍처 원칙</td></tr><tr><td>URS-073</td><td>[필수]</td><td>현재 적용된 설정 상태를 조회·출력할 수 있어야 한다(configuration spec, 검증·감사용). <strong>역할별 권한 매핑(RBAC 매트릭스)도 읽기전용으로 조회</strong>할 수 있어야 한다(권한 분리 검증·감사용)</td><td>회사별 IQ/OQ</td></tr></tbody></table>
+<h3>2.9 INT — 연동 · 확장성</h3>
+<table><thead><tr><th>URS ID</th><th>태그</th><th>요구사항</th><th>출처(RA)</th></tr></thead><tbody><tr><td>URS-080</td><td>[설정가능]</td><td>LIMS 등 외부 시스템 연동 인터페이스(커넥터) 구조를 제공, 미사용 시 비활성</td><td>확장성</td></tr><tr><td>URS-081</td><td>[조건부]</td><td>연동 사용 시 외부 전송 데이터의 무결성(정확한 전송·확인)을 보장해야 한다</td><td>DI</td></tr></tbody></table>
+<h3>2.10 NFR — 운영 · 비기능</h3>
+<table><thead><tr><th>URS ID</th><th>태그</th><th>요구사항</th><th>출처(RA)</th></tr></thead><tbody><tr><td>URS-090</td><td>[필수]</td><td>정기 검토를 위해 감사추적을 조회·필터·출력할 수 있어야 한다</td><td>HUM-02</td></tr><tr><td>URS-091</td><td>[필수]</td><td>미인가 반출 방지를 위한 내보내기 통제(권한 기반)</td><td>INF-02</td></tr><tr><td>URS-092</td><td>[설정가능]</td><td>사용자 교육을 위한 도움말/가이드를 제공한다</td><td>HUM-01</td></tr><tr><td>URS-093</td><td>[필수]</td><td>PharmCam에서 생성된 전자기록이 원본이며, 종이로 사용할 경우에는 PharmCam의 <strong>통제 인쇄(controlled printout)</strong> 기능으로 출력한 문서만 공식 출력본으로 인정한다. 인쇄 전 미리보기에는 최소한 <strong>User ID, 시험번호, 촬영일시, 기록 ID, 파일명</strong>이 표시되어야 하며, 사용자는 이를 확인한 뒤 인쇄해야 한다. 인쇄 행위는 누가·언제·어떤 기록을 인쇄했는지 감사추적에 기록되어야 한다. 저장 폴더의 이미지 파일을 OS 또는 외부 프로그램으로 직접 인쇄한 출력물은 PharmCam 통제·감사추적·메타데이터 확인을 거치지 않았으므로 공식 출력본으로 보지 않는다</td><td>DAT-09</td></tr><tr><td>URS-094</td><td>[필수]</td><td>기록 목록은 날짜/기간으로 필터링할 수 있어야 하며, 기록확인 탭의 기본 조회 범위는 <strong>오늘 날짜</strong>로 제한되어야 한다. 사용자는 필요 시 허용된 권한 범위 내에서 과거 날짜 또는 기간을 선택해 조회할 수 있어야 한다</td><td>DAT-10</td></tr><tr><td>URS-095</td><td>[필수]</td><td>기록 조회 범위는 역할 기반으로 통제되어야 한다. operator는 본인이 촬영한 기록만 조회할 수 있어야 하며, reviewer/admin은 전체 기록 조회와 사용자별 필터링이 가능해야 한다. 이 통제는 Renderer 표시 제어가 아니라 Main 프로세스의 조회 쿼리에서 강제되어야 한다</td><td>DAT-10, AUTH-02</td></tr></tbody></table>
+<h2>3. 요약</h2>
+<table><thead><tr><th>카테고리</th><th>요구사항 수</th></tr></thead><tbody><tr><td>GEN 일반</td><td>3</td></tr><tr><td>AUTH 접근통제</td><td>7</td></tr><tr><td>ESIG 전자서명</td><td>4</td></tr><tr><td>CAP 촬영·메타데이터</td><td>5</td></tr><tr><td>DAT 무결성·감사추적</td><td>8</td></tr><tr><td>SEC 보안·암호화</td><td>3</td></tr><tr><td>BAK 백업·보존</td><td>4</td></tr><tr><td>CFG 설정 관리</td><td>4</td></tr><tr><td>INT 연동·확장</td><td>2</td></tr><tr><td>NFR 운영</td><td>6</td></tr><tr><td><strong>합계</strong></td><td><strong>46</strong></td></tr></tbody></table>
+<ul><li>[필수] 무결성 코어 요구사항은 모든 배포에서 검증 대상.</li><li>[설정가능]/[조건부] 요구사항은 회사별 설정 명세에 따라 적용 범위가 정해지며, 해당 설정 상태로 IQ/OQ 검증한다.</li></ul>
+<h2>4. 승인 (Approval)</h2>
+<table><thead><tr><th>역할</th><th>성명</th><th>서명</th><th>일자</th></tr></thead><tbody><tr><td>System Owner</td><td><em>(승인)</em></td><td>✔</td><td>2026-06-08</td></tr><tr><td>QA</td><td><em>(승인)</em></td><td>✔</td><td>2026-06-08</td></tr></tbody></table>
+<hr>
+<h2>부록 — 약어</h2>
+<p>URS(User Requirement Specification), RBAC(Role-Based Access Control),</p>
+<p>e-signature(전자서명), encryption at rest(저장 데이터 암호화),</p>
+<p>LIMS(Laboratory Information Management System, 실험실 정보관리시스템),</p>
+<p>config(configuration, 설정 프로필), DI(Data Integrity).</p></main><footer>PharmCam CSV 산출물 · URS-001 · HTML 재생성: 2026-06-08 · Draft</footer></div></body></html>

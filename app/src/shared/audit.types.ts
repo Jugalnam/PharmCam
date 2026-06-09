@@ -41,3 +41,8 @@ export interface AuditListItem extends AuditEntry {
 }
 
 export type AuditListResult = AuditListItem[]
+
+export interface AuditUserOption {
+  id: number
+  username: string
+}

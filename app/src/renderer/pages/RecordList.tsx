@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { RecordDetail, RecordListItem } from '../../shared/record.types'
+import type { RecordDetail, RecordFilter, RecordListItem, RecordUserOption } from '../../shared/record.types'
 import type { SessionUser } from '../../shared/auth.types'
 import type { EsignStatus, SignatureView } from '../../shared/sign.types'
 import type { SignatureMeaning } from '../../shared/types'
@@ -14,9 +14,29 @@ const MEANING_LABELS: Record<SignatureMeaning, string> = {
   approve: '승인 (approve)'
 }
 
+function todayLocalDate(): string {
+  const d = new Date()
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function dayStartIso(date: string): string | undefined {
+  return date ? new Date(`${date}T00:00:00`).toISOString() : undefined
+}
+
+function dayEndIso(date: string): string | undefined {
+  return date ? new Date(`${date}T23:59:59.999`).toISOString() : undefined
+}
+
 export default function RecordList({ user }: RecordListProps): JSX.Element {
   const [records, setRecords] = useState<RecordListItem[]>([])
   const [selected, setSelected] = useState<RecordDetail | null>(null)
+  const [recordUsers, setRecordUsers] = useState<RecordUserOption[]>([])
+  const [fromDate, setFromDate] = useState(todayLocalDate())
+  const [toDate, setToDate] = useState(todayLocalDate())
+  const [operatorFilter, setOperatorFilter] = useState('')
   const [signatures, setSignatures] = useState<SignatureView[]>([])
   const [esignStatus, setEsignStatus] = useState<EsignStatus | null>(null)
   const [signMeaning, setSignMeaning] = useState<SignatureMeaning>('approve')
@@ -24,22 +44,47 @@ export default function RecordList({ user }: RecordListProps): JSX.Element {
   const [signError, setSignError] = useState<string | null>(null)
   const [signSuccess, setSignSuccess] = useState<string | null>(null)
   const [signing, setSigning] = useState(false)
+  const [printPreviewHtml, setPrintPreviewHtml] = useState<string | null>(null)
+  const [printError, setPrintError] = useState<string | null>(null)
+  const [printSuccess, setPrintSuccess] = useState<string | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
+  const [printing, setPrinting] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const canSignReviewApprove = user.role === 'reviewer' || user.role === 'admin'
+  const canFilterByUser = user.role === 'reviewer' || user.role === 'admin'
 
   useEffect(() => {
     loadRecords()
     window.api.sign.getStatus().then(setEsignStatus).catch(() => {})
+    if (canFilterByUser) {
+      window.api.record.listUsers().then(setRecordUsers).catch(() => {})
+    }
   }, [])
 
-  async function loadRecords(): Promise<void> {
+  async function loadRecords(
+    override?: { fromDate?: string; toDate?: string; operatorFilter?: string }
+  ): Promise<void> {
     setLoading(true)
     setError(null)
     try {
-      const data = await window.api.record.list({ limit: 50 })
+      const effectiveFrom = override?.fromDate ?? fromDate
+      const effectiveTo = override?.toDate ?? toDate
+      const effectiveOperator = override?.operatorFilter ?? operatorFilter
+      const filter: RecordFilter = {
+        fromTs: dayStartIso(effectiveFrom),
+        toTs: dayEndIso(effectiveTo),
+        limit: 200
+      }
+      if (canFilterByUser && effectiveOperator) {
+        filter.operatorId = Number(effectiveOperator)
+      }
+      const data = await window.api.record.list(filter)
       setRecords(data)
+      if (selected && !data.some((r) => r.id === selected.id)) {
+        setSelected(null)
+      }
     } catch {
       setError('기록 목록을 불러올 수 없습니다.')
     } finally {
@@ -51,6 +96,9 @@ export default function RecordList({ user }: RecordListProps): JSX.Element {
     setSignError(null)
     setSignSuccess(null)
     setSignPassword('')
+    setPrintPreviewHtml(null)
+    setPrintError(null)
+    setPrintSuccess(null)
     try {
       const [detail, sigs] = await Promise.all([
         window.api.record.get(id),
@@ -60,6 +108,55 @@ export default function RecordList({ user }: RecordListProps): JSX.Element {
       setSignatures(sigs)
     } catch {
       setError('기록 상세를 불러올 수 없습니다.')
+    }
+  }
+
+  async function handleOpenPrintPreview(): Promise<void> {
+    if (!selected) {
+      return
+    }
+
+    setPreviewLoading(true)
+    setPrintError(null)
+    setPrintSuccess(null)
+
+    try {
+      const result = await window.api.record.getPrintPreview(selected.id)
+      if (result.ok && result.html) {
+        setPrintPreviewHtml(result.html)
+      } else {
+        setPrintError(result.error ?? '인쇄 미리보기를 생성할 수 없습니다.')
+      }
+    } catch (err) {
+      setPrintError(
+        err instanceof Error ? err.message : '인쇄 미리보기 생성 중 오류가 발생했습니다.'
+      )
+    } finally {
+      setPreviewLoading(false)
+    }
+  }
+
+  async function handleControlledPrint(): Promise<void> {
+    if (!selected) {
+      return
+    }
+
+    setPrinting(true)
+    setPrintError(null)
+    setPrintSuccess(null)
+
+    try {
+      const result = await window.api.record.printControlled(selected.id)
+      if (result.ok) {
+        setPrintSuccess(`통제 인쇄 기록 완료 (Print Job ID: ${result.printJobId})`)
+        setPrintPreviewHtml(null)
+      } else {
+        setPrintError(result.error ?? '인쇄가 실패하거나 취소되었습니다.')
+      }
+    } catch (err) {
+      setPrintError(err instanceof Error ? err.message : '인쇄 처리 중 오류가 발생했습니다.')
+    } finally {
+      setPrinting(false)
     }
   }
 
@@ -102,10 +199,68 @@ export default function RecordList({ user }: RecordListProps): JSX.Element {
     <div className="record-list-page">
       <div className="list-header">
         <h2>촬영 기록</h2>
-        <button type="button" className="secondary-btn" onClick={loadRecords}>
+        <button type="button" className="secondary-btn" onClick={() => loadRecords()}>
           새로고침
         </button>
       </div>
+
+      <div className="record-filters">
+        <label>
+          시작일
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+          />
+        </label>
+        <label>
+          종료일
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+          />
+        </label>
+        {canFilterByUser && (
+          <label>
+            작업자
+            <select
+              value={operatorFilter}
+              onChange={(e) => setOperatorFilter(e.target.value)}
+            >
+              <option value="">전체 작업자</option>
+              {recordUsers.map((recordUser) => (
+                <option key={recordUser.id} value={recordUser.id}>
+                  {recordUser.username} (#{recordUser.id})
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        <button type="button" onClick={() => loadRecords()} disabled={loading}>
+          조회
+        </button>
+        <button
+          type="button"
+          className="secondary-btn"
+          onClick={() => {
+            const today = todayLocalDate()
+            setFromDate(today)
+            setToDate(today)
+            setOperatorFilter('')
+            loadRecords({ fromDate: today, toDate: today, operatorFilter: '' })
+          }}
+          disabled={loading}
+        >
+          오늘
+        </button>
+      </div>
+
+      <p className="record-scope-hint">
+        {user.role === 'operator'
+          ? '작업자는 본인이 촬영한 기록만 조회할 수 있습니다.'
+          : '검토자/관리자는 전체 기록 조회와 작업자별 필터를 사용할 수 있습니다.'}
+      </p>
 
       {loading && <p className="status-inline">불러오는 중…</p>}
       {error && <p className="login-error">{error}</p>}
@@ -255,7 +410,67 @@ export default function RecordList({ user }: RecordListProps): JSX.Element {
             )}
           </div>
 
+          <div className="controlled-print-section">
+            <h4>통제 인쇄</h4>
+            <p className="esign-status">
+              PharmCam 통제 인쇄 기능으로 출력한 문서만 공식 출력본으로 인정됩니다.
+            </p>
+            <button
+              type="button"
+              className="secondary-btn"
+              onClick={handleOpenPrintPreview}
+              disabled={previewLoading}
+            >
+              {previewLoading ? '미리보기 생성 중…' : '인쇄 미리보기'}
+            </button>
+            {printError && <p className="login-error">{printError}</p>}
+            {printSuccess && <p className="save-success">{printSuccess}</p>}
+          </div>
+
           <p className="detail-hint">조회자: {user.username}</p>
+        </div>
+      )}
+
+      {printPreviewHtml && selected && (
+        <div className="modal-backdrop" role="dialog" aria-modal="true">
+          <div className="print-modal">
+            <div className="print-modal-header">
+              <div>
+                <h3>통제 인쇄 미리보기</h3>
+                <p>기록 #{selected.id} 공식 출력본</p>
+              </div>
+              <button
+                type="button"
+                className="text-btn"
+                onClick={() => setPrintPreviewHtml(null)}
+                disabled={printing}
+              >
+                닫기
+              </button>
+            </div>
+            <iframe
+              className="print-preview-frame"
+              title={`기록 #${selected.id} 통제 인쇄 미리보기`}
+              srcDoc={printPreviewHtml}
+            />
+            <div className="print-modal-actions">
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={() => setPrintPreviewHtml(null)}
+                disabled={printing}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={handleControlledPrint}
+                disabled={printing}
+              >
+                {printing ? '인쇄 처리 중…' : '공식 출력본 인쇄'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

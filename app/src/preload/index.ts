@@ -31,7 +31,10 @@ contextBridge.exposeInMainWorld('api', {
     list: (filter?: RecordFilter) => ipcRenderer.invoke('record:list', filter),
     get: (id: number) => ipcRenderer.invoke('record:get', id),
     correct: (id: number, input: CorrectRecordInput) =>
-      ipcRenderer.invoke('record:correct', id, input)
+      ipcRenderer.invoke('record:correct', id, input),
+    listUsers: () => ipcRenderer.invoke('record:listUsers'),
+    getPrintPreview: (id: number) => ipcRenderer.invoke('record:getPrintPreview', id),
+    printControlled: (id: number) => ipcRenderer.invoke('record:printControlled', id)
   },
   config: {
     get: (key: string) => ipcRenderer.invoke('config:get', key),
@@ -63,6 +66,7 @@ contextBridge.exposeInMainWorld('api', {
   },
   audit: {
     list: (filter?: AuditFilter) => ipcRenderer.invoke('audit:list', filter),
+    listUsers: () => ipcRenderer.invoke('audit:listUsers'),
     verifyChain: () => ipcRenderer.invoke('audit:verifyChain'),
     export: (request: ExportRequest) => ipcRenderer.invoke('audit:export', request)
   },

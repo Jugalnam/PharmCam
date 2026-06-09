@@ -12,6 +12,7 @@ import { CryptoService } from './services/crypto.service'
 import { BackupService } from './services/backup.service'
 import { LimsConnector } from './services/lims.connector'
 import { SystemService } from './services/system.service'
+import { PrintService } from './services/print.service'
 import { registerIpcHandlers } from './ipc/handlers'
 
 let mainWindow: BrowserWindow | null = null
@@ -109,6 +110,13 @@ app.whenReady().then(async () => {
     cryptoService,
     timeService
   )
+  const printService = new PrintService(
+    db,
+    auditService,
+    integrityService,
+    timeService,
+    cryptoService
+  )
   registerIpcHandlers(
     auditService,
     authService,
@@ -118,7 +126,8 @@ app.whenReady().then(async () => {
     backupService,
     cryptoService,
     limsConnector,
-    systemService
+    systemService,
+    printService
   )
   createWindow()
 
