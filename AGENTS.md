@@ -46,7 +46,7 @@ PQ  (성능 적격성 평가)       docs/07_PQ
 [✓] RA-001   v1.1 Approved (2026-06-08)  (DAT-08 저장위치 위험 추가)
 [✓] URS-001  v1.1 Approved (2026-06-08)  (URS-047 저장위치 신설, URS-040·073 문구보강)
 [✓] DQ-001   v1.1 Approved (2026-06-08)  (D-11 저장위치 설계 추가)
-[△] RA/URS/DQ v1.2 Draft (2026-06-08)  (DAT-09/URS-093/D-12 통제 인쇄, DAT-10/URS-094·095/D-13 기록 조회 통제 추가안)
+[✓] RA/URS/DQ v1.2 Approved (2026-06-08)  (DAT-09/URS-093/D-12 통제 인쇄, DAT-10/URS-094·095/D-13 기록 조회 통제)
 [✓] app/ 구현 완료         (M1~M8 + 배포준비) + 2026-06-08 세션 추가구현(아래)
 [ ] IQ  ← 다음 단계        (자가점검 화면이 IQ 검증 항목과 연결됨)
 [ ] OQ / PQ
@@ -124,7 +124,7 @@ PQ  (성능 적격성 평가)       docs/07_PQ
 1. **문서 마무리 잔여**: URS/RA/DQ v1.1 Approved·추적성 갱신 完(2026-06-08). 남은 것 = (규칙)v1.1 변경분 **HTML 변환·강의자료 생성** + **OQ-TC** 작성 + 추적성 OQ열 + **git 커밋(이번 세션 전부 미커밋)**.
 2. **A-1 카메라 선택/전환**: 현재 `facingMode:'environment'` 고정 → 신규 **URS-035[설정가능]+RA+DQ** 필요(미작성).
 3. URS-092 도움말 미구현 / 기록상세에 커스텀 meta 표시 후속.
-4. 통제 인쇄 기능은 구현·수동확인 완료. 기록 조회 통제는 구현·typecheck 완료. 남은 것 = v1.2 문서 승인 여부 결정, dev 수동 확인, OQ 시험 항목 작성, 패키징 빌드 재생성.
+4. 통제 인쇄·기록 조회 통제 구현 완료. **v1.2 문서 Approved 확정(2026-06-08)**, 회귀 7모듈 PASS·typecheck 통과. 남은 것 = OQ-001 v1.2 확장+실행, 패키징 빌드 재생성, 인쇄 다이얼로그 GUI 최종 spot-check.
 
 **배포(테스트용):** `npm run build` → `release/` 삭제 → `npx electron-builder --win portable`
 (rcedit "Unable to commit changes"=Defender 잠금 추정 → release 정리+재시도로 해결).
@@ -208,9 +208,14 @@ PharmCam은 **GMP를 엄격하게 적용하되, 회사마다 기능을 커스터
 | `npm install` | 의존성 설치 (네이티브 모듈 자동 재빌드) |
 | `npm run dev` | 개발 실행 (기능 확인·OQ 준비는 이걸로 충분) |
 | `npm run build` | electron-vite 빌드 (`out/`) |
+| `npm run typecheck` | **타입 검사(main+renderer 두 tsconfig). 커밋 전 1차 검증은 이것** |
 | `npm run package` | 빌드 + electron-builder Windows 설치본 (`release/`) |
-| `npm run test:*` | 모듈별 개발자 테스트 (audit/auth/record/config/sign/audit-export/m8) |
+| `npm run test:<모듈>` | 모듈별 개발자 테스트 (audit/auth/record/config/sign/audit-export/m8) |
 
+- **Node PATH(이 PC):** `npm`이 PATH에 없음 → 모든 npm 명령 앞에 프리픽스 필요:
+  `$env:Path="C:\Users\User\AppData\Local\Microsoft\WinGet\Packages\OpenJS.NodeJS.22_Microsoft.Winget.Source_8wekyb3d8bbwe\node-v22.22.3-win-x64;"+$env:Path`
+- **테스트 구조:** Jest 등 프레임워크 아님. 각 `test:*`는 `app/scripts/test-*.ts`를 electron(`ELECTRON_RUN_AS_NODE`)+tsx로 실행하는 **독립 스크립트**(in-memory SQLite, PASS/FAIL 콘솔 출력). **파일 내 단일 테스트 단위 실행은 없음** — 모듈 스크립트를 통째로 돌린다. config 항목 수가 바뀌면 `test-config.ts` 기대값(현재 18)도 함께 갱신.
+- **포터블 빌드 주의:** `npx electron-builder --win portable` 시 rcedit "Unable to commit changes"(Defender 잠금 추정) 발생 가능 → `release/` 삭제 후 재시도로 해결.
 - **패키징 전제(빌드 PC 1회):** VS 2022 Build Tools(C++ 워크로드) + Python 필요 — 네이티브 모듈(argon2·better-sqlite3) 컴파일용. 운영 PC엔 불필요. (`app/README.md` 참조)
 - 데이터 위치: `%APPDATA%/pharmcam/data/` (DB·이미지·암호화 키)
 - 초기 계정: `admin / Admin123!` (최초 로그인 시 비밀번호 강제 변경)

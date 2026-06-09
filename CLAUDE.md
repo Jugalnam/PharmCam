@@ -46,6 +46,7 @@ PQ  (성능 적격성 평가)       docs/07_PQ
 [✓] RA-001   v1.1 Approved (2026-06-08)  (DAT-08 저장위치 위험 추가)
 [✓] URS-001  v1.1 Approved (2026-06-08)  (URS-047 저장위치 신설, URS-040·073 문구보강)
 [✓] DQ-001   v1.1 Approved (2026-06-08)  (D-11 저장위치 설계 추가)
+[✓] RA/URS/DQ v1.2 Approved (2026-06-08)  (DAT-09/URS-093/D-12 통제 인쇄, DAT-10/URS-094·095/D-13 기록 조회 통제)
 [✓] app/ 구현 완료         (M1~M8 + 배포준비) + 2026-06-08 세션 추가구현(아래)
 [ ] IQ  ← 다음 단계        (자가점검 화면이 IQ 검증 항목과 연결됨)
 [ ] OQ / PQ
@@ -59,7 +60,7 @@ PQ  (성능 적격성 평가)       docs/07_PQ
 **환경(새 PC):** Node 22.22.3(winget OpenJS.NodeJS.22) — PATH 미등록이라 PowerShell 앞에
 `$env:Path="C:\Users\User\AppData\Local\Microsoft\WinGet\Packages\OpenJS.NodeJS.22_Microsoft.Winget.Source_8wekyb3d8bbwe\node-v22.22.3-win-x64;"+$env:Path` 프리픽스 필요. VS BuildTools+ClangCL 설치됨.
 
-**구현 완료(코드 반영·typecheck/test 통과, 단 git 미커밋):**
+**구현 완료(코드 반영·typecheck/test 통과 — git 커밋 b83bfdc):**
 - 재촬영 버그 수정(`Capture.tsx` video 항상 마운트) URS-032
 - 설정 입력 위젯화(드롭다운/체크박스/숫자) `Settings.tsx`
 - 계정 관리 UI `UserManagement.tsx`(생성/비활성화) URS-014
@@ -69,10 +70,16 @@ PQ  (성능 적격성 평가)       docs/07_PQ
 - **메타데이터 항목 구성** `metadata.fields` config — 촬영화면 동적입력+필수검증, 설정탭 "촬영 메타데이터 항목" 편집, `metadata:*` IPC. URS-031
 - config 시드 `INSERT OR IGNORE`(멱등) → 기존 DB에도 신규키 추가. **config 18개**(테스트 기대값 18).
 
+**추가 세션 — 2026-06-08 (Codex): 통제 인쇄·기록 조회 통제·감사 필터** *(상세 로그는 `AGENTS.md`, git 커밋 aa975e7)*
+- **통제 인쇄(URS-093/D-12)**: `print_jobs` 테이블(schema v4), `PrintService`(인쇄 전 원본 해시검증), 미리보기=인쇄 동일 템플릿(`print-template.ts`), `record:getPrintPreview/printControlled` IPC, 기록상세 통제인쇄 UI, `print`/`print_failed` 감사추적. `webContents.print` 미동작 → `window.print()` 방식. **인쇄 제외 결정 철회됨.**
+- **기록 조회 통제(URS-094/095/D-13)**: 기본 오늘 조회 + 날짜 필터, **operator 본인기록 한정(Main 강제)**, reviewer/admin 전체+작업자필터, `record:listUsers` IPC.
+- **감사 필터 UX**: 사용자명 드롭다운(`audit:listUsers`), 날짜→일범위 변환.
+- 산출물: RA/URS/DQ **HTML 재생성**, **OQ-001** 시험서(v0.1 Draft, 범위=v1.1), **사용자 매뉴얼 Beta**, **강의 05**.
+
 **미완료/다음 작업(우선순위순):**
-1. **문서 마무리 잔여**: URS/RA/DQ v1.1 Approved·추적성 갱신 完(2026-06-08). 남은 것 = (규칙)v1.1 변경분 **HTML 변환·강의자료 생성** + **OQ-TC** 작성 + 추적성 OQ열 + **git 커밋(이번 세션 전부 미커밋)**.
+1. **OQ 확장·실행**: RA/URS/DQ **v1.2 Approved 完(2026-06-08)** + 회귀 7모듈 PASS·typecheck 통과·스키마 v4 정상. 남은 것 = **OQ-001(현 v0.1, 범위=v1.1)을 v1.2(인쇄·조회통제)까지 확장 + 실행** + 추적성 OQ열 + v1.2 HTML 재생성 확인.
 2. **A-1 카메라 선택/전환**: 현재 `facingMode:'environment'` 고정 → 신규 **URS-035[설정가능]+RA+DQ** 필요(미작성).
-3. URS-092 도움말 미구현 / 기록상세에 커스텀 meta 표시 후속 / 인쇄는 의식적 제외(저장위치 대체).
+3. URS-092 도움말 미구현 / 기록상세에 커스텀 meta 표시 후속. (인쇄는 통제 인쇄로 도입됨.)
 
 **배포(테스트용):** `npm run build` → `release/` 삭제 → `npx electron-builder --win portable`
 (rcedit "Unable to commit changes"=Defender 잠금 추정 → release 정리+재시도로 해결).
