@@ -744,6 +744,47 @@ body {
   color: #e2e8f0;
 }
 
+.user-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.1rem 1.25rem;
+}
+
+.user-modal-body label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+
+.user-modal-body input,
+.user-modal-body select {
+  padding: 0.5rem 0.6rem;
+  background: #0f172a;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  color: #e2e8f0;
+  font-size: 0.9rem;
+}
+
+.camera-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.6rem;
+}
+
+.camera-controls select {
+  flex: 1;
+  padding: 0.4rem 0.5rem;
+  background: #0f172a;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  color: #e2e8f0;
+}
+
 .audit-view-page {
   width: 100%;
 }

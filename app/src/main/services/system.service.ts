@@ -30,6 +30,12 @@ export class SystemService {
   ) {}
 
   private dataDir(): string {
+    // 저장 위치 설정(storage.root, D-11)을 반영 — 비어 있으면 기본 경로.
+    // RecordService.getStorageRoot()와 동일 규칙. 환경점검의 폴더 표시·쓰기검사가 실제 저장 위치를 따른다.
+    const configured = this.configService.get('storage.root')
+    if (configured && configured.trim()) {
+      return configured.trim()
+    }
     return join(app.getPath('userData'), 'data')
   }
 

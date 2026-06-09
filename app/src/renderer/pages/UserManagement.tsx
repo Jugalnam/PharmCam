@@ -39,8 +39,10 @@ export default function UserManagement({ user }: UserManagementProps): JSX.Eleme
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [role, setRole] = useState<UserRole>('operator')
   const [submitting, setSubmitting] = useState(false)
+  const [showCreate, setShowCreate] = useState(false)
 
   useEffect(() => {
     loadUsers()
@@ -70,12 +72,31 @@ export default function UserManagement({ user }: UserManagementProps): JSX.Eleme
     }
   }
 
+  function openCreate(): void {
+    setUsername('')
+    setPassword('')
+    setConfirmPassword('')
+    setRole('operator')
+    setError(null)
+    setMessage(null)
+    setShowCreate(true)
+  }
+
+  function closeCreate(): void {
+    setShowCreate(false)
+    setError(null)
+  }
+
   async function handleCreate(e: FormEvent): Promise<void> {
     e.preventDefault()
     setError(null)
     setMessage(null)
     if (!username.trim() || !password) {
-      setError('사용자명과 초기 비밀번호를 입력하세요.')
+      setError('사용자명과 비밀번호를 입력하세요.')
+      return
+    }
+    if (password !== confirmPassword) {
+      setError('비밀번호 확인이 일치하지 않습니다.')
       return
     }
     setSubmitting(true)
@@ -89,7 +110,9 @@ export default function UserManagement({ user }: UserManagementProps): JSX.Eleme
         setMessage(`계정 '${username.trim()}'(${ROLE_LABELS[role]}) 생성 완료`)
         setUsername('')
         setPassword('')
+        setConfirmPassword('')
         setRole('operator')
+        setShowCreate(false)
         await loadUsers()
       } else {
         setError(result.error ?? '계정 생성에 실패했습니다.')
@@ -124,9 +147,14 @@ export default function UserManagement({ user }: UserManagementProps): JSX.Eleme
     <div className="settings-page">
       <div className="list-header">
         <h2>계정 관리 (User Management)</h2>
-        <button type="button" className="secondary-btn" onClick={loadUsers}>
-          새로고침
-        </button>
+        <div>
+          <button type="button" onClick={openCreate}>
+            + 계정 추가
+          </button>{' '}
+          <button type="button" className="secondary-btn" onClick={loadUsers}>
+            새로고침
+          </button>
+        </div>
       </div>
 
       <p className="settings-hint">
@@ -137,41 +165,76 @@ export default function UserManagement({ user }: UserManagementProps): JSX.Eleme
       {error && <p className="login-error">{error}</p>}
       {message && <p className="save-success">{message}</p>}
 
-      <form className="user-create-form" onSubmit={handleCreate}>
-        <h3>새 계정 추가</h3>
-        <div className="user-form-row">
-          <label>
-            사용자명 <span className="required">*</span>
-            <input
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="예: hong.gd"
-            />
-          </label>
-          <label>
-            초기 비밀번호 <span className="required">*</span>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="비밀번호 정책 적용"
-            />
-          </label>
-          <label>
-            역할
-            <select value={role} onChange={(e) => setRole(e.target.value as UserRole)}>
-              {ROLE_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button type="submit" disabled={submitting}>
-            {submitting ? '생성 중…' : '계정 생성'}
-          </button>
+      {showCreate && (
+        <div className="modal-backdrop" onClick={closeCreate}>
+          <div
+            className="print-modal"
+            style={{ width: 'min(440px, 100%)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="print-modal-header">
+              <div>
+                <h3>새 계정 추가</h3>
+                <p>1인 1계정 — 생성은 감사추적에 기록됩니다</p>
+              </div>
+            </div>
+            <form onSubmit={handleCreate}>
+              <div className="user-modal-body">
+                {error && <p className="login-error">{error}</p>}
+                <label>
+                  사용자명(아이디) <span className="required">*</span>
+                  <input
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="예: hong.gd"
+                    autoFocus
+                  />
+                </label>
+                <label>
+                  비밀번호 <span className="required">*</span>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="비밀번호 정책 적용"
+                  />
+                </label>
+                <label>
+                  비밀번호 확인 <span className="required">*</span>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </label>
+                <label>
+                  역할(권한)
+                  <select value={role} onChange={(e) => setRole(e.target.value as UserRole)}>
+                    {ROLE_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <div className="print-modal-actions">
+                <button
+                  type="button"
+                  className="secondary-btn"
+                  onClick={closeCreate}
+                  disabled={submitting}
+                >
+                  취소
+                </button>
+                <button type="submit" disabled={submitting}>
+                  {submitting ? '생성 중…' : '계정 생성'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </form>
+      )}
 
       {loading ? (
         <p className="status-inline">사용자 목록 불러오는 중…</p>
