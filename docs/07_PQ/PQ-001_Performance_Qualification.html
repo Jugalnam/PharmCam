@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PQ-001 — Performance Qualification Protocol (성능 적격성 평가) — PharmCam</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #15203a; --panel2: #1e293b;
+    --line: #334155; --text: #e2e8f0; --muted: #94a3b8;
+    --gold: #d4a853; --gold-soft: #e6c884; --accent: #38bdf8;
+    --ok: #4ade80; --bad: #f87171;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: "Segoe UI", "Malgun Gothic", system-ui, sans-serif;
+    line-height: 1.65; font-size: 15px;
+  }
+  .topbar {
+    background: linear-gradient(90deg, #0b1326, #15203a);
+    border-bottom: 2px solid var(--gold);
+    padding: 14px 28px;
+  }
+  .topbar .brand { color: var(--gold); font-weight: 700; font-size: 1.15rem; letter-spacing: .5px; }
+  .topbar .sub { color: var(--muted); font-size: .8rem; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 32px 28px 80px; }
+  h1, h2, h3, h4 { color: var(--gold); line-height: 1.3; }
+  h1 { font-size: 1.7rem; border-bottom: 2px solid var(--gold); padding-bottom: .35em; margin-top: .2em; }
+  h2 { font-size: 1.3rem; border-bottom: 1px solid var(--line); padding-bottom: .3em; margin-top: 2em; }
+  h3 { font-size: 1.08rem; color: var(--gold-soft); margin-top: 1.6em; }
+  h4 { font-size: .98rem; color: var(--gold-soft); margin-top: 1.3em; }
+  p { margin: .6em 0; }
+  a { color: var(--accent); }
+  strong { color: #fff; }
+  code {
+    background: var(--panel2); color: var(--gold-soft);
+    padding: 1px 6px; border-radius: 4px; font-family: Consolas, "Courier New", monospace; font-size: .9em;
+  }
+  pre {
+    background: #0b1326; border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 16px; overflow-x: auto;
+  }
+  pre code { background: none; color: var(--text); padding: 0; }
+  blockquote {
+    margin: 1em 0; padding: .6em 1em; border-left: 4px solid var(--gold);
+    background: rgba(212,168,83,.08); color: var(--muted); border-radius: 0 6px 6px 0;
+  }
+  blockquote strong { color: var(--gold-soft); }
+  hr { border: none; border-top: 1px solid var(--line); margin: 2em 0; }
+  ul, ol { padding-left: 1.4em; }
+  li { margin: .25em 0; }
+  table {
+    width: 100%; border-collapse: collapse; margin: 1.1em 0; font-size: .9rem;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+  }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--panel2); color: var(--gold-soft); font-weight: 600; }
+  tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+  .doc-footer {
+    max-width: 980px; margin: 0 auto; padding: 18px 28px 40px;
+    color: var(--muted); font-size: .8rem; border-top: 1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">PharmCam</div>
+    <div class="sub">GMP 검체·시료 사진 기록 시스템 — CSV 산출물</div>
+  </div>
+  <main class="wrap">
+<h1>PQ-001 — Performance Qualification Protocol (성능 적격성 평가)</h1>
+<p><strong>시스템명:</strong> PharmCam — 검체·시료 사진 기록 시스템<br>
+<strong>문서 ID:</strong> PQ-001<br>
+<strong>버전:</strong> 0.1 (Draft)<br>
+<strong>작성일:</strong> 2026-06-09<br>
+<strong>상위 문서:</strong> VP-001, URS-001 v1.4 (PQ는 URS와 짝을 이룬다), IQ-001, OQ-001<br>
+<strong>추적성:</strong> <code>docs/traceability_matrix.md</code> 및 본 문서 부록</p>
+<blockquote>
+<p><strong>이 문서가 하는 일:</strong> PharmCam이 <strong>실제 운영 환경에서 실제 사용자가 일상적으로 사용</strong>할 때, 사용자 요구사항(URS)을 <strong>일관되게·의도대로</strong> 충족하는지 확인하기 위한 PQ(성능 적격성) 시험 항목을 정의한다.<br>
+OQ가 "기능이 설계대로 작동하는가"를 본다면, PQ는 "실 환경·실 사용자·누적 사용 속에서 의도된 사용에 적합한가"를 본다.<br>
+본 문서는 초안이며, 실제 실행 전 QA/System Owner 검토·승인 후 <strong>파일럿 실사용</strong>으로 수행한다.</p>
+</blockquote>
+<hr>
+<h2>1. 목적 (Purpose)</h2>
+<p>IQ(설치)·OQ(기능)가 완료된 PharmCam을 <strong>실제 운영 PC·실제 QC 작업자·실제(또는 대표) 검체 워크플로우</strong>로 일정 기간 운용하여, 데이터 무결성(ALCOA+)·촬영 기록·검토/서명·통제 인쇄·백업/복구 등 <strong>의도된 사용</strong>이 안정적으로 충족됨을 입증한다. PQ 합격은 실운영 전환(go-live)의 근거가 된다.</p>
+<h2>2. 범위 (Scope)</h2>
+<h3>2.1 포함 (실 환경·실사용·누적 시간이 변수인 항목)</h3>
+<ul>
+<li>실사용자 일상 촬영 워크플로우(검체→메타데이터→저장)</li>
+<li>실제 조명·카메라·검체 조건에서의 이미지 적합성(판독·식별 가능성)</li>
+<li>다중 역할 실제 운영(작업자 본인기록 한정 / 검토자 검토·전자서명 / 관리자 운영)</li>
+<li>통제 인쇄본의 실제 기록 흐름(종이 배치기록 첨부 등) 적합성</li>
+<li>누적 운영에서의 데이터 무결성·감사추적·해시체인·원본 보존</li>
+<li>신뢰 시각·동시성(실 근무·교대)</li>
+<li>백업·복구 드릴(실데이터)</li>
+<li>저장 용량·보존·저장공간 경고의 실제 동작</li>
+<li>접근통제 및 SOP 준수(표준 사용자 운영, 정기 무결성 검토)</li>
+<li>지속 운영 신뢰성·성능</li>
+</ul>
+<h3>2.2 제외</h3>
+<ul>
+<li>단위 기능의 작동/차단 확인(OQ-001에서 수행)</li>
+<li>설치 적격성(IQ-001에서 수행)</li>
+<li>카메라 장치 자체의 계측 검교정(장비 관리 SOP 영역)</li>
+</ul>
+<h2>3. 전제조건 (Prerequisites)</h2>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>기준</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IQ/OQ</td>
+<td><strong>IQ-001·OQ-001 승인·합격 완료</strong>(부적합 일탈 종료)</td>
+</tr>
+<tr>
+<td>환경</td>
+<td>실제 운영 PC(또는 동등 검증 PC), 폐쇄망</td>
+</tr>
+<tr>
+<td>사용자</td>
+<td>실제 역할별 계정(작업자·검토자·관리자), 표준 Windows 사용자</td>
+</tr>
+<tr>
+<td>검체</td>
+<td>실제 또는 대표 검체/시료(품질 영향 없는 시험 대상 권장)</td>
+</tr>
+<tr>
+<td>SOP</td>
+<td>촬영·검토·전자서명·통제 인쇄·백업·정기검토 SOP 확정</td>
+</tr>
+<tr>
+<td>기간</td>
+<td><strong>파일럿 기간 사전 정의</strong>(권장 2~4주) 또는 <strong>누적 최소 기록 건수</strong>(예: ≥ 50건) — 승인 시 확정</td>
+</tr>
+<tr>
+<td>설정</td>
+<td>회사별 설정 명세(configuration spec) 확정·기록</td>
+</tr>
+</tbody>
+</table>
+<h2>4. PQ 수행 방식 (Approach)</h2>
+<ul>
+<li>파일럿 기간 동안 <strong>실제 작업자가 평소 절차대로</strong> PharmCam으로 검체를 촬영·기록한다.</li>
+<li>검토자/관리자는 실제 검토·서명·인쇄·백업·정기 무결성 검토를 수행한다.</li>
+<li>기간 종료(또는 목표 건수 도달) 시 <strong>누적 데이터·감사추적·백업·복구 결과</strong>를 평가한다.</li>
+<li>각 PQ-TC는 <strong>사전 합격 기준</strong> 충족 여부로 판정한다(적합/부적합/N/A). 부적합은 §7 일탈로 처리한다.</li>
+</ul>
+<h2>5. PQ 시험 항목 (PQ Test Cases)</h2>
+<table>
+<thead>
+<tr>
+<th>PQ-TC</th>
+<th>항목</th>
+<th>연결 URS</th>
+<th>실사용 시험 방법</th>
+<th>합격 기준</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PQ-TC-001</td>
+<td>일상 촬영 워크플로우</td>
+<td>URS-002, 030, 032, 034</td>
+<td>작업자가 파일럿 기간 동안 실제 검체를 SOP대로 촬영·메타데이터 입력·저장</td>
+<td>정해진 기간/건수 동안 누락·차질 없이 기록이 생성되고 시험정보·필수항목이 정확히 귀속된다</td>
+</tr>
+<tr>
+<td>PQ-TC-002</td>
+<td>이미지 적합성(현장 조건)</td>
+<td>URS-002, 035</td>
+<td>실제 실험실 조명·카메라·검체로 촬영, 필요 시 카메라 선택/전환</td>
+<td>저장된 이미지가 검체 식별·판독에 충분하며, 사용 카메라가 현장 하드웨어에서 정상 동작한다</td>
+</tr>
+<tr>
+<td>PQ-TC-003</td>
+<td>다중 역할 실제 운영</td>
+<td>URS-012, 094, 095, 020~023</td>
+<td>작업자·검토자·관리자가 각자 역할로 운영(본인기록 한정/검토·서명/계정·설정 관리)</td>
+<td>operator는 본인 기록만 조회·인쇄, reviewer/admin은 전체 조회·검토·서명이 흐름대로 수행된다</td>
+</tr>
+<tr>
+<td>PQ-TC-004</td>
+<td>통제 인쇄의 기록 흐름 적합성</td>
+<td>URS-093</td>
+<td>검토자가 통제 인쇄본을 출력해 실제 종이 기록(배치기록 등)에 첨부하는 절차 수행</td>
+<td>통제 인쇄본에 식별정보가 표시되고 인쇄가 감사추적되며, 실제 문서 흐름에 적합하다</td>
+</tr>
+<tr>
+<td>PQ-TC-005</td>
+<td>누적 데이터 무결성·ALCOA+</td>
+<td>URS-040~046</td>
+<td>파일럿 누적 기록에 대해 감사추적 조회·해시체인 검증·원본 보호 상태 점검</td>
+<td>누적량/기간에도 감사추적이 완전·불변(해시체인 통과)하고 원본·귀속·시각이 보존된다</td>
+</tr>
+<tr>
+<td>PQ-TC-006</td>
+<td>신뢰 시각·동시성</td>
+<td>URS-044</td>
+<td>실 근무/교대에 걸쳐 기록·감사추적 시각 일관성, 시간 이상 감지 로그 검토</td>
+<td>기록 시각이 신뢰 출처로 일관되며, 시간 변경/이상은 감사추적에 남는다</td>
+</tr>
+<tr>
+<td>PQ-TC-007</td>
+<td>백업·복구 드릴(실데이터)</td>
+<td>URS-060, 061</td>
+<td>누적 실데이터로 백업 수행 후 별도 환경에 복구·무결성 검증</td>
+<td>백업이 생성되고 복구본의 무결성(해시) 검증을 통과한다(복구 가능성 입증)</td>
+</tr>
+<tr>
+<td>PQ-TC-008</td>
+<td>저장 용량·보존·공간 경고</td>
+<td>URS-047, 062, 063</td>
+<td>누적 저장 경과 관찰, 저장공간 경고 임계치·보존 동작 확인</td>
+<td>지정 저장 위치에 안정 저장되고, 공간 임계치 경고가 적시 표시되며 보존 정책이 유지된다</td>
+</tr>
+<tr>
+<td>PQ-TC-009</td>
+<td>접근통제·SOP 준수</td>
+<td>URS-053, HUM-02</td>
+<td>표준 사용자 운영, 정기 verifyChain 검토 등 절차 준수 관찰</td>
+<td>작업자는 표준 사용자로 운영되고 정기 무결성 검토가 SOP대로 수행·기록된다</td>
+</tr>
+<tr>
+<td>PQ-TC-010</td>
+<td>지속 운영 신뢰성·성능</td>
+<td>운영(NFR)</td>
+<td>파일럿 기간 일상 사용에서 안정성·응답성 관찰</td>
+<td>중단·데이터 손실 없이 운용되며 일상 작업에 무리 없는 응답성을 보인다</td>
+</tr>
+</tbody>
+</table>
+<h2>6. 종합 합격 기준 (Acceptance Criteria)</h2>
+<ul>
+<li>PQ-TC 전 항목이 <strong>적합(Pass)</strong> 또는 정당한 <strong>N/A</strong>.</li>
+<li>파일럿 기간/목표 건수 동안 <strong>감사추적 해시체인 무결성 100% 유지</strong>, 데이터 손실 0건.</li>
+<li>발생한 일탈은 §7로 처리하고 조치·재확인 후 합격해야 실운영 전환을 승인한다.</li>
+<li>누적 기록·감사추적·백업/복구 결과·정기검토 기록을 PQ 보고서에 첨부한다.</li>
+</ul>
+<h2>7. 일탈 처리 (Deviation)</h2>
+<table>
+<thead>
+<tr>
+<th>일탈 ID</th>
+<th>관련 PQ-TC</th>
+<th>현상</th>
+<th>영향 평가(무결성/품질/안전)</th>
+<th>원인</th>
+<th>조치</th>
+<th>종료 기준</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DEV-PQ-xxx</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>조치 완료 및 재확인 합격</td>
+</tr>
+</tbody>
+</table>
+<h2>8. 승인 (Approval)</h2>
+<table>
+<thead>
+<tr>
+<th>역할</th>
+<th>성명</th>
+<th>서명</th>
+<th>일자</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>수행자 (QC 작업자/검토자)</td>
+<td><em>(지정)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>System Owner</td>
+<td><em>(지정)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>QA</td>
+<td><em>(지정)</em></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>부록 — URS ↔ PQ-TC 추적</h2>
+<table>
+<thead>
+<tr>
+<th>URS(주요)</th>
+<th>PQ-TC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>URS-002·030·032·034 (촬영·기록·표시)</td>
+<td>PQ-TC-001, PQ-TC-002</td>
+</tr>
+<tr>
+<td>URS-035 (카메라 선택)</td>
+<td>PQ-TC-002</td>
+</tr>
+<tr>
+<td>URS-012·094·095 (RBAC·조회 통제)</td>
+<td>PQ-TC-003</td>
+</tr>
+<tr>
+<td>URS-020~023 (전자서명)</td>
+<td>PQ-TC-003</td>
+</tr>
+<tr>
+<td>URS-093 (통제 인쇄)</td>
+<td>PQ-TC-004</td>
+</tr>
+<tr>
+<td>URS-040~046 (무결성·감사추적·원본·정정)</td>
+<td>PQ-TC-005</td>
+</tr>
+<tr>
+<td>URS-044 (신뢰 시각)</td>
+<td>PQ-TC-006</td>
+</tr>
+<tr>
+<td>URS-060·061 (백업·복구)</td>
+<td>PQ-TC-007</td>
+</tr>
+<tr>
+<td>URS-047·062·063 (저장위치·보존·용량 경고)</td>
+<td>PQ-TC-008</td>
+</tr>
+<tr>
+<td>URS-053 (접근통제) · HUM-02 (정기검토)</td>
+<td>PQ-TC-009</td>
+</tr>
+<tr>
+<td>운영·비기능(NFR)</td>
+<td>PQ-TC-010</td>
+</tr>
+</tbody>
+</table>
+  </main>
+  <footer class="doc-footer">
+    자동 생성: 2026-06-09 · 원본: <code>docs/07_PQ/PQ-001_Performance_Qualification.md</code> · 단일 파일(외부 CDN 없음)
+  </footer>
+</body>
+</html>
