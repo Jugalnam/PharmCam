@@ -184,6 +184,11 @@ export default function AuditView({ user }: AuditViewProps): JSX.Element {
           </span>
         )}
       </div>
+      <p className="settings-hint">
+        감사추적은 저장 후 수정·삭제할 수 없습니다(append-only). 이 검사는 각 기록의 해시(지문)를
+        다시 계산해 사슬이 끊겼는지 확인합니다 — <strong>통과</strong>면 기록이 처음 저장된 그대로,{' '}
+        <strong>실패</strong>면 변조가 의심되는 위치(seq)를 표시합니다.
+      </p>
 
       {canExport && (
         <div className="export-actions">
