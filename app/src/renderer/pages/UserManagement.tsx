@@ -148,7 +148,7 @@ export default function UserManagement({ user }: UserManagementProps): JSX.Eleme
       <div className="list-header">
         <h2>계정 관리 (User Management)</h2>
         <div>
-          <button type="button" onClick={openCreate}>
+          <button type="button" className="secondary-btn" onClick={openCreate}>
             + 계정 추가
           </button>{' '}
           <button type="button" className="secondary-btn" onClick={loadUsers}>
