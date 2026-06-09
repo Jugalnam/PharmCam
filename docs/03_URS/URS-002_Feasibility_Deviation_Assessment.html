@@ -1,133 +1,464 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>URS-002 적합성·일탈 검토 — PharmCam</title>
+<title>URS-002 — URS Feasibility & Deviation Assessment (URS 적합성·일탈 검토) — PharmCam</title>
 <style>
-  :root{
-    --navy:#0b1929; --navy-2:#15273d; --navy-3:#1e3a5f;
-    --gold:#c8a847; --gold-2:#e8d07a;
-    --ink:#1c2b3a; --muted:#64748b; --line:#dde3ec; --soft:#f7f9fc; --panel:#fff;
-    --ok:#15803d; --ok-bg:#dcfce7; --dev:#b45309; --dev-bg:#fef3c7; --def:#1d4ed8; --def-bg:#dbeafe;
+  :root {
+    --bg: #0f172a; --panel: #15203a; --panel2: #1e293b;
+    --line: #334155; --text: #e2e8f0; --muted: #94a3b8;
+    --gold: #d4a853; --gold-soft: #e6c884; --accent: #38bdf8;
+    --ok: #4ade80; --bad: #f87171;
   }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:"Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif;background:#e8edf3;color:var(--ink);line-height:1.6;}
-  .page{width:min(1040px,calc(100% - 32px));margin:28px auto 48px;background:var(--panel);box-shadow:0 24px 64px rgba(11,25,41,.14);}
-  header{background:var(--navy);padding:30px 36px 26px;}
-  .doc-id{font-size:13px;letter-spacing:3px;color:var(--gold);font-weight:800;}
-  header h1{font-size:23px;color:#fff;margin:8px 0 4px;font-weight:800;}
-  header .sub{color:#7da4c4;font-size:14px;}
-  .badge-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
-  .badge{padding:4px 12px;border-radius:4px;font-size:12px;font-weight:700;}
-  .badge.approved{background:var(--ok-bg);color:var(--ok);}
-  .badge.gold{background:rgba(200,168,71,.18);color:var(--gold-2);}
-  main{padding:14px 36px 40px;}
-  section{margin-top:28px;}
-  h2{font-size:13px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:1.2px;padding-bottom:8px;border-bottom:2px solid var(--navy);margin-bottom:12px;display:flex;align-items:baseline;gap:10px;}
-  h2 .num{color:var(--gold);font-size:18px;font-weight:800;}
-  h3{font-size:15px;color:var(--navy-3);margin:16px 0 8px;}
-  p{margin:8px 0;font-size:14px;}
-  .note{background:var(--soft);border-left:4px solid var(--gold);padding:12px 16px;font-size:14px;margin:10px 0;}
-  .gate{background:#fff4f4;border:1px solid #f3c0c0;border-left:4px solid var(--dev);padding:12px 16px;font-size:14px;margin:10px 0;border-radius:0 6px 6px 0;}
-  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.5px;}
-  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top;}
-  th{background:var(--navy);color:#fff;font-weight:700;font-size:11.5px;}
-  tr:nth-child(even) td{background:var(--soft);}
-  td.id{font-weight:800;color:var(--dev);white-space:nowrap;}
-  .v{text-align:center;font-weight:800;}
-  .v.met{color:var(--ok);}
-  .v.dev{color:var(--dev);}
-  .v.def{color:var(--def);}
-  .chk{list-style:none;margin:10px 0;}
-  .chk li{padding:7px 0 7px 28px;position:relative;font-size:14px;border-bottom:1px solid var(--line);}
-  .chk li::before{content:"☐";position:absolute;left:4px;top:6px;color:var(--dev);font-size:16px;font-weight:800;}
-  .approach{display:grid;grid-template-columns:1fr 2fr;gap:0;}
-  footer{padding:18px 36px 28px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;}
-  strong{color:var(--navy-3);}
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: "Segoe UI", "Malgun Gothic", system-ui, sans-serif;
+    line-height: 1.65; font-size: 15px;
+  }
+  .topbar {
+    background: linear-gradient(90deg, #0b1326, #15203a);
+    border-bottom: 2px solid var(--gold);
+    padding: 14px 28px;
+  }
+  .topbar .brand { color: var(--gold); font-weight: 700; font-size: 1.15rem; letter-spacing: .5px; }
+  .topbar .sub { color: var(--muted); font-size: .8rem; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 32px 28px 80px; }
+  h1, h2, h3, h4 { color: var(--gold); line-height: 1.3; }
+  h1 { font-size: 1.7rem; border-bottom: 2px solid var(--gold); padding-bottom: .35em; margin-top: .2em; }
+  h2 { font-size: 1.3rem; border-bottom: 1px solid var(--line); padding-bottom: .3em; margin-top: 2em; }
+  h3 { font-size: 1.08rem; color: var(--gold-soft); margin-top: 1.6em; }
+  h4 { font-size: .98rem; color: var(--gold-soft); margin-top: 1.3em; }
+  p { margin: .6em 0; }
+  a { color: var(--accent); }
+  strong { color: #fff; }
+  code {
+    background: var(--panel2); color: var(--gold-soft);
+    padding: 1px 6px; border-radius: 4px; font-family: Consolas, "Courier New", monospace; font-size: .9em;
+  }
+  pre {
+    background: #0b1326; border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 16px; overflow-x: auto;
+  }
+  pre code { background: none; color: var(--text); padding: 0; }
+  blockquote {
+    margin: 1em 0; padding: .6em 1em; border-left: 4px solid var(--gold);
+    background: rgba(212,168,83,.08); color: var(--muted); border-radius: 0 6px 6px 0;
+  }
+  blockquote strong { color: var(--gold-soft); }
+  hr { border: none; border-top: 1px solid var(--line); margin: 2em 0; }
+  ul, ol { padding-left: 1.4em; }
+  li { margin: .25em 0; }
+  table {
+    width: 100%; border-collapse: collapse; margin: 1.1em 0; font-size: .9rem;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+  }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--panel2); color: var(--gold-soft); font-weight: 600; }
+  tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+  .doc-footer {
+    max-width: 980px; margin: 0 auto; padding: 18px 28px 40px;
+    color: var(--muted); font-size: .8rem; border-top: 1px solid var(--line);
+  }
 </style>
 </head>
 <body>
-<div class="page">
-  <header>
-    <div class="doc-id">URS-002</div>
-    <h1>URS Feasibility &amp; Deviation Assessment — 적합성·일탈 검토</h1>
-    <div class="sub">PharmCam — 검체·시료 사진 기록 시스템</div>
-    <div class="badge-row">
-      <span class="badge approved">확정 v1.0</span>
-      <span class="badge gold">조건부 수용 예외 7건</span>
-      <span class="badge gold">DQ 진입 가능</span>
-    </div>
-  </header>
-
-  <main>
-    <p class="note"><strong>이 문서가 하는 일:</strong> DQ에 들어가기 전, 택한 구현 방식(Electron·단독 PC·로컬 저장)으로 URS 42개를 모두 만족할 수 있는지 검토한다. SW만으로 완전히 충족되지 않는 항목은 <strong>일탈(deviation)</strong>로 기록하고 필수 후속 조치를 지정한다.</p>
-
-    <section>
-      <h2><span class="num">1</span> 전제 — 의도된 구현 방식</h2>
-      <table>
-        <tr><th>영역</th><th>방식</th></tr>
-        <tr><td>플랫폼</td><td>Electron(Chromium+Node.js), Windows 단독 PC</td></tr>
-        <tr><td>저장</td><td>임베디드 DB(메타데이터·감사추적) + 로컬 디스크(이미지)</td></tr>
-        <tr><td>감사추적</td><td>append-only + 해시 체이닝(변조 탐지), 편집/삭제 경로 없음</td></tr>
-        <tr><td>원본 보호</td><td>이미지 + SHA-256, 읽기전용, 읽을 때 해시 검증</td></tr>
-        <tr><td>시각</td><td>OS 시계 + 시간변경 탐지·로깅, (가능 시) NTP 보조</td></tr>
-        <tr><td>암호화</td><td>선택적 DB·이미지 암호화, 키는 OS 보호 저장소(DPAPI)</td></tr>
-        <tr><td>인증</td><td>로컬 계정, argon2/bcrypt 해시, RBAC, 세션 타임아웃</td></tr>
-        <tr><td>설정</td><td>권한자 전용·감사추적되는 설정 프로필, 코어 플래그 잠금</td></tr>
-        <tr><td>백업 / LIMS</td><td>내장 복사(경로 설정)/비활성 · 커넥터 확장점(기본 비활성)</td></tr>
-      </table>
-    </section>
-
-    <section>
-      <h2><span class="num">3</span> 요구사항별 적합성 (요약)</h2>
-      <p style="font-size:13px;color:var(--muted)">✔ 충족 &nbsp;·&nbsp; ◐ 부분충족→일탈 &nbsp;·&nbsp; ⟳ 후속</p>
-      <table>
-        <tr><th>URS</th><th>판정</th><th>구현/사유</th><th>일탈</th></tr>
-        <tr><td>URS-001~040, 042, 045~046, 051, 060, 063, 070~073, 090~092</td><td class="v met">✔</td><td>구현으로 충족 (인증·촬영·감사추적·설정관리 등)</td><td></td></tr>
-        <tr><td>URS-041 / 043</td><td class="v dev">◐</td><td>OS 관리자 파일접근은 SW로 차단 불가 → 해시로 변조 <strong>탐지</strong></td><td class="id">DEV-01</td></tr>
-        <tr><td>URS-044</td><td class="v dev">◐</td><td>오프라인 PC, 신뢰 외부 시각원 보장 곤란</td><td class="id">DEV-02</td></tr>
-        <tr><td>URS-050</td><td class="v dev">◐</td><td>단독 PC 암호화 키 관리 제약</td><td class="id">DEV-03</td></tr>
-        <tr><td>URS-052</td><td class="v dev">◐</td><td>백신·네트워크 차단은 앱 기능 아님</td><td class="id">DEV-04</td></tr>
-        <tr><td>URS-061</td><td class="v dev">◐</td><td>복구 테스트를 앱이 강제 못 함</td><td class="id">DEV-05</td></tr>
-        <tr><td>URS-062</td><td class="v dev">◐</td><td>장기 보존 매체 내구·판독 보장 한계</td><td class="id">DEV-06</td></tr>
-        <tr><td>URS-080 / 081</td><td class="v def">⟳</td><td>LIMS 실제 연동 미구현, 확장점만 제공</td><td class="id">DEV-07</td></tr>
-      </table>
-    </section>
-
-    <section>
-      <h2><span class="num">4</span> 일탈 등록부 및 예외 처리</h2>
-      <div class="gate"><strong>예외 처리 원칙:</strong> 이 일탈들은 단독 앱만으로 해결 불가하고 회사마다 환경이 달라, <strong>"조건부 수용 예외"</strong>로 분류한다. 각 예외엔 <strong>필수 후속 조치</strong>를 지정하며, <strong>이행·확인되지 않으면 일탈 미종결 → 운영 불가</strong>(VP §7).</div>
-      <table>
-        <tr><th>ID</th><th>관련 URS</th><th>일탈(예외) 내용</th><th>구분</th><th>필수 후속 조치</th><th>검증</th></tr>
-        <tr><td class="id">DEV-01</td><td>041·043</td><td>변조 방지가 아닌 탐지 수준</td><td>환경 의존</td><td>OS 관리자 권한 제한 + 주기 무결성 점검 SOP</td><td>IQ·SOP</td></tr>
-        <tr><td class="id">DEV-02</td><td>044</td><td>신뢰 외부 시각원 보장 곤란</td><td>환경 의존</td><td>OS 시간변경 제한, (가능 시) NTP 연결</td><td>IQ·OQ</td></tr>
-        <tr><td class="id">DEV-03</td><td>050</td><td>암호화 키 관리 제약</td><td>설계 의존</td><td>회사 보안정책에 맞는 키 관리 확정</td><td>DQ·IQ</td></tr>
-        <tr><td class="id">DEV-04</td><td>052</td><td>백신·네트워크 차단 앱 외 영역</td><td>환경 의존</td><td>백신·외부연결 차단·단독 PC 정책</td><td>IQ·SOP</td></tr>
-        <tr><td class="id">DEV-05</td><td>061</td><td>복구 테스트 앱 강제 불가</td><td>절차 의존</td><td>주기 백업 복구 테스트 SOP</td><td>SOP·PQ</td></tr>
-        <tr><td class="id">DEV-06</td><td>062</td><td>장기 보존 매체 판독 한계</td><td>절차 의존</td><td>보존·매체 이관·판독 점검 SOP</td><td>SOP</td></tr>
-        <tr><td class="id">DEV-07</td><td>080·081</td><td>LIMS 실제 연동 미구현</td><td>범위 외 후속</td><td>연동 필요 시 별도 변경관리 프로젝트</td><td>후속</td></tr>
-      </table>
-
-      <h3>4.3 필수 후속 조치 — 회사별 도입 체크리스트 (IQ에서 확인)</h3>
-      <ul class="chk">
-        <li>OS 관리자 권한 제한 적용 (DEV-01)</li>
-        <li>OS 시스템 시간 변경 제한 정책 / NTP 연결 (DEV-02)</li>
-        <li>암호화 키 관리 방식 회사 보안정책에 맞게 확정 (DEV-03)</li>
-        <li>백신·외부연결 차단·단독 PC 정책 적용 (DEV-04)</li>
-        <li>백업 복구 테스트 SOP 수립 (DEV-05)</li>
-        <li>장기 보존·매체 이관 SOP 수립 (DEV-06)</li>
-        <li>(해당 시) LIMS 연동 변경관리 프로젝트 등록 (DEV-07)</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2><span class="num">5</span> 결론</h2>
-      <p>URS 42개 중 충족(✔)이 대부분이며, 단독 앱이 떠안을 수 없는 항목은 <strong>조건부 수용 예외 7건(DEV-01~07)</strong>으로 처리했다. 모든 예외는 SW 단독의 한계 + 회사별 환경 차이에서 비롯되므로 <strong>필수 후속 조치(환경·절차)</strong>를 동반하며, 회사별 도입 시 IQ/SOP로 반드시 검증된다(미이행 시 운영 불가). 미해결 일탈 없음 → <strong>DQ 단계 진입 가능</strong>.</p>
-    </section>
+  <div class="topbar">
+    <div class="brand">PharmCam</div>
+    <div class="sub">GMP 검체·시료 사진 기록 시스템 — CSV 산출물</div>
+  </div>
+  <main class="wrap">
+<h1>URS-002 — URS Feasibility &amp; Deviation Assessment (URS 적합성·일탈 검토)</h1>
+<p><strong>시스템명:</strong> PharmCam — 검체·시료 사진 기록 시스템<br>
+<strong>문서 ID:</strong> URS-002<br>
+<strong>버전:</strong> 1.0 (Approved)<br>
+<strong>작성일:</strong> 2026-06-05<br>
+<strong>확정일:</strong> 2026-06-05<br>
+<strong>상위 문서:</strong> URS-001 (User Requirement Specification)</p>
+<blockquote>
+<p><strong>이 문서가 하는 일:</strong> DQ(설계)에 들어가기 전, <strong>우리가 택한 구현 방식으로 URS 42개를 모두 만족할 수 있는지</strong> 검토한다.<br>
+소프트웨어만으로 완전히 충족되지 않는 요구사항은 <strong>일탈(deviation)</strong>로 정식 기록하고, 사유·위험·처리방안을 명시한다.<br>
+미해결 일탈이 남으면 DQ로 넘어가지 않는다(VP §7 일탈 처리 원칙).</p>
+</blockquote>
+<hr>
+<h2>1. 전제 — 의도된 구현 방식 (Intended Implementation Approach)</h2>
+<p>본 검토는 아래 구현 방식을 전제로 한다. (세부 설계는 DQ에서 확정)</p>
+<table>
+<thead>
+<tr>
+<th>영역</th>
+<th>방식</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>플랫폼</td>
+<td>Electron (Chromium + Node.js), Windows 단독 PC</td>
+</tr>
+<tr>
+<td>데이터 저장</td>
+<td>임베디드 DB(메타데이터·감사추적) + 로컬 디스크(이미지 파일)</td>
+</tr>
+<tr>
+<td>감사추적</td>
+<td>append-only 테이블 + 레코드 해시 체이닝(변조 탐지), 편집/삭제 UI·API 없음</td>
+</tr>
+<tr>
+<td>원본 보호</td>
+<td>이미지 + SHA-256 해시 저장, 읽기전용 속성, 읽을 때 해시 검증</td>
+</tr>
+<tr>
+<td>시각</td>
+<td>OS 시스템 시계 사용 + 시간 변경 탐지·로깅 (네트워크 가능 시 NTP 보조)</td>
+</tr>
+<tr>
+<td>암호화</td>
+<td>선택적 DB·이미지 암호화(encryption at rest), 키는 OS 보호 저장소(DPAPI 등)</td>
+</tr>
+<tr>
+<td>인증</td>
+<td>로컬 계정, salted hash(argon2/bcrypt), RBAC, 세션 타임아웃</td>
+</tr>
+<tr>
+<td>전자서명</td>
+<td>재인증 + 서명 레코드(의미·시각) 기록 연결</td>
+</tr>
+<tr>
+<td>설정</td>
+<td>권한자 전용·감사추적되는 설정 프로필, 코어 플래그 잠금</td>
+</tr>
+<tr>
+<td>백업</td>
+<td>내장 스케줄 복사(경로 설정) 또는 비활성, 해시 무결성 점검</td>
+</tr>
+<tr>
+<td>LIMS</td>
+<td>커넥터 인터페이스(확장 지점), 기본 비활성</td>
+</tr>
+</tbody>
+</table>
+<h2>2. 판정 기준</h2>
+<table>
+<thead>
+<tr>
+<th>기호</th>
+<th>판정</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✔</td>
+<td>충족 (Met)</td>
+<td>구현으로 완전 충족</td>
+</tr>
+<tr>
+<td>◐</td>
+<td>부분충족 → <strong>일탈</strong></td>
+<td>SW만으로 불완전, 환경/절차 통제 병행 필요</td>
+</tr>
+<tr>
+<td>⟳</td>
+<td>후속 (Deferred)</td>
+<td>구조만 제공, 실제 구현은 변경관리 후속 프로젝트</td>
+</tr>
+</tbody>
+</table>
+<h2>3. 요구사항별 적합성 검토</h2>
+<table>
+<thead>
+<tr>
+<th>URS ID</th>
+<th>요구사항(요약)</th>
+<th style="text-align: center;">판정</th>
+<th>구현/사유</th>
+<th style="text-align: center;">일탈</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>URS-001~003</td>
+<td>플랫폼·촬영·ALCOA+</td>
+<td style="text-align: center;">✔</td>
+<td>Electron/Windows, 로컬 저장 구조로 충족</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td>URS-010~012</td>
+<td>개인계정·식별강제·RBAC</td>
+<td style="text-align: center;">✔</td>
+<td>로컬 계정·권한 모델로 충족</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td>URS-013~016</td>
+<td>세션·계정수명·비번정책·잠금</td>
+<td style="text-align: center;">✔</td>
+<td>설정값으로 구현</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td>URS-020~023</td>
+<td>전자서명</td>
+<td style="text-align: center;">✔</td>
+<td>재인증 + 서명 레코드 연결로 충족</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td>URS-030~034</td>
+<td>촬영·필수항목·미리보기·저장검증·정보표시</td>
+<td style="text-align: center;">✔</td>
+<td>입력검증·캡처 파이프라인으로 충족</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td>URS-040</td>
+<td>전 행위 감사추적</td>
+<td style="text-align: center;">✔</td>
+<td>append-only 테이블</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td>URS-041</td>
+<td>감사추적 수정·삭제 불가</td>
+<td style="text-align: center;">◐</td>
+<td>앱 계층 append-only는 보장하나, OS 파일 접근(관리자) 위협은 SW만으로 절대 차단 불가 → 해시 체이닝으로 <strong>변조 탐지</strong></td>
+<td style="text-align: center;"><strong>DEV-01</strong></td>
+</tr>
+<tr>
+<td>URS-042</td>
+<td>감사추적 비활성화 불가</td>
+<td style="text-align: center;">✔</td>
+<td>코어 잠금, 비활성 경로 미제공</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td>URS-043</td>
+<td>원본 읽기전용·해시</td>
+<td style="text-align: center;">◐</td>
+<td>해시·읽기전용으로 변조 <strong>탐지</strong>는 가능하나 절대 <strong>방지</strong>는 OS 권한·외부 WORM 필요</td>
+<td style="text-align: center;"><strong>DEV-01</strong></td>
+</tr>
+<tr>
+<td>URS-044</td>
+<td>신뢰 시각·시간변경 탐지</td>
+<td style="text-align: center;">◐</td>
+<td>단독·오프라인 PC는 신뢰 외부 시각원 보장 곤란 → OS 시계 + 변경 탐지/로깅, OS 시간변경 제한(환경)</td>
+<td style="text-align: center;"><strong>DEV-02</strong></td>
+</tr>
+<tr>
+<td>URS-045~046</td>
+<td>묶음저장·정정이력</td>
+<td style="text-align: center;">✔</td>
+<td>트랜잭션·정정기록으로 충족</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td>URS-050</td>
+<td>저장 암호화</td>
+<td style="text-align: center;">◐</td>
+<td>암호화는 구현 가능하나 단독 PC <strong>키 관리</strong>가 제약 → OS 보호 저장소 사용, 설계 상세는 DQ</td>
+<td style="text-align: center;"><strong>DEV-03</strong></td>
+</tr>
+<tr>
+<td>URS-051</td>
+<td>비번 해시 보관</td>
+<td style="text-align: center;">✔</td>
+<td>argon2/bcrypt</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td>URS-052</td>
+<td>외부차단·악성코드 보호</td>
+<td style="text-align: center;">◐</td>
+<td>백신 설치·네트워크 차단은 앱 기능이 아님 → 환경/IT·SOP 책임</td>
+<td style="text-align: center;"><strong>DEV-04</strong></td>
+</tr>
+<tr>
+<td>URS-060</td>
+<td>백업 방식 선택</td>
+<td style="text-align: center;">✔</td>
+<td>내장/외부경로/비활성 3택</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td>URS-061</td>
+<td>백업 무결성·복구 검증</td>
+<td style="text-align: center;">◐</td>
+<td>검증 기능은 제공하나 <strong>주기적 복구 테스트</strong>는 절차(SOP)</td>
+<td style="text-align: center;"><strong>DEV-05</strong></td>
+</tr>
+<tr>
+<td>URS-062</td>
+<td>보존기간·장기 판독성</td>
+<td style="text-align: center;">◐</td>
+<td>표준 포맷 저장은 충족, 보존기간 매체 내구·판독 보장은 환경/아카이브</td>
+<td style="text-align: center;"><strong>DEV-06</strong></td>
+</tr>
+<tr>
+<td>URS-063</td>
+<td>용량 경고</td>
+<td style="text-align: center;">✔</td>
+<td>임계치 모니터링</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td>URS-070~073</td>
+<td>설정 프로필·권한·코어잠금·설정조회</td>
+<td style="text-align: center;">✔</td>
+<td>설정 관리 모듈로 충족</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td>URS-080~081</td>
+<td>LIMS 연동</td>
+<td style="text-align: center;">⟳</td>
+<td>커넥터 인터페이스(확장 지점)만 제공, 실제 연동은 후속 변경관리</td>
+<td style="text-align: center;"><strong>DEV-07</strong></td>
+</tr>
+<tr>
+<td>URS-090~092</td>
+<td>감사추적 조회·내보내기통제·도움말</td>
+<td style="text-align: center;">✔</td>
+<td>조회·권한 기반 내보내기로 충족</td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+<h2>4. 일탈 등록부 및 예외 처리 (Deviation Register &amp; Accepted Exceptions)</h2>
+<h3>4.1 예외 처리 원칙 (Exception Principle)</h3>
+<ul>
+<li>아래 일탈은 모두 <strong>단독 앱(SW)만으로는 해결 불가</strong>하며, <strong>회사마다 환경·설정이 달라</strong> 제품이 일률적으로 떠안을 수 없다.</li>
+<li>따라서 이들을 <strong>"조건부 수용 예외(conditionally accepted exception)"</strong>로 분류한다 — 제품의 결함이 아니라, 도입 환경에서 보완해야 할 항목으로 본다.</li>
+<li>단, 각 예외에는 <strong>필수 후속 조치(mandatory follow-up)</strong>를 지정한다. 이는 <strong>회사별 도입 시 반드시 수행·검증</strong>되어야 한다.</li>
+<li><strong>필수 후속 조치가 이행·확인되지 않으면 해당 일탈은 미종결(open)</strong> 상태이며, VP §7에 따라 <strong>시스템을 운영에 사용할 수 없다.</strong></li>
+<li>필수 후속 조치는 회사별 <strong>도입 체크리스트(IQ)</strong> 및 <strong>SOP</strong>로 전개되어 추적된다.</li>
+</ul>
+<h3>4.2 일탈/예외 등록부</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>관련 URS</th>
+<th>일탈(예외) 내용</th>
+<th>구분</th>
+<th><strong>필수 후속 조치 (반드시 수행)</strong></th>
+<th>검증 지점</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DEV-01</strong></td>
+<td>URS-041, 043</td>
+<td>절대적 변조 <strong>방지</strong>가 아닌 변조 <strong>탐지</strong> 수준</td>
+<td>환경 의존 예외</td>
+<td>OS 관리자 권한 제한 + 주기 무결성 점검 SOP 수립</td>
+<td>IQ(권한)·SOP</td>
+</tr>
+<tr>
+<td><strong>DEV-02</strong></td>
+<td>URS-044</td>
+<td>신뢰 외부 시각원 보장 곤란</td>
+<td>환경 의존 예외</td>
+<td>OS 시간변경 정책 제한, (가능 시) NTP 연결</td>
+<td>IQ(환경)·OQ(탐지)</td>
+</tr>
+<tr>
+<td><strong>DEV-03</strong></td>
+<td>URS-050</td>
+<td>암호화 키 관리 제약</td>
+<td>설계 의존 예외</td>
+<td>회사 보안정책에 맞는 키 관리 방식 확정</td>
+<td>DQ·IQ</td>
+</tr>
+<tr>
+<td><strong>DEV-04</strong></td>
+<td>URS-052</td>
+<td>백신·네트워크 차단은 앱 외 영역</td>
+<td>환경 의존 예외</td>
+<td>백신 설치·외부연결 차단·단독 PC 정책 적용</td>
+<td>IQ(환경)·SOP</td>
+</tr>
+<tr>
+<td><strong>DEV-05</strong></td>
+<td>URS-061</td>
+<td>백업 복구 테스트를 앱이 강제 못 함</td>
+<td>절차 의존 예외</td>
+<td>주기적 백업 복구 테스트 SOP 수립·수행</td>
+<td>SOP·PQ</td>
+</tr>
+<tr>
+<td><strong>DEV-06</strong></td>
+<td>URS-062</td>
+<td>장기 보존 매체 내구·판독 보장 한계</td>
+<td>절차 의존 예외</td>
+<td>보존·매체 이관·판독성 점검 SOP 수립</td>
+<td>SOP</td>
+</tr>
+<tr>
+<td><strong>DEV-07</strong></td>
+<td>URS-080, 081</td>
+<td>LIMS 실제 연동 미구현</td>
+<td>범위 외 후속</td>
+<td>연동 필요 시 별도 변경관리(URS→검증) 프로젝트 수행</td>
+<td>후속 프로젝트</td>
+</tr>
+</tbody>
+</table>
+<h3>4.3 필수 후속 조치 — 회사별 도입 체크리스트 (요약)</h3>
+<blockquote>
+<p>아래는 <strong>각 회사 도입 시 IQ 단계에서 반드시 확인</strong>하는 항목이다. 하나라도 미이행이면 해당 일탈 미종결.</p>
+</blockquote>
+<ul>
+<li>☐ OS 관리자 권한 제한 적용 (DEV-01)</li>
+<li>☐ OS 시스템 시간 변경 제한 정책 적용 / NTP 연결 (DEV-02)</li>
+<li>☐ 암호화 키 관리 방식 회사 보안정책에 맞게 확정 (DEV-03)</li>
+<li>☐ 백신·외부연결 차단·단독 PC 정책 적용 (DEV-04)</li>
+<li>☐ 백업 복구 테스트 SOP 수립 (DEV-05)</li>
+<li>☐ 장기 보존·매체 이관 SOP 수립 (DEV-06)</li>
+<li>☐ (해당 시) LIMS 연동 변경관리 프로젝트 등록 (DEV-07)</li>
+</ul>
+<h2>5. 결론 (Conclusion)</h2>
+<ul>
+<li>URS 42개 중 <strong>충족(✔) 대부분</strong>, 단독 앱이 떠안을 수 없는 항목은 <strong>조건부 수용 예외 7건(DEV-01~07)</strong>으로 처리.</li>
+<li>모든 예외는 <strong>소프트웨어 단독의 한계 + 회사별 환경 차이</strong>에서 비롯되므로, 제품이 일률 구현하지 않고 <strong>필수 후속 조치(환경·절차)</strong>를 동반한 예외로 둔다 — RA의 "통제 3종류(SW·환경·절차)" 원칙과 일치.</li>
+<li>각 예외의 필수 후속 조치는 <strong>회사별 도입 시 IQ/SOP로 반드시 검증</strong>되며, 미이행 시 일탈 미종결 → 운영 불가(게이트).</li>
+<li>미해결(open) 일탈 없음(전 예외에 후속 조치·검증 지점 지정) → <strong>DQ 단계 진입 가능</strong>.</li>
+</ul>
+<h2>6. 승인 (Approval)</h2>
+<table>
+<thead>
+<tr>
+<th>역할</th>
+<th>성명</th>
+<th>서명</th>
+<th>일자</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>System Owner</td>
+<td><em>(지정)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>QA</td>
+<td><em>(지정)</em></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>부록 — 약어</h2>
+<p>DEV(Deviation, 일탈), WORM(Write Once Read Many, 1회 기록 다회 판독 저장),<br>
+NTP(Network Time Protocol), DPAPI(Windows Data Protection API),<br>
+SOP(표준작업절차), DQ/IQ/OQ(설계/설치/운전 적격성 평가).</p>
   </main>
-
-  <footer>PharmCam CSV 산출물 · URS-002 v1.0 · 상위: URS-001 · 약어: DEV, WORM, NTP, DPAPI, SOP</footer>
-</div>
+  <footer class="doc-footer">
+    자동 생성: 2026-06-09 · 원본: <code>docs/03_URS/URS-002_Feasibility_Deviation_Assessment.md</code> · 단일 파일(외부 CDN 없음)
+  </footer>
 </body>
 </html>

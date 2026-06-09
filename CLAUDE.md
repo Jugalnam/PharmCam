@@ -80,7 +80,7 @@ PQ  (성능 적격성 평가)       docs/07_PQ
 - 산출물: RA/URS/DQ **HTML 재생성**, **OQ-001** 시험서(v0.1 Draft, 범위=v1.1), **사용자 매뉴얼 Beta**, **강의 05**.
 
 **미완료/다음 작업(우선순위순):**
-1. **IQ/OQ 승인·실행**: IQ-001 Draft·OQ-001 v0.2 Draft(v1.4 범위, OQ-TC-001~025) 작성·추적성 OQ열 完(2026-06-09). 남은 것 = **IQ/OQ 검토·승인 후 실제 실행** + (규칙)v1.2~v1.4 변경분 HTML/강의 재생성(debt).
+1. **IQ/OQ 승인·실행**: IQ-001 Draft·OQ-001 v0.2 Draft(v1.4 범위, OQ-TC-001~025)·추적성·**전 문서 HTML 일괄생성 完**(2026-06-09, `scripts/md2html.py` + `pip install markdown`로 docs/ 전체 변환). 남은 것 = **IQ/OQ 검토·승인 후 실제 실행** + 강의자료(lecture) 재생성(debt).
 2. **A-1 카메라 선택/전환 = 2026-06-09 완료**: URS-035[설정가능]+D-14 반영(URS/DQ v1.3 Approved). `Capture.tsx`가 `enumerateDevices()`로 장치 열거 + "카메라 전환" 버튼·드롭다운, `deviceId` 재취득.
 3. **URS-063 저장공간 경고·URS-092 인앱 도움말·기록상세 커스텀 meta 표시 = 2026-06-09 구현 완료** (storage.minFreeMb·`storage:getSpace`, `Help.tsx` 도움말 탭, `RecordList` meta 파싱표시). (인쇄는 통제 인쇄로 도입됨.)
 

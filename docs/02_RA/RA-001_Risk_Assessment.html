@@ -1,62 +1,883 @@
-<!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>RA-001 Risk Assessment — 위험평가 — PharmCam</title><style>:root{--navy:#0b1929;--navy-3:#1e3a5f;--gold:#c8a847;--gold-2:#e8d07a;--ink:#1c2b3a;--muted:#64748b;--line:#dde3ec;--soft:#f7f9fc;--panel:#fff;--draft:#92400e;--draft-bg:#fef3c7}*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif;background:#e8edf3;color:var(--ink);line-height:1.68}.page{width:min(1040px,calc(100% - 32px));margin:28px auto 48px;background:var(--panel);box-shadow:0 24px 64px rgba(11,25,41,.14)}header{background:var(--navy);padding:30px 36px 26px}.doc-id{font-size:13px;letter-spacing:3px;color:var(--gold);font-weight:800}header h1{font-size:24px;color:#fff;margin:8px 0 4px;font-weight:800}.sub{color:#9fc0db;font-size:14px}.badge-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}.badge{padding:4px 12px;border-radius:4px;font-size:12px;font-weight:700}.draft{background:var(--draft-bg);color:var(--draft)}.gold{background:rgba(200,168,71,.18);color:var(--gold-2)}main{padding:18px 36px 42px}h1{font-size:24px;color:var(--navy);margin:14px 0 16px}h2{font-size:17px;font-weight:800;color:var(--navy);margin:28px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--navy)}h3{font-size:15px;color:var(--navy-3);margin:20px 0 8px}p{margin:8px 0;font-size:14px}.note{background:var(--soft);border-left:4px solid var(--gold);padding:12px 16px;font-size:14px;margin:12px 0}ul{margin:8px 0 8px 4px;list-style:none}li{position:relative;padding:5px 0 5px 20px;font-size:14px;border-bottom:1px solid #edf1f6}li:before{content:"▸";position:absolute;left:0;color:var(--gold)}table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}th{background:var(--navy);color:#fff;font-weight:700;font-size:12px}tr:nth-child(even) td{background:var(--soft)}code{background:#eef2f7;padding:1px 5px;border-radius:3px}pre{background:var(--navy);color:#c8ddef;padding:16px 18px;border-radius:6px;font-size:13px;overflow-x:auto;margin:12px 0;line-height:1.5}hr{border:0;border-top:1px solid var(--line);margin:22px 0}footer{padding:18px 36px 28px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}</style></head><body><div class="page"><header><div class="doc-id">RA-001</div><h1>RA-001 Risk Assessment — 위험평가</h1><div class="sub">PharmCam — GMP 검체·시료 사진 기록 시스템</div><div class="badge-row"><span class="badge draft">v1.2 Draft</span><span class="badge gold">Record Query Control</span><span class="badge gold">CSV V-Model</span></div></header><main><h1>RA-001 — Risk Assessment (위험평가)</h1>
-<p><strong>시스템명:</strong> PharmCam — 검체·시료 사진 기록 시스템</p>
-<p><strong>문서 ID:</strong> RA-001</p>
-<p><strong>버전:</strong> 1.2 (Draft — 2026-06-08 변경안: DAT-09 통제 인쇄본, DAT-10 기록 조회 통제 추가)</p>
-<p><strong>작성일:</strong> 2026-06-05</p>
-<p><strong>확정일:</strong> 2026-06-05 (v1.0) · 2026-06-08 (v1.1)</p>
-<p><strong>상위 문서:</strong> VP-001 (Validation Plan) §4 영향성 평가</p>
-<div class="note"><strong>이 문서가 하는 일:</strong> "어디서 무엇이 잘못될 수 있는가"를 다방면으로 따져, 검증 노력을 위험이 큰 곳에 집중시킨다.<br>PharmCam은 <strong>GAMP 5 Category 5(맞춤 개발)</strong>이므로, 위험평가를 심도 깊게 수행한다. 여기서 도출된 <strong>위험 통제(risk control)</strong>가 URS 요구사항과 OQ/PQ 시험 항목으로 직결된다.</div>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RA-001 — Risk Assessment (위험평가) — PharmCam</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #15203a; --panel2: #1e293b;
+    --line: #334155; --text: #e2e8f0; --muted: #94a3b8;
+    --gold: #d4a853; --gold-soft: #e6c884; --accent: #38bdf8;
+    --ok: #4ade80; --bad: #f87171;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: "Segoe UI", "Malgun Gothic", system-ui, sans-serif;
+    line-height: 1.65; font-size: 15px;
+  }
+  .topbar {
+    background: linear-gradient(90deg, #0b1326, #15203a);
+    border-bottom: 2px solid var(--gold);
+    padding: 14px 28px;
+  }
+  .topbar .brand { color: var(--gold); font-weight: 700; font-size: 1.15rem; letter-spacing: .5px; }
+  .topbar .sub { color: var(--muted); font-size: .8rem; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 32px 28px 80px; }
+  h1, h2, h3, h4 { color: var(--gold); line-height: 1.3; }
+  h1 { font-size: 1.7rem; border-bottom: 2px solid var(--gold); padding-bottom: .35em; margin-top: .2em; }
+  h2 { font-size: 1.3rem; border-bottom: 1px solid var(--line); padding-bottom: .3em; margin-top: 2em; }
+  h3 { font-size: 1.08rem; color: var(--gold-soft); margin-top: 1.6em; }
+  h4 { font-size: .98rem; color: var(--gold-soft); margin-top: 1.3em; }
+  p { margin: .6em 0; }
+  a { color: var(--accent); }
+  strong { color: #fff; }
+  code {
+    background: var(--panel2); color: var(--gold-soft);
+    padding: 1px 6px; border-radius: 4px; font-family: Consolas, "Courier New", monospace; font-size: .9em;
+  }
+  pre {
+    background: #0b1326; border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 16px; overflow-x: auto;
+  }
+  pre code { background: none; color: var(--text); padding: 0; }
+  blockquote {
+    margin: 1em 0; padding: .6em 1em; border-left: 4px solid var(--gold);
+    background: rgba(212,168,83,.08); color: var(--muted); border-radius: 0 6px 6px 0;
+  }
+  blockquote strong { color: var(--gold-soft); }
+  hr { border: none; border-top: 1px solid var(--line); margin: 2em 0; }
+  ul, ol { padding-left: 1.4em; }
+  li { margin: .25em 0; }
+  table {
+    width: 100%; border-collapse: collapse; margin: 1.1em 0; font-size: .9rem;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+  }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--panel2); color: var(--gold-soft); font-weight: 600; }
+  tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+  .doc-footer {
+    max-width: 980px; margin: 0 auto; padding: 18px 28px 40px;
+    color: var(--muted); font-size: .8rem; border-top: 1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">PharmCam</div>
+    <div class="sub">GMP 검체·시료 사진 기록 시스템 — CSV 산출물</div>
+  </div>
+  <main class="wrap">
+<h1>RA-001 — Risk Assessment (위험평가)</h1>
+<p><strong>시스템명:</strong> PharmCam — 검체·시료 사진 기록 시스템<br>
+<strong>문서 ID:</strong> RA-001<br>
+<strong>버전:</strong> 1.3 (Approved — 2026-06-09 확정: SEC-06 설치·데이터 접근통제 위험 추가)<br>
+<strong>작성일:</strong> 2026-06-05<br>
+<strong>확정일:</strong> 2026-06-05 (v1.0) · 2026-06-08 (v1.1·v1.2) · 2026-06-09 (v1.3)<br>
+<strong>상위 문서:</strong> VP-001 (Validation Plan) §4 영향성 평가</p>
+<blockquote>
+<p><strong>이 문서가 하는 일:</strong> "어디서 무엇이 잘못될 수 있는가"를 다방면으로 따져, 검증 노력을 위험이 큰 곳에 집중시킨다.<br>
+PharmCam은 <strong>GAMP 5 Category 5(맞춤 개발)</strong>이므로, 위험평가를 심도 깊게 수행한다. 여기서 도출된 <strong>위험 통제(risk control)</strong>가 URS 요구사항과 OQ/PQ 시험 항목으로 직결된다.</p>
+</blockquote>
 <hr>
 <h2>1. 목적 (Purpose)</h2>
 <p>PharmCam의 GxP 핵심 기능에서 발생 가능한 위험을 <strong>보안·권한·데이터·백업</strong> 등 전 영역에 걸쳐 식별·평가하고, 허용 수준으로 낮추기 위한 통제를 정의한다. 본 평가는 <strong>ICH Q9(품질위험관리)</strong> 원칙과 <strong>GAMP 5</strong> 위험기반 접근을 따른다.</p>
-<ul><li>*ICH Q9:* 의약품 품질위험관리 국제 가이드라인. "위험에 비례한 노력"이 핵심 원칙.</li></ul>
+<ul>
+<li><em>ICH Q9:</em> 의약품 품질위험관리 국제 가이드라인. "위험에 비례한 노력"이 핵심 원칙.</li>
+</ul>
 <h2>2. 범위 (Scope)</h2>
 <p>VP-001 §4.1에서 <strong>Direct Impact</strong>로 판정된 기능 전체. 단독 PC 환경의 보안·운영·인적 요인까지 포함한다. No Impact 기능(화면 테마 등)은 제외.</p>
 <h2>3. 위험평가 방법론 (Methodology)</h2>
 <h3>3.1 평가 척도 (S / P / D)</h3>
 <p><strong>① 심각도 (Severity, S)</strong> — 데이터 무결성·품질·환자 안전에 미치는 영향</p>
-<table><thead><tr><th>등급</th><th>정의</th></tr></thead><tbody><tr><td>High (3)</td><td>잘못된 품질 판정·기록 위변조 등 무결성/품질에 직접 영향</td></tr><tr><td>Medium (2)</td><td>기록 누락·재작업 필요, 무결성 일부 저해</td></tr><tr><td>Low (1)</td><td>사용 불편 수준, 품질 영향 경미</td></tr></tbody></table>
+<table>
+<thead>
+<tr>
+<th>등급</th>
+<th>정의</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>High (3)</td>
+<td>잘못된 품질 판정·기록 위변조 등 무결성/품질에 직접 영향</td>
+</tr>
+<tr>
+<td>Medium (2)</td>
+<td>기록 누락·재작업 필요, 무결성 일부 저해</td>
+</tr>
+<tr>
+<td>Low (1)</td>
+<td>사용 불편 수준, 품질 영향 경미</td>
+</tr>
+</tbody>
+</table>
 <p><strong>② 발생가능성 (Probability, P)</strong> — 통제가 없을 때의 발생 빈도</p>
-<table><thead><tr><th>등급</th><th>정의</th></tr></thead><tbody><tr><td>High (3)</td><td>일상적으로 발생 가능</td></tr><tr><td>Medium (2)</td><td>가끔 발생</td></tr><tr><td>Low (1)</td><td>드묾</td></tr></tbody></table>
+<table>
+<thead>
+<tr>
+<th>등급</th>
+<th>정의</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>High (3)</td>
+<td>일상적으로 발생 가능</td>
+</tr>
+<tr>
+<td>Medium (2)</td>
+<td>가끔 발생</td>
+</tr>
+<tr>
+<td>Low (1)</td>
+<td>드묾</td>
+</tr>
+</tbody>
+</table>
 <p><strong>③ 검출성 (Detectability, D)</strong> — 발견되기 어려운 정도 (어려울수록 위험 ↑)</p>
-<table><thead><tr><th>등급</th><th>정의</th></tr></thead><tbody><tr><td>High (3)</td><td>발견 매우 어려움 (조용히 잘못됨)</td></tr><tr><td>Medium (2)</td><td>일부 점검으로 발견 가능</td></tr><tr><td>Low (1)</td><td>즉시 눈에 띔</td></tr></tbody></table>
+<table>
+<thead>
+<tr>
+<th>등급</th>
+<th>정의</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>High (3)</td>
+<td>발견 매우 어려움 (조용히 잘못됨)</td>
+</tr>
+<tr>
+<td>Medium (2)</td>
+<td>일부 점검으로 발견 가능</td>
+</tr>
+<tr>
+<td>Low (1)</td>
+<td>즉시 눈에 띔</td>
+</tr>
+</tbody>
+</table>
 <h3>3.2 위험 우선순위 (Risk Priority = S × P × D)</h3>
-<table><thead><tr><th>점수</th><th>판정</th><th>조치</th></tr></thead><tbody><tr><td>12 ~ 27</td><td><strong>High</strong></td><td>반드시 통제 + OQ/PQ 집중 시험</td></tr><tr><td>5 ~ 11</td><td><strong>Medium</strong></td><td>통제 권장 + 시험 확인</td></tr><tr><td>1 ~ 4</td><td><strong>Low</strong></td><td>기본 통제로 충분</td></tr></tbody></table>
+<table>
+<thead>
+<tr>
+<th>점수</th>
+<th>판정</th>
+<th>조치</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>12 ~ 27</td>
+<td><strong>High</strong></td>
+<td>반드시 통제 + OQ/PQ 집중 시험</td>
+</tr>
+<tr>
+<td>5 ~ 11</td>
+<td><strong>Medium</strong></td>
+<td>통제 권장 + 시험 확인</td>
+</tr>
+<tr>
+<td>1 ~ 4</td>
+<td><strong>Low</strong></td>
+<td>기본 통제로 충분</td>
+</tr>
+</tbody>
+</table>
 <h3>3.3 위험 카테고리</h3>
-<table><thead><tr><th>코드</th><th>카테고리</th><th>핵심 관심사</th></tr></thead><tbody><tr><td><strong>SEC</strong></td><td>보안 · 암호화</td><td>저장 암호화, 비밀번호, 악성코드, 무단 접근</td></tr><tr><td><strong>AUTH</strong></td><td>권한 · 접근통제</td><td>인증, 1인1계정, 역할권한, 세션, 전자서명</td></tr><tr><td><strong>DAT</strong></td><td>데이터 무결성</td><td>ALCOA+, 감사추적, 원본성, 시각, 완전성</td></tr><tr><td><strong>BAK</strong></td><td>백업 · 복구 · 보존</td><td>백업, 복구검증, 장기 보존·판독성, 용량</td></tr><tr><td><strong>SW</strong></td><td>소프트웨어 · 기능</td><td>캡처 신뢰성, 버그, 예외</td></tr><tr><td><strong>INF</strong></td><td>인프라 · 운영</td><td>OS 시계, 단말 통제, 매체 반출</td></tr><tr><td><strong>HUM</strong></td><td>인적 · 절차</td><td>교육, 정기검토(periodic review)</td></tr></tbody></table>
+<table>
+<thead>
+<tr>
+<th>코드</th>
+<th>카테고리</th>
+<th>핵심 관심사</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SEC</strong></td>
+<td>보안 · 암호화</td>
+<td>저장 암호화, 비밀번호, 악성코드, 무단 접근</td>
+</tr>
+<tr>
+<td><strong>AUTH</strong></td>
+<td>권한 · 접근통제</td>
+<td>인증, 1인1계정, 역할권한, 세션, 전자서명</td>
+</tr>
+<tr>
+<td><strong>DAT</strong></td>
+<td>데이터 무결성</td>
+<td>ALCOA+, 감사추적, 원본성, 시각, 완전성</td>
+</tr>
+<tr>
+<td><strong>BAK</strong></td>
+<td>백업 · 복구 · 보존</td>
+<td>백업, 복구검증, 장기 보존·판독성, 용량</td>
+</tr>
+<tr>
+<td><strong>SW</strong></td>
+<td>소프트웨어 · 기능</td>
+<td>캡처 신뢰성, 버그, 예외</td>
+</tr>
+<tr>
+<td><strong>INF</strong></td>
+<td>인프라 · 운영</td>
+<td>OS 시계, 단말 통제, 매체 반출</td>
+</tr>
+<tr>
+<td><strong>HUM</strong></td>
+<td>인적 · 절차</td>
+<td>교육, 정기검토(periodic review)</td>
+</tr>
+</tbody>
+</table>
 <hr>
 <h2>4. 위험 등록부 (Risk Register)</h2>
-<div class="note">S·P·D는 <strong>통제 적용 전(inherent risk)</strong> 기준. 통제 적용 후 잔여위험은 §6에서 평가.</div>
+<blockquote>
+<p>S·P·D는 <strong>통제 적용 전(inherent risk)</strong> 기준. 통제 적용 후 잔여위험은 §6에서 평가.</p>
+</blockquote>
 <h3>4.1 SEC — 보안 · 암호화</h3>
-<table><thead><tr><th>ID</th><th>실패 모드</th><th>영향</th><th>S</th><th>P</th><th>D</th><th>점수</th><th>우선순위</th><th>위험 통제 → 전개</th></tr></thead><tbody><tr><td>SEC-01</td><td>저장 이미지·메타데이터가 비암호화 → PC/파일 직접 접근 시 유출·변조</td><td>무결성·기밀성 상실</td><td>3</td><td>2</td><td>2</td><td>12</td><td><strong>High</strong></td><td>저장 데이터 암호화(encryption at rest) → URS/DQ</td></tr><tr><td>SEC-02</td><td>비밀번호 정책 부재(복잡도·만료·잠금 없음)</td><td>계정 도용</td><td>2</td><td>2</td><td>2</td><td>8</td><td>Medium</td><td>비밀번호 복잡도·만료·실패 잠금 정책 → URS</td></tr><tr><td>SEC-03</td><td>비밀번호 평문 저장/전송</td><td>자격증명 유출</td><td>3</td><td>1</td><td>3</td><td>9</td><td>Medium</td><td>salted hash 저장, 평문 미보관 → DQ</td></tr><tr><td>SEC-04</td><td>악성코드/랜섬웨어로 데이터 손상·암호화</td><td>가용성·무결성 상실</td><td>3</td><td>1</td><td>2</td><td>6</td><td>Medium</td><td>단독 PC·백신·외부연결 차단 → URS(환경)</td></tr><tr><td>SEC-05</td><td>무차별 대입(brute-force) 로그인</td><td>무단 접근</td><td>2</td><td>2</td><td>2</td><td>8</td><td>Medium</td><td>로그인 실패 횟수 제한·계정 잠금 → URS</td></tr></tbody></table>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>실패 모드</th>
+<th>영향</th>
+<th>S</th>
+<th>P</th>
+<th>D</th>
+<th>점수</th>
+<th>우선순위</th>
+<th>위험 통제 → 전개</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SEC-01</td>
+<td>저장 이미지·메타데이터가 비암호화 → PC/파일 직접 접근 시 유출·변조</td>
+<td>무결성·기밀성 상실</td>
+<td>3</td>
+<td>2</td>
+<td>2</td>
+<td>12</td>
+<td><strong>High</strong></td>
+<td>저장 데이터 암호화(encryption at rest) → URS/DQ</td>
+</tr>
+<tr>
+<td>SEC-02</td>
+<td>비밀번호 정책 부재(복잡도·만료·잠금 없음)</td>
+<td>계정 도용</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>8</td>
+<td>Medium</td>
+<td>비밀번호 복잡도·만료·실패 잠금 정책 → URS</td>
+</tr>
+<tr>
+<td>SEC-03</td>
+<td>비밀번호 평문 저장/전송</td>
+<td>자격증명 유출</td>
+<td>3</td>
+<td>1</td>
+<td>3</td>
+<td>9</td>
+<td>Medium</td>
+<td>salted hash 저장, 평문 미보관 → DQ</td>
+</tr>
+<tr>
+<td>SEC-04</td>
+<td>악성코드/랜섬웨어로 데이터 손상·암호화</td>
+<td>가용성·무결성 상실</td>
+<td>3</td>
+<td>1</td>
+<td>2</td>
+<td>6</td>
+<td>Medium</td>
+<td>단독 PC·백신·외부연결 차단 → URS(환경)</td>
+</tr>
+<tr>
+<td>SEC-05</td>
+<td>무차별 대입(brute-force) 로그인</td>
+<td>무단 접근</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>8</td>
+<td>Medium</td>
+<td>로그인 실패 횟수 제한·계정 잠금 → URS</td>
+</tr>
+<tr>
+<td>SEC-06</td>
+<td>작업자가 설치 폴더·데이터 폴더에 직접 접근해 실행파일·DB·이미지 파일을 조작·삭제(앱 우회)</td>
+<td>무결성·원본성 상실</td>
+<td>3</td>
+<td>2</td>
+<td>3</td>
+<td>18</td>
+<td><strong>High</strong></td>
+<td>작업자=표준 Windows 사용자(로컬 admin 금지), 프로그램 Program Files per-machine 설치, 데이터 폴더 ACL 제한, 암호화(at rest), 해시체인·읽기전용 탐지, 접근통제 SOP → URS-053/DQ</td>
+</tr>
+</tbody>
+</table>
 <h3>4.2 AUTH — 권한 · 접근통제</h3>
-<table><thead><tr><th>ID</th><th>실패 모드</th><th>영향</th><th>S</th><th>P</th><th>D</th><th>점수</th><th>우선순위</th><th>위험 통제 → 전개</th></tr></thead><tbody><tr><td>AUTH-01</td><td>공용(공유) 계정 사용 → 누가 했는지 불명</td><td>귀속성 위반(DI 단골 지적)</td><td>3</td><td>3</td><td>2</td><td>18</td><td><strong>High</strong></td><td>1인 1계정 강제, 공용계정 금지 → URS</td></tr><tr><td>AUTH-02</td><td>권한 구분 없음 → 일반 작업자가 기록 삭제·설정 변경</td><td>무결성 저해</td><td>3</td><td>2</td><td>2</td><td>12</td><td><strong>High</strong></td><td>역할 기반 접근통제(RBAC) → URS</td></tr><tr><td>AUTH-03</td><td>로그인 없이 촬영 가능</td><td>귀속성 상실</td><td>3</td><td>2</td><td>2</td><td>12</td><td><strong>High</strong></td><td>식별 없이는 촬영 차단 → URS</td></tr><tr><td>AUTH-04</td><td>세션 미종료 → 자리비움 시 타인이 그 계정으로 작업</td><td>귀속성 위반</td><td>2</td><td>3</td><td>3</td><td>18</td><td><strong>High</strong></td><td>자동 로그아웃(세션 타임아웃) → URS</td></tr><tr><td>AUTH-05</td><td>전자서명 부재/위조 가능 → 승인 책임 불명</td><td>책임추적 상실</td><td>3</td><td>1</td><td>2</td><td>6</td><td>Medium</td><td>e-signature(아이디+의미+시각), URS에서 채택 결정</td></tr><tr><td>AUTH-06</td><td>퇴사·전배자 계정 미비활성화</td><td>무단 접근</td><td>2</td><td>2</td><td>3</td><td>12</td><td><strong>High</strong></td><td>계정 수명주기(생성·비활성) 관리 → URS/SOP</td></tr></tbody></table>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>실패 모드</th>
+<th>영향</th>
+<th>S</th>
+<th>P</th>
+<th>D</th>
+<th>점수</th>
+<th>우선순위</th>
+<th>위험 통제 → 전개</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AUTH-01</td>
+<td>공용(공유) 계정 사용 → 누가 했는지 불명</td>
+<td>귀속성 위반(DI 단골 지적)</td>
+<td>3</td>
+<td>3</td>
+<td>2</td>
+<td>18</td>
+<td><strong>High</strong></td>
+<td>1인 1계정 강제, 공용계정 금지 → URS</td>
+</tr>
+<tr>
+<td>AUTH-02</td>
+<td>권한 구분 없음 → 일반 작업자가 기록 삭제·설정 변경</td>
+<td>무결성 저해</td>
+<td>3</td>
+<td>2</td>
+<td>2</td>
+<td>12</td>
+<td><strong>High</strong></td>
+<td>역할 기반 접근통제(RBAC) → URS</td>
+</tr>
+<tr>
+<td>AUTH-03</td>
+<td>로그인 없이 촬영 가능</td>
+<td>귀속성 상실</td>
+<td>3</td>
+<td>2</td>
+<td>2</td>
+<td>12</td>
+<td><strong>High</strong></td>
+<td>식별 없이는 촬영 차단 → URS</td>
+</tr>
+<tr>
+<td>AUTH-04</td>
+<td>세션 미종료 → 자리비움 시 타인이 그 계정으로 작업</td>
+<td>귀속성 위반</td>
+<td>2</td>
+<td>3</td>
+<td>3</td>
+<td>18</td>
+<td><strong>High</strong></td>
+<td>자동 로그아웃(세션 타임아웃) → URS</td>
+</tr>
+<tr>
+<td>AUTH-05</td>
+<td>전자서명 부재/위조 가능 → 승인 책임 불명</td>
+<td>책임추적 상실</td>
+<td>3</td>
+<td>1</td>
+<td>2</td>
+<td>6</td>
+<td>Medium</td>
+<td>e-signature(아이디+의미+시각), URS에서 채택 결정</td>
+</tr>
+<tr>
+<td>AUTH-06</td>
+<td>퇴사·전배자 계정 미비활성화</td>
+<td>무단 접근</td>
+<td>2</td>
+<td>2</td>
+<td>3</td>
+<td>12</td>
+<td><strong>High</strong></td>
+<td>계정 수명주기(생성·비활성) 관리 → URS/SOP</td>
+</tr>
+</tbody>
+</table>
 <h3>4.3 DAT — 데이터 무결성</h3>
-<table><thead><tr><th>ID</th><th>실패 모드</th><th>영향</th><th>S</th><th>P</th><th>D</th><th>점수</th><th>우선순위</th><th>위험 통제 → 전개</th></tr></thead><tbody><tr><td>DAT-01</td><td>시험번호 오입력·누락 → 엉뚱한 시험에 귀속</td><td>추적성 상실</td><td>3</td><td>3</td><td>3</td><td>27</td><td><strong>High</strong></td><td>필수항목 강제·입력검증·저장 전 확인 → URS</td></tr><tr><td>DAT-02</td><td>감사추적 누락 또는 사후 변조 가능</td><td>무결성 증거 상실</td><td>3</td><td>2</td><td>3</td><td>18</td><td><strong>High</strong></td><td>append-only·수정불가 감사추적 → URS/DQ</td></tr><tr><td>DAT-03</td><td>원본 이미지 변조·교체</td><td>원본성 상실</td><td>3</td><td>2</td><td>2</td><td>12</td><td><strong>High</strong></td><td>원본 해시·읽기전용 보관 → URS/DQ</td></tr><tr><td>DAT-04</td><td>촬영 시각 부정확(시스템 시간 변경 등)</td><td>동시성(Contemporaneous) 의심</td><td>2</td><td>2</td><td>3</td><td>12</td><td><strong>High</strong></td><td>신뢰 시각원·시간변경 감지·로깅 → URS/DQ</td></tr><tr><td>DAT-05</td><td>중도 실패·재촬영 기록이 누락(Complete 위반)</td><td>완전성 상실</td><td>2</td><td>2</td><td>2</td><td>8</td><td>Medium</td><td>실패/재시도도 기록, 트랜잭션 무결성 → DQ</td></tr><tr><td>DAT-06</td><td>메타데이터-이미지 분리/불일치</td><td>신뢰성 저하</td><td>2</td><td>2</td><td>2</td><td>8</td><td>Medium</td><td>메타데이터+이미지 원자적 묶음 저장 → DQ</td></tr><tr><td>DAT-07</td><td>감사추적 기능 자체를 끌 수 있음</td><td>무결성 통제 무력화</td><td>3</td><td>1</td><td>3</td><td>9</td><td>Medium</td><td>감사추적 비활성화 불가·상시 작동 → DQ</td></tr><tr><td>DAT-08</td><td>저장 위치 지정/변경 기능 도입 → 잘못된 경로·권한 부족·위치 변경 후 데이터 분산으로 원본 보관·검토·백업 누락</td><td>가용성·검토성 저해(Available)</td><td>2</td><td>2</td><td>3</td><td>12</td><td><strong>High</strong></td><td>저장 위치 지정·조회(로컬 한정)·변경 이력 감사추적·현재 위치 표시, 위치 무관 무결성 강제 → URS-047/DQ</td></tr><tr><td>DAT-09</td><td>저장 폴더의 이미지 파일을 OS/외부 프로그램으로 직접 인쇄해 PharmCam 공식 출력본처럼 사용</td><td>메타데이터·사용자·감사추적이 누락된 비통제 사본이 공식 기록으로 오인됨</td><td>3</td><td>2</td><td>2</td><td>12</td><td><strong>High</strong></td><td>PharmCam 통제 인쇄 기능 제공, 인쇄 미리보기에서 핵심 식별정보 확인, 인쇄 행위 감사추적 기록, 외부 직접 인쇄본은 공식 출력본이 아님을 SOP/화면 문구로 통제 → URS-093/DQ</td></tr><tr><td>DAT-10</td><td>기록이 누적되며 단순 ID 순 목록만 제공되거나, 작업자가 타인의 기록까지 불필요하게 조회</td><td>필요한 기록 검토 누락, 최소권한 원칙 약화, 기록 혼동</td><td>2</td><td>3</td><td>2</td><td>12</td><td><strong>High</strong></td><td>기본 조회 범위는 오늘 날짜, 날짜/기간 필터 제공, operator는 본인 기록만 조회, reviewer/admin은 전체 조회 및 사용자 필터 가능 → URS-094/095/DQ</td></tr></tbody></table>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>실패 모드</th>
+<th>영향</th>
+<th>S</th>
+<th>P</th>
+<th>D</th>
+<th>점수</th>
+<th>우선순위</th>
+<th>위험 통제 → 전개</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DAT-01</td>
+<td>시험번호 오입력·누락 → 엉뚱한 시험에 귀속</td>
+<td>추적성 상실</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>27</td>
+<td><strong>High</strong></td>
+<td>필수항목 강제·입력검증·저장 전 확인 → URS</td>
+</tr>
+<tr>
+<td>DAT-02</td>
+<td>감사추적 누락 또는 사후 변조 가능</td>
+<td>무결성 증거 상실</td>
+<td>3</td>
+<td>2</td>
+<td>3</td>
+<td>18</td>
+<td><strong>High</strong></td>
+<td>append-only·수정불가 감사추적 → URS/DQ</td>
+</tr>
+<tr>
+<td>DAT-03</td>
+<td>원본 이미지 변조·교체</td>
+<td>원본성 상실</td>
+<td>3</td>
+<td>2</td>
+<td>2</td>
+<td>12</td>
+<td><strong>High</strong></td>
+<td>원본 해시·읽기전용 보관 → URS/DQ</td>
+</tr>
+<tr>
+<td>DAT-04</td>
+<td>촬영 시각 부정확(시스템 시간 변경 등)</td>
+<td>동시성(Contemporaneous) 의심</td>
+<td>2</td>
+<td>2</td>
+<td>3</td>
+<td>12</td>
+<td><strong>High</strong></td>
+<td>신뢰 시각원·시간변경 감지·로깅 → URS/DQ</td>
+</tr>
+<tr>
+<td>DAT-05</td>
+<td>중도 실패·재촬영 기록이 누락(Complete 위반)</td>
+<td>완전성 상실</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>8</td>
+<td>Medium</td>
+<td>실패/재시도도 기록, 트랜잭션 무결성 → DQ</td>
+</tr>
+<tr>
+<td>DAT-06</td>
+<td>메타데이터-이미지 분리/불일치</td>
+<td>신뢰성 저하</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>8</td>
+<td>Medium</td>
+<td>메타데이터+이미지 원자적 묶음 저장 → DQ</td>
+</tr>
+<tr>
+<td>DAT-07</td>
+<td>감사추적 기능 자체를 끌 수 있음</td>
+<td>무결성 통제 무력화</td>
+<td>3</td>
+<td>1</td>
+<td>3</td>
+<td>9</td>
+<td>Medium</td>
+<td>감사추적 비활성화 불가·상시 작동 → DQ</td>
+</tr>
+<tr>
+<td>DAT-08</td>
+<td>저장 위치 지정/변경 기능 도입 → 잘못된 경로·권한 부족·위치 변경 후 데이터 분산으로 원본 보관·검토·백업 누락</td>
+<td>가용성·검토성 저해(Available)</td>
+<td>2</td>
+<td>2</td>
+<td>3</td>
+<td>12</td>
+<td><strong>High</strong></td>
+<td>저장 위치 지정·조회(로컬 한정)·변경 이력 감사추적·현재 위치 표시, 위치 무관 무결성 강제 → URS-047/DQ</td>
+</tr>
+<tr>
+<td>DAT-09</td>
+<td>저장 폴더의 이미지 파일을 OS/외부 프로그램으로 직접 인쇄해 PharmCam 공식 출력본처럼 사용</td>
+<td>메타데이터·사용자·감사추적이 누락된 비통제 사본이 공식 기록으로 오인됨</td>
+<td>3</td>
+<td>2</td>
+<td>2</td>
+<td>12</td>
+<td><strong>High</strong></td>
+<td>PharmCam 통제 인쇄 기능 제공, 인쇄 미리보기에서 핵심 식별정보 확인, 인쇄 행위 감사추적 기록, 외부 직접 인쇄본은 공식 출력본이 아님을 SOP/화면 문구로 통제 → URS-093/DQ</td>
+</tr>
+<tr>
+<td>DAT-10</td>
+<td>기록이 누적되며 단순 ID 순 목록만 제공되거나, 작업자가 타인의 기록까지 불필요하게 조회</td>
+<td>필요한 기록 검토 누락, 최소권한 원칙 약화, 기록 혼동</td>
+<td>2</td>
+<td>3</td>
+<td>2</td>
+<td>12</td>
+<td><strong>High</strong></td>
+<td>기본 조회 범위는 오늘 날짜, 날짜/기간 필터 제공, operator는 본인 기록만 조회, reviewer/admin은 전체 조회 및 사용자 필터 가능 → URS-094/095/DQ</td>
+</tr>
+</tbody>
+</table>
 <h3>4.4 BAK — 백업 · 복구 · 보존</h3>
-<table><thead><tr><th>ID</th><th>실패 모드</th><th>영향</th><th>S</th><th>P</th><th>D</th><th>점수</th><th>우선순위</th><th>위험 통제 → 전개</th></tr></thead><tbody><tr><td>BAK-01</td><td>백업 부재 → PC 고장 시 전체 유실</td><td>가용성 상실</td><td>3</td><td>2</td><td>2</td><td>12</td><td><strong>High</strong></td><td>정기 자동 백업·이중 저장 → URS</td></tr><tr><td>BAK-02</td><td>백업 무결성 미검증 → 복구 시 손상 발견</td><td>복구 실패</td><td>3</td><td>1</td><td>3</td><td>9</td><td>Medium</td><td>주기적 복구 테스트(restore test) → SOP</td></tr><tr><td>BAK-03</td><td>보존기간 중 판독 불가(포맷 구식화·매체 열화)</td><td>Enduring/Available 위반</td><td>2</td><td>2</td><td>2</td><td>8</td><td>Medium</td><td>표준 포맷·보존정책·주기 점검 → URS/SOP</td></tr><tr><td>BAK-04</td><td>저장공간 부족으로 신규 기록 저장 실패</td><td>가용성 상실</td><td>2</td><td>2</td><td>2</td><td>8</td><td>Medium</td><td>용량 모니터링·임계치 경고 → URS</td></tr><tr><td>BAK-05</td><td>재해복구 절차 부재 → 재해 시 복구 불가</td><td>가용성 상실</td><td>3</td><td>1</td><td>2</td><td>6</td><td>Medium</td><td>재해복구(DR) 절차 문서화 → SOP</td></tr></tbody></table>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>실패 모드</th>
+<th>영향</th>
+<th>S</th>
+<th>P</th>
+<th>D</th>
+<th>점수</th>
+<th>우선순위</th>
+<th>위험 통제 → 전개</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BAK-01</td>
+<td>백업 부재 → PC 고장 시 전체 유실</td>
+<td>가용성 상실</td>
+<td>3</td>
+<td>2</td>
+<td>2</td>
+<td>12</td>
+<td><strong>High</strong></td>
+<td>정기 자동 백업·이중 저장 → URS</td>
+</tr>
+<tr>
+<td>BAK-02</td>
+<td>백업 무결성 미검증 → 복구 시 손상 발견</td>
+<td>복구 실패</td>
+<td>3</td>
+<td>1</td>
+<td>3</td>
+<td>9</td>
+<td>Medium</td>
+<td>주기적 복구 테스트(restore test) → SOP</td>
+</tr>
+<tr>
+<td>BAK-03</td>
+<td>보존기간 중 판독 불가(포맷 구식화·매체 열화)</td>
+<td>Enduring/Available 위반</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>8</td>
+<td>Medium</td>
+<td>표준 포맷·보존정책·주기 점검 → URS/SOP</td>
+</tr>
+<tr>
+<td>BAK-04</td>
+<td>저장공간 부족으로 신규 기록 저장 실패</td>
+<td>가용성 상실</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>8</td>
+<td>Medium</td>
+<td>용량 모니터링·임계치 경고 → URS</td>
+</tr>
+<tr>
+<td>BAK-05</td>
+<td>재해복구 절차 부재 → 재해 시 복구 불가</td>
+<td>가용성 상실</td>
+<td>3</td>
+<td>1</td>
+<td>2</td>
+<td>6</td>
+<td>Medium</td>
+<td>재해복구(DR) 절차 문서화 → SOP</td>
+</tr>
+</tbody>
+</table>
 <h3>4.5 SW — 소프트웨어 · 기능</h3>
-<table><thead><tr><th>ID</th><th>실패 모드</th><th>영향</th><th>S</th><th>P</th><th>D</th><th>점수</th><th>우선순위</th><th>위험 통제 → 전개</th></tr></thead><tbody><tr><td>SW-01</td><td>흐릿·과다노출 등 판독 불가 이미지 기록</td><td>가독성 저하·재작업</td><td>2</td><td>2</td><td>2</td><td>8</td><td>Medium</td><td>촬영 미리보기·재촬영 → URS</td></tr><tr><td>SW-02</td><td>캡처/저장 실패인데 성공으로 표시</td><td>기록 누락 미인지</td><td>2</td><td>2</td><td>3</td><td>12</td><td><strong>High</strong></td><td>저장 성공 검증·실패 알림 → URS/DQ</td></tr><tr><td>SW-03</td><td>잘못된 검체를 촬영(작업자 실수)</td><td>잘못된 기록</td><td>2</td><td>2</td><td>3</td><td>12</td><td><strong>High</strong></td><td>시험정보 화면 병기·확인 절차(SW+SOP) → URS</td></tr><tr><td>SW-04</td><td>버그·예외로 비정상 종료 시 데이터 손상</td><td>무결성 저해</td><td>2</td><td>2</td><td>2</td><td>8</td><td>Medium</td><td>예외처리·자동복구·무결성 검사 → DQ</td></tr></tbody></table>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>실패 모드</th>
+<th>영향</th>
+<th>S</th>
+<th>P</th>
+<th>D</th>
+<th>점수</th>
+<th>우선순위</th>
+<th>위험 통제 → 전개</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SW-01</td>
+<td>흐릿·과다노출 등 판독 불가 이미지 기록</td>
+<td>가독성 저하·재작업</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>8</td>
+<td>Medium</td>
+<td>촬영 미리보기·재촬영 → URS</td>
+</tr>
+<tr>
+<td>SW-02</td>
+<td>캡처/저장 실패인데 성공으로 표시</td>
+<td>기록 누락 미인지</td>
+<td>2</td>
+<td>2</td>
+<td>3</td>
+<td>12</td>
+<td><strong>High</strong></td>
+<td>저장 성공 검증·실패 알림 → URS/DQ</td>
+</tr>
+<tr>
+<td>SW-03</td>
+<td>잘못된 검체를 촬영(작업자 실수)</td>
+<td>잘못된 기록</td>
+<td>2</td>
+<td>2</td>
+<td>3</td>
+<td>12</td>
+<td><strong>High</strong></td>
+<td>시험정보 화면 병기·확인 절차(SW+SOP) → URS</td>
+</tr>
+<tr>
+<td>SW-04</td>
+<td>버그·예외로 비정상 종료 시 데이터 손상</td>
+<td>무결성 저해</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>8</td>
+<td>Medium</td>
+<td>예외처리·자동복구·무결성 검사 → DQ</td>
+</tr>
+</tbody>
+</table>
 <h3>4.6 INF — 인프라 · 운영</h3>
-<table><thead><tr><th>ID</th><th>실패 모드</th><th>영향</th><th>S</th><th>P</th><th>D</th><th>점수</th><th>우선순위</th><th>위험 통제 → 전개</th></tr></thead><tbody><tr><td>INF-01</td><td>OS 시스템 시계 변경 권한 노출 → 시각 조작</td><td>동시성 위반</td><td>2</td><td>2</td><td>3</td><td>12</td><td><strong>High</strong></td><td>OS 시간변경 제한·관리자 통제 → URS(환경)</td></tr><tr><td>INF-02</td><td>미인가 SW 설치·USB로 데이터 반출</td><td>무단 반출·변조</td><td>2</td><td>2</td><td>2</td><td>8</td><td>Medium</td><td>단말 통제 정책(USB·설치 제한) → SOP</td></tr></tbody></table>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>실패 모드</th>
+<th>영향</th>
+<th>S</th>
+<th>P</th>
+<th>D</th>
+<th>점수</th>
+<th>우선순위</th>
+<th>위험 통제 → 전개</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>INF-01</td>
+<td>OS 시스템 시계 변경 권한 노출 → 시각 조작</td>
+<td>동시성 위반</td>
+<td>2</td>
+<td>2</td>
+<td>3</td>
+<td>12</td>
+<td><strong>High</strong></td>
+<td>OS 시간변경 제한·관리자 통제 → URS(환경)</td>
+</tr>
+<tr>
+<td>INF-02</td>
+<td>미인가 SW 설치·USB로 데이터 반출</td>
+<td>무단 반출·변조</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>8</td>
+<td>Medium</td>
+<td>단말 통제 정책(USB·설치 제한) → SOP</td>
+</tr>
+</tbody>
+</table>
 <h3>4.7 HUM — 인적 · 절차</h3>
-<table><thead><tr><th>ID</th><th>실패 모드</th><th>영향</th><th>S</th><th>P</th><th>D</th><th>점수</th><th>우선순위</th><th>위험 통제 → 전개</th></tr></thead><tbody><tr><td>HUM-01</td><td>미숙련 작업자 오조작</td><td>잘못된 기록·재작업</td><td>2</td><td>2</td><td>2</td><td>8</td><td>Medium</td><td>교육 훈련·SOP → SOP</td></tr><tr><td>HUM-02</td><td>정기 검토(periodic review) 부재 → 누적 이상 미발견</td><td>잠재 위험 방치</td><td>2</td><td>2</td><td>3</td><td>12</td><td><strong>High</strong></td><td>감사추적 주기 검토 SOP → SOP</td></tr></tbody></table>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>실패 모드</th>
+<th>영향</th>
+<th>S</th>
+<th>P</th>
+<th>D</th>
+<th>점수</th>
+<th>우선순위</th>
+<th>위험 통제 → 전개</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HUM-01</td>
+<td>미숙련 작업자 오조작</td>
+<td>잘못된 기록·재작업</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>8</td>
+<td>Medium</td>
+<td>교육 훈련·SOP → SOP</td>
+</tr>
+<tr>
+<td>HUM-02</td>
+<td>정기 검토(periodic review) 부재 → 누적 이상 미발견</td>
+<td>잠재 위험 방치</td>
+<td>2</td>
+<td>2</td>
+<td>3</td>
+<td>12</td>
+<td><strong>High</strong></td>
+<td>감사추적 주기 검토 SOP → SOP</td>
+</tr>
+</tbody>
+</table>
 <hr>
 <h2>5. 위험 요약 (Summary)</h2>
-<table><thead><tr><th>카테고리</th><th>총 건수</th><th>High</th><th>Medium</th></tr></thead><tbody><tr><td>SEC 보안·암호화</td><td>5</td><td>1</td><td>4</td></tr><tr><td>AUTH 권한·접근통제</td><td>6</td><td>4</td><td>2</td></tr><tr><td>DAT 데이터 무결성</td><td>10</td><td>7</td><td>3</td></tr><tr><td>BAK 백업·복구·보존</td><td>5</td><td>1</td><td>4</td></tr><tr><td>SW 소프트웨어·기능</td><td>4</td><td>2</td><td>2</td></tr><tr><td>INF 인프라·운영</td><td>2</td><td>1</td><td>1</td></tr><tr><td>HUM 인적·절차</td><td>2</td><td>1</td><td>1</td></tr><tr><td><strong>합계</strong></td><td><strong>34</strong></td><td><strong>17</strong></td><td><strong>17</strong></td></tr></tbody></table>
-<div class="note">최고위험: <strong>DAT-01(시험번호 오귀속, 27점)</strong>, <strong>AUTH-01·AUTH-04·DAT-02(18점)</strong>.</div>
-<h2>6. 잔여위험 평가 (Residual Risk) — *통제 설계 후 갱신*</h2>
+<table>
+<thead>
+<tr>
+<th>카테고리</th>
+<th>총 건수</th>
+<th>High</th>
+<th>Medium</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SEC 보안·암호화</td>
+<td>6</td>
+<td>2</td>
+<td>4</td>
+</tr>
+<tr>
+<td>AUTH 권한·접근통제</td>
+<td>6</td>
+<td>4</td>
+<td>2</td>
+</tr>
+<tr>
+<td>DAT 데이터 무결성</td>
+<td>10</td>
+<td>7</td>
+<td>3</td>
+</tr>
+<tr>
+<td>BAK 백업·복구·보존</td>
+<td>5</td>
+<td>1</td>
+<td>4</td>
+</tr>
+<tr>
+<td>SW 소프트웨어·기능</td>
+<td>4</td>
+<td>2</td>
+<td>2</td>
+</tr>
+<tr>
+<td>INF 인프라·운영</td>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>HUM 인적·절차</td>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td><strong>합계</strong></td>
+<td><strong>35</strong></td>
+<td><strong>18</strong></td>
+<td><strong>17</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>최고위험: <strong>DAT-01(시험번호 오귀속, 27점)</strong>, <strong>AUTH-01·AUTH-04·DAT-02(18점)</strong>.</p>
+</blockquote>
+<h2>6. 잔여위험 평가 (Residual Risk) — <em>통제 설계 후 갱신</em></h2>
 <p>각 위험 통제가 URS→DQ로 구현되고 OQ/PQ로 검증되면 통제 후 점수를 재산정해 <strong>잔여위험이 허용 수준(Low~Medium)인지</strong> 확인한다. (구현 단계에서 채움)</p>
-<table><thead><tr><th>ID</th><th>적용 통제</th><th>잔여 S×P×D</th><th>잔여 우선순위</th><th>허용 여부</th></tr></thead><tbody><tr><td><em>(DQ/OQ 이후 채움)</em></td><td></td><td></td><td></td><td></td></tr></tbody></table>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>적용 통제</th>
+<th>잔여 S×P×D</th>
+<th>잔여 우선순위</th>
+<th>허용 여부</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>(DQ/OQ 이후 채움)</em></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <h2>7. 결론 (Conclusion)</h2>
-<ul><li>7개 카테고리에서 <strong>위험 34건</strong>(High 17, Medium 17)을 식별. Category 5에 걸맞은 다방면 평가를 수행했다.</li><li><strong>High 위험 17건은 전부 URS 요구사항으로 전개</strong>하고 OQ/PQ에서 집중 검증한다.</li><li>통제는 ① 소프트웨어 기능(암호화·RBAC·감사추적 등), ② 환경 통제(단독 PC·OS 시간 제한), ③ 절차 통제(SOP·정기검토·복구 테스트)로 나뉘며, <strong>SW만으로 해결되지 않는 위험은 SOP와 병행</strong>한다.</li><li>모든 통제는 <code>docs/traceability_matrix.md</code>로 URS↔DQ↔OQ/PQ까지 추적된다.</li></ul>
+<ul>
+<li>7개 카테고리에서 <strong>위험 35건</strong>(High 18, Medium 17)을 식별. Category 5에 걸맞은 다방면 평가를 수행했다.</li>
+<li><strong>High 위험 18건은 전부 URS 요구사항으로 전개</strong>하고 OQ/PQ에서 집중 검증한다.</li>
+<li>통제는 ① 소프트웨어 기능(암호화·RBAC·감사추적 등), ② 환경 통제(단독 PC·OS 시간 제한), ③ 절차 통제(SOP·정기검토·복구 테스트)로 나뉘며, <strong>SW만으로 해결되지 않는 위험은 SOP와 병행</strong>한다.</li>
+<li>모든 통제는 <code>docs/traceability_matrix.md</code>로 URS↔DQ↔OQ/PQ까지 추적된다.</li>
+</ul>
 <h2>8. 승인 (Approval)</h2>
-<table><thead><tr><th>역할</th><th>성명</th><th>서명</th><th>일자</th></tr></thead><tbody><tr><td>System Owner</td><td><em>(승인)</em></td><td>✔</td><td>2026-06-08</td></tr><tr><td>QA</td><td><em>(승인)</em></td><td>✔</td><td>2026-06-08</td></tr></tbody></table>
+<table>
+<thead>
+<tr>
+<th>역할</th>
+<th>성명</th>
+<th>서명</th>
+<th>일자</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>System Owner</td>
+<td><em>(승인)</em></td>
+<td>✔</td>
+<td>2026-06-08</td>
+</tr>
+<tr>
+<td>QA</td>
+<td><em>(승인)</em></td>
+<td>✔</td>
+<td>2026-06-08</td>
+</tr>
+</tbody>
+</table>
 <hr>
 <h2>부록 — 약어</h2>
-<p>RA(Risk Assessment), S(Severity), P(Probability), D(Detectability),</p>
-<p>FMEA(Failure Mode and Effects Analysis), ICH Q9(품질위험관리),</p>
-<p>RBAC(Role-Based Access Control, 역할 기반 접근통제), DR(Disaster Recovery, 재해복구),</p>
-<p>DI(Data Integrity, 데이터 무결성), SOP(Standard Operating Procedure, 표준작업절차),</p>
-<p>e-signature(전자서명).</p></main><footer>PharmCam CSV 산출물 · RA-001 · HTML 재생성: 2026-06-08 · Draft</footer></div></body></html>
+<p>RA(Risk Assessment), S(Severity), P(Probability), D(Detectability),<br>
+FMEA(Failure Mode and Effects Analysis), ICH Q9(품질위험관리),<br>
+RBAC(Role-Based Access Control, 역할 기반 접근통제), DR(Disaster Recovery, 재해복구),<br>
+DI(Data Integrity, 데이터 무결성), SOP(Standard Operating Procedure, 표준작업절차),<br>
+e-signature(전자서명).</p>
+  </main>
+  <footer class="doc-footer">
+    자동 생성: 2026-06-09 · 원본: <code>docs/02_RA/RA-001_Risk_Assessment.md</code> · 단일 파일(외부 CDN 없음)
+  </footer>
+</body>
+</html>
