@@ -67,6 +67,8 @@ PQ  성능 적격성 평가       docs/07_PQ
 | [`lectures/`](lectures/) | 단계별 HTML 강의자료 ("만들면서 가르친다") |
 
 > 📖 **운영 매뉴얼:** [`docs/PharmCam_Operation_Manual.md`](docs/PharmCam_Operation_Manual.md) (OM-001 v1.0) — 설치·로그인부터 7개 탭 사용법·운영 점검·문제 해결까지.
+>
+> 🖥️ **소개 슬라이드:** [`docs/PharmCam_소개.pptx`](docs/PharmCam_소개.pptx) — 실제 앱 화면 캡처를 포함한 7개 탭 소개 발표자료(PowerPoint).
 
 ## 빠른 시작 (개발자용)
 
