@@ -62,9 +62,11 @@ PQ  성능 적격성 평가       docs/07_PQ
 
 | 경로 | 역할 |
 |---|---|
-| [`docs/`](docs/) | GMP 검증 문서 (VP~PQ) + 추적성 매트릭스 |
+| [`docs/`](docs/) | GMP 검증 문서 (VP~PQ) + 추적성 매트릭스 + [운영 매뉴얼](docs/PharmCam_Operation_Manual.md) |
 | [`app/`](app/) | Electron 앱 소스 — 빌드/실행은 [`app/README.md`](app/README.md) 참조 |
 | [`lectures/`](lectures/) | 단계별 HTML 강의자료 ("만들면서 가르친다") |
+
+> 📖 **운영 매뉴얼:** [`docs/PharmCam_Operation_Manual.md`](docs/PharmCam_Operation_Manual.md) (OM-001 v1.0) — 설치·로그인부터 7개 탭 사용법·운영 점검·문제 해결까지.
 
 ## 빠른 시작 (개발자용)
 

@@ -23,3 +23,7 @@ npm-debug.log*
 Thumbs.db
 .vscode/
 .idea/
+
+# Python (문서 변환 스크립트)
+__pycache__/
+*.pyc
